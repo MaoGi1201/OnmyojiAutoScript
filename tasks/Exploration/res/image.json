@@ -2,8 +2,8 @@
   {
     "itemName": "e_exploration_open",
     "imageName": "res_e_exploration_open.png",
-    "roiFront": "1057,248,37,80",
-    "roiBack": "1052,242,47,92",
+    "roiFront": "1077,248,37,80",
+    "roiBack": "1072,242,47,92",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "进入难度选择界面"
@@ -11,8 +11,8 @@
   {
     "itemName": "e_exploration_click",
     "imageName": "res_e_exploration_click.png",
-    "roiFront": "890,518,96,42",
-    "roiBack": "890,518,96,42",
+    "roiFront": "898,518,96,42",
+    "roiBack": "898,518,96,42",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "探索按钮"
