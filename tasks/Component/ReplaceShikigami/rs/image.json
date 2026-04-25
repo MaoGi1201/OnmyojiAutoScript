@@ -128,7 +128,7 @@
   {
     "itemName": "rs_level_max",
     "imageName": "rs_rs_level_max.png",
-    "roiFront": "487,248,23,21",
+    "roiFront": "473,240,41,27",
     "roiBack": "52,238,1118,37",
     "method": "Template matching",
     "threshold": 0.8,
@@ -137,7 +137,7 @@
   {
     "itemName": "rs_smart_exchange",
     "imageName": "rs_rs_smart_exchange.png",
-    "roiFront": "1150,507,40,44",
+    "roiFront": "1143,506,51,41",
     "roiBack": "1128,488,86,162",
     "method": "Template matching",
     "threshold": 0.8,
