@@ -119,8 +119,8 @@
   {
     "itemName": "st_level_0",
     "imageName": "simple_st_level_0.png",
-    "roiFront": "85,235,45,30",
-    "roiBack": "85,235,45,30",
+    "roiFront": "85,235,45,26",
+    "roiBack": "85,235,45,25",
     "method": "Template matching",
     "threshold": 0.9,
     "description": "第一个御魂是+0的"

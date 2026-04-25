@@ -11,7 +11,7 @@
   {
     "itemName": "soul_preset",
     "imageName": "ss_soul_preset.png",
-    "roiFront": "335,73,90,51",
+    "roiFront": "334,73,90,51",
     "roiBack": "310,57,169,72",
     "method": "Template matching",
     "threshold": 0.8,
@@ -137,8 +137,8 @@
   {
     "itemName": "sou_team_present",
     "imageName": "ss_sou_team_present.png",
-    "roiFront": "737,82,148,43",
-    "roiBack": "727,71,165,63",
+    "roiFront": "726,81,156,43",
+    "roiBack": "722,71,165,63",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "匹配队伍预设"

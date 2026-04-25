@@ -33,7 +33,7 @@ class SwitchSoulAssets:
 	# 退出式神录 
 	I_RECORD_SOUL_BACK = RuleImage(roi_front=(19,9,51,44), roi_back=(19,9,51,44), threshold=0.8, method="Template matching", file="./tasks/Component/SwitchSoul/ss/ss_record_soul_back.png")
 	# 预设 
-	I_SOUL_PRESET = RuleImage(roi_front=(335,73,90,51), roi_back=(310,57,169,72), threshold=0.8, method="Template matching", file="./tasks/Component/SwitchSoul/ss/ss_soul_preset.png")
+	I_SOUL_PRESET = RuleImage(roi_front=(334,73,90,51), roi_back=(310,57,169,72), threshold=0.8, method="Template matching", file="./tasks/Component/SwitchSoul/ss/ss_soul_preset.png")
 	# description 
 	I_SOU_SWITCH_1 = RuleImage(roi_front=(971,149,34,32), roi_back=(962,141,51,48), threshold=0.8, method="Template matching", file="./tasks/Component/SwitchSoul/ss/ss_sou_switch_1.png")
 	# description 
@@ -61,7 +61,7 @@ class SwitchSoulAssets:
 	# description 
 	I_SOU_CHECK_GROUP_7 = RuleImage(roi_front=(1088,512,21,54), roi_back=(1088,512,21,54), threshold=0.8, method="Template matching", file="./tasks/Component/SwitchSoul/ss/ss_sou_check_group_7.png")
 	# 匹配队伍预设 
-	I_SOU_TEAM_PRESENT = RuleImage(roi_front=(737,82,148,43), roi_back=(727,71,165,63), threshold=0.8, method="Template matching", file="./tasks/Component/SwitchSoul/ss/ss_sou_team_present.png")
+	I_SOU_TEAM_PRESENT = RuleImage(roi_front=(726,81,156,43), roi_back=(722,71,165,63), threshold=0.8, method="Template matching", file="./tasks/Component/SwitchSoul/ss/ss_sou_team_present.png")
 	# 需要切换的预设按钮(颜色深一点) 
 	I_SOU_CLICK_PRESENT = RuleImage(roi_front=(967,305,43,22), roi_back=(965,142,48,480), threshold=0.9, method="Template matching", file="./tasks/Component/SwitchSoul/ss/ss_sou_click_present.png")
 	# 误触点到式神检查 

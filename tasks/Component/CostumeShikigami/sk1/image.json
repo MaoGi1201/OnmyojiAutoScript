@@ -164,8 +164,8 @@
   {
     "itemName": "st_souls_1",
     "imageName": "sk1_st_souls_1.png",
-    "roiFront": "1180,236,62,66",
-    "roiBack": "1176,230,70,80",
+    "roiFront": "1179,225,63,81",
+    "roiBack": "1176,222,69,88",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "选中的御魂"

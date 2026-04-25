@@ -83,7 +83,7 @@
   {
     "itemName": "ui_uncheck",
     "imageName": "ui_ui_uncheck.png",
-    "roiFront": "567,343,33,36",
+    "roiFront": "512,341,33,36",
     "roiBack": "497,303,216,100",
     "method": "Template matching",
     "threshold": 0.8,
@@ -92,8 +92,8 @@
   {
     "itemName": "ui_check",
     "imageName": "ui_ui_check.png",
-    "roiFront": "564,341,40,38",
-    "roiBack": "512,329,164,78",
+    "roiFront": "508,339,40,38",
+    "roiBack": "503,329,164,78",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "勾选"
