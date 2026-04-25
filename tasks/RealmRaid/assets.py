@@ -36,7 +36,7 @@ class RealmRaidAssets:
 	# 点击的式神录 
 	I_SHIKIGAMI = RuleImage(roi_front=(1206,608,54,51), roi_back=(1206,608,54,51), threshold=0.8, method="Template matching", file="./tasks/RealmRaid/res/res_shikigami.png")
 	# 进攻 
-	I_FIRE = RuleImage(roi_front=(982,494,136,63), roi_back=(140,129,1024,584), threshold=0.8, method="Template matching", file="./tasks/RealmRaid/res/res_fire.png")
+	I_FIRE = RuleImage(roi_front=(317,492,136,63), roi_back=(140,129,1024,584), threshold=0.8, method="Template matching", file="./tasks/RealmRaid/res/res_fire.png")
 	# 打完个后出现的领取奖励 
 	I_SOUL_RAID = RuleImage(roi_front=(577,502,100,100), roi_back=(577,502,100,100), threshold=0.8, method="Template matching", file="./tasks/RealmRaid/res/res_soul_raid.png")
 	# 刷新确认 
@@ -61,7 +61,7 @@ class RealmRaidAssets:
 	# 呱太入侵， 第一次进入结界时候出现 
 	I_FROG_RAID = RuleImage(roi_front=(511,301,282,100), roi_back=(511,301,282,100), threshold=0.8, method="Template matching", file="./tasks/RealmRaid/res/res_frog_raid.png")
 	# 个人 
-	I_RR_PERSON = RuleImage(roi_front=(1203,236,56,100), roi_back=(1203,236,56,155), threshold=0.8, method="Template matching", file="./tasks/RealmRaid/res/res_rr_person.png")
+	I_RR_PERSON = RuleImage(roi_front=(1206,281,49,110), roi_back=(1203,275,55,116), threshold=0.8, method="Template matching", file="./tasks/RealmRaid/res/res_rr_person.png")
 
 
 	# Ocr Rule Assets

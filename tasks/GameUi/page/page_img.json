@@ -191,7 +191,7 @@
   {
     "itemName": "check_area_boss",
     "imageName": "page_check_area_boss.png",
-    "roiFront": "20,320,150,130",
+    "roiFront": "20,361,106,89",
     "roiBack": "20,320,150,130",
     "method": "Template matching",
     "threshold": 0.8,
@@ -245,8 +245,8 @@
   {
     "itemName": "ryoutoppa_goto_realmraid",
     "imageName": "page_ryoutoppa_goto_realmraid.png",
-    "roiFront": "1201,234,62,105",
-    "roiBack": "1201,234,62,105",
+    "roiFront": "1202,280,56,105",
+    "roiBack": "1199,279,62,105",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
