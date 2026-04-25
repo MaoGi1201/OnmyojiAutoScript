@@ -2,7 +2,7 @@
   {
     "itemName": "abyss_dragon",
     "imageName": "res_abyss_dragon.png",
-    "roiFront": "199,150,109,271",
+    "roiFront": "220,176,70,188",
     "roiBack": "199,150,109,271",
     "method": "Template matching",
     "threshold": 0.8,
@@ -29,8 +29,8 @@
   {
     "itemName": "abyss_fox",
     "imageName": "res_abyss_fox.png",
-    "roiFront": "815,174,49,144",
-    "roiBack": "789,130,148,249",
+    "roiFront": "811,178,61,157",
+    "roiBack": "786,131,148,249",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "狭间_白藏主入口"
@@ -137,7 +137,7 @@
   {
     "itemName": "is_attack",
     "imageName": "res_is_attack.png",
-    "roiFront": "576,54,91,45",
+    "roiFront": "586,62,75,30",
     "roiBack": "576,54,91,45",
     "method": "Template matching",
     "threshold": 0.8,

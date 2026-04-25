@@ -51,13 +51,13 @@ class AbyssShadowsAssets:
 
 	# Image Rule Assets
 	# 狭间_神龙入口 
-	I_ABYSS_DRAGON = RuleImage(roi_front=(199,150,109,271), roi_back=(199,150,109,271), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_abyss_dragon.png")
+	I_ABYSS_DRAGON = RuleImage(roi_front=(220,176,70,188), roi_back=(199,150,109,271), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_abyss_dragon.png")
 	# 狭间_神龙入口_已封印 
 	I_ABYSS_DRAGON_OVER = RuleImage(roi_front=(200,150,110,270), roi_back=(200,150,110,270), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_abyss_dragon_over.png")
 	# 狭间_孔雀入口 
 	I_ABYSS_PEACOCK = RuleImage(roi_front=(521,152,48,165), roi_back=(465,104,145,312), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_abyss_peacock.png")
 	# 狭间_白藏主入口 
-	I_ABYSS_FOX = RuleImage(roi_front=(815,174,49,144), roi_back=(789,130,148,249), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_abyss_fox.png")
+	I_ABYSS_FOX = RuleImage(roi_front=(811,178,61,157), roi_back=(786,131,148,249), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_abyss_fox.png")
 	# 狭间_黑豹入口 
 	I_ABYSS_LEOPARD = RuleImage(roi_front=(1142,166,50,162), roi_back=(1093,143,138,297), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_abyss_leopard.png")
 	# 战报 
@@ -81,7 +81,7 @@ class AbyssShadowsAssets:
 	# description 
 	I_ENSURE_BUTTON = RuleImage(roi_front=(672,405,169,55), roi_back=(672,405,169,55), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_ensure_button.png")
 	# 进攻中 
-	I_IS_ATTACK = RuleImage(roi_front=(576,54,91,45), roi_back=(576,54,91,45), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_is_attack.png")
+	I_IS_ATTACK = RuleImage(roi_front=(586,62,75,30), roi_back=(576,54,91,45), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_is_attack.png")
 	# 狭间暗域 挑战结束 
 	I_CHECK_FINISH = RuleImage(roi_front=(570,50,120,60), roi_back=(570,50,120,60), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_check_finish.png")
 	# description 
