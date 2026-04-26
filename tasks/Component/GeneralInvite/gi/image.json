@@ -308,8 +308,8 @@
   {
     "itemName": "i_no_default",
     "imageName": "gi_i_no_default.png",
-    "roiFront": "542,343,36,35",
-    "roiBack": "542,343,36,35",
+    "roiFront": "509,340,36,40",
+    "roiBack": "509,340,36,40",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "不勾选 默认邀请"
@@ -317,8 +317,8 @@
   {
     "itemName": "i_default",
     "imageName": "gi_i_default.png",
-    "roiFront": "541,342,41,39",
-    "roiBack": "541,342,41,39",
+    "roiFront": "506,340,41,39",
+    "roiBack": "506,340,41,39",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "勾选 默认邀请"
@@ -353,8 +353,8 @@
   {
     "itemName": "gi_in_room",
     "imageName": "gi_gi_in_room.png",
-    "roiFront": "92,17,213,64",
-    "roiBack": "92,17,213,64",
+    "roiFront": "80,14,152,45",
+    "roiBack": "80,14,184,46",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "三人御魂组队左上角的协站队伍"

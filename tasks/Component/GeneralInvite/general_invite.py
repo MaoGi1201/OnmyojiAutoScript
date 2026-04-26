@@ -459,7 +459,7 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
         :param friend_class: OCR 识别到的分类文本
         :return: 归一化后的分类文本
         """
-        mapping = {'蔡友': '寮友', '路区': '跨区', '察友': '寮友', '区': '跨区'}
+        mapping = {'蔡友员': '寮友', '路区': '跨区', '察友员': '寮友', '区': '跨区','友达':'好友','友速':'好友'}
         return mapping.get(friend_class, friend_class)
 
     def _read_friend_classes(self) -> list[str]:
@@ -521,7 +521,7 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
             return False
         recent_index = friend_class.index('最近')
         self._switch_friend_class(recent_index)
-        sleep(0.5)
+        sleep(1)
         logger.info('Now find friend in ”最近“')
         self._select_current_page_friends(friend_list, selected_set)
         return True
