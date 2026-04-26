@@ -119,8 +119,8 @@
   {
     "itemName": "a_activate_yellow",
     "imageName": "a_a_activate_yellow.png",
-    "roiFront": "1047,560,100,100",
-    "roiBack": "1047,560,100,100",
+    "roiFront": "1066,563,100,100",
+    "roiBack": "1066,563,100,100",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "激活, 黄色的可以激活"
@@ -128,8 +128,8 @@
   {
     "itemName": "a_activate_gray",
     "imageName": "a_a_activate_gray.png",
-    "roiFront": "1046,556,100,100",
-    "roiBack": "1046,556,100,100",
+    "roiFront": "1048,554,100,100",
+    "roiBack": "1047,554,100,100",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "激活, 灰色不可激活"

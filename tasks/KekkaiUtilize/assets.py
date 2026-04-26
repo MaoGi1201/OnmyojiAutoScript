@@ -144,11 +144,11 @@ class KekkaiUtilizeAssets:
 	# description 
 	I_U_MOON_2 = RuleImage(roi_front=(552,313,46,44), roi_back=(542,174,81,437), threshold=0.8, method="Template matching", file="./tasks/KekkaiUtilize/utilize/utilize_u_moon_2.png")
 	# description 
-	I_CHECK_FRIEND_REALM_1 = RuleImage(roi_front=(1059,17,90,21), roi_back=(844,4,421,65), threshold=0.8, method="Template matching", file="./tasks/KekkaiUtilize/utilize/utilize_check_friend_realm_1.png")
+	I_CHECK_FRIEND_REALM_1 = RuleImage(roi_front=(1060,16,115,27), roi_back=(844,4,421,65), threshold=0.8, method="Template matching", file="./tasks/KekkaiUtilize/utilize/utilize_check_friend_realm_1.png")
 	# description 
-	I_CHECK_FRIEND_REALM_2 = RuleImage(roi_front=(590,143,44,52), roi_back=(538,106,161,158), threshold=0.8, method="Template matching", file="./tasks/KekkaiUtilize/utilize/utilize_check_friend_realm_2.png")
+	I_CHECK_FRIEND_REALM_2 = RuleImage(roi_front=(637,194,41,52), roi_back=(538,99,181,250), threshold=0.8, method="Template matching", file="./tasks/KekkaiUtilize/utilize/utilize_check_friend_realm_2.png")
 	# 好友寄养 
-	I_CHECK_FRIEND_REALM_3 = RuleImage(roi_front=(900,23,22,120), roi_back=(884,11,271,160), threshold=0.8, method="Template matching", file="./tasks/KekkaiUtilize/utilize/utilize_check_friend_realm_3.png")
+	I_CHECK_FRIEND_REALM_3 = RuleImage(roi_front=(900,23,22,120), roi_back=(838,11,317,152), threshold=0.8, method="Template matching", file="./tasks/KekkaiUtilize/utilize/utilize_check_friend_realm_3.png")
 
 
 	# Ocr Rule Assets
@@ -157,7 +157,7 @@ class KekkaiUtilizeAssets:
 	# 今日已领取经验 
 	O_BOX_EXP = RuleOcr(roi=(654,538,179,39), area=(654,538,179,39), mode="DigitCounter", method="Default", keyword="", name="box_exp")
 	# 斗鱼或太古寄养数目 
-	O_CARD_NUM = RuleOcr(roi=(800,421,150,33), area=(800,421,150,33), mode="Single", method="Default", keyword="", name="card_num")
+	O_CARD_NUM = RuleOcr(roi=(801,420,178,33), area=(801,421,178,33), mode="Single", method="Default", keyword="", name="card_num")
 
 
 	# Swipe Rule Assets

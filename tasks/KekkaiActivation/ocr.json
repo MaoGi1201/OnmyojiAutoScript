@@ -10,8 +10,8 @@
   },
   {
     "itemName": "check_card_number",
-    "roiFront": "305,153,107,481",
-    "roiBack": "305,153,107,481",
+    "roiFront": "305,153,140,481",
+    "roiBack": "305,153,140,481",
     "mode": "Single",
     "method": "Default",
     "keyword": "",

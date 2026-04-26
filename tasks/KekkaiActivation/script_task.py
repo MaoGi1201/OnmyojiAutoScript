@@ -242,7 +242,7 @@ class ScriptTask(KU, KekkaiActivationAssets):
             check_card = "勾玉"
         elif rule == CardType.FISH:
             min_card_num = self.config.kekkai_activation.activation_config.min_fish_num
-            check_card = "体力"
+            check_card = "夕"
         else:
             logger.error('Unknown utilize rule')
             raise ValueError('Unknown utilize rule')

@@ -72,7 +72,7 @@ class RestartAssets:
 	# 庭院卷轴关闭 
 	I_LOGIN_SCROOLL_CLOSE = RuleImage(roi_front=(1181,634,28,39), roi_back=(1162,595,77,112), threshold=0.7, method="Template matching", file="./tasks/Restart/login/login_login_scrooll_close.png")
 	# 闲庭图片 
-	I_LOGIN_COURTYARD = RuleImage(roi_front=(40,640,100,50), roi_back=(40,640,100,50), threshold=0.8, method="Template matching", file="./tasks/Restart/login/login_courtyard.png")
+	I_LOGIN_COURTYARD = RuleImage(roi_front=(40,640,68,42), roi_back=(40,640,100,50), threshold=0.8, method="Template matching", file="./tasks/Restart/login/login_courtyard.png")
 	# description 
 	I_LOGIN_RED_CLOSE = RuleImage(roi_front=(800,0,480,290), roi_back=(800,0,480,290), threshold=0.8, method="Template matching", file="./tasks/Restart/login/login_login_red_close.png")
 	# description 

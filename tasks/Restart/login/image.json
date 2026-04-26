@@ -20,7 +20,7 @@
   {
     "itemName": "login_courtyard",
     "imageName": "login_courtyard.png",
-    "roiFront": "40,640,100,50",
+    "roiFront": "40,640,68,42",
     "roiBack": "40,640,100,50",
     "method": "Template matching",
     "threshold": 0.8,
