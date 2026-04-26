@@ -11,8 +11,8 @@
   {
     "itemName": "preset",
     "imageName": "gb_preset.png",
-    "roiFront": "32,650,47,45",
-    "roiBack": "32,650,47,45",
+    "roiFront": "40,652,43,58",
+    "roiBack": "40,652,43,59",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "预设的小图标"
@@ -29,7 +29,7 @@
   {
     "itemName": "win",
     "imageName": "gb_win.png",
-    "roiFront": "385,47,100,100",
+    "roiFront": "462,145,100,100",
     "roiBack": "296,33,414,224",
     "method": "Template matching",
     "threshold": 0.8,
