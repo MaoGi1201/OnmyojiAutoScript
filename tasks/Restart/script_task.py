@@ -1,7 +1,7 @@
 # This Python file uses the following encoding: utf-8
 # @author runhey
 # github https://github.com/runhey
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from module.exception import TaskEnd
 from module.logger import logger
@@ -17,9 +17,8 @@ class ScriptTask(BaseTask):
         :return:
         """
         if not self.delay_pending_tasks():
-            self.app_restart()
-            if self.config.model.restart.restart_config.enable_daily:
-                self.config.task_call('DailyTrifles')
+            self.recover_app()
+            self.finish_recovery()
         raise TaskEnd('ScriptTask end')
 
     def app_stop(self):
@@ -35,10 +34,26 @@ class ScriptTask(BaseTask):
     def app_restart(self):
         logger.hr('App restart')
         self.device.app_stop()
-        self.device.app_start()
-        self.device.wait_app_start_ready()
-        LoginService(config=self.config, device=self.device).app_handle_login()
+        self.app_start()
+
+    def recover_app(self):
+        if not self.device.app_is_alive():
+            logger.info('Recovery branch: game process not alive and not in foreground -> full restart')
+            self.app_restart()
+            return
+
+        if self.device.app_is_running():
+            logger.info('Recovery branch: game process alive and in foreground -> full restart')
+            self.app_restart()
+            return
+
+        logger.info('Recovery branch: game process alive but in background -> bring to foreground')
+        self.app_start()
+
+    def finish_recovery(self):
         self.set_next_run(task='Restart', success=True, finish=True, server=True)
+        if self.config.model.restart.restart_config.enable_daily:
+            self.config.task_call('DailyTrifles')
 
     def delay_pending_tasks(self) -> bool:
         """

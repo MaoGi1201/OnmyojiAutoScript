@@ -2,6 +2,8 @@
 # @brief    Ryou Dokan Toppa (阴阳竂道馆突破功能)
 # @author   AzurTian
 # @note     draft version without full test
+import time
+
 import re
 from datetime import timedelta
 from time import sleep
@@ -67,10 +69,10 @@ class ScriptTask(GameUi, SwitchSoul, GeneralBattle, DokanAssets):
     def _handle_in_battle(self, context: BattleContext, config: GeneralBattleConfig) -> BattleAction:
         count = self.conf.attack_count_config.attack_dokan_master_count()
         if context.battle_key == 'dokan_owner':
-            if context.continuous_count == 1 and count == 1:
-                return BattleAction.EXIT_WIN
-            if context.continuous_count == 2 and count < 2:
-                return BattleAction.EXIT_WIN
+            if count <= 0:  # 不让打直接退
+                return BattleAction.QUICK_EXIT
+            if context.continuous_count == 2 and count == 1:  # 2阵但只允许打一次
+                return BattleAction.QUICK_EXIT
         return super()._handle_in_battle(context, config)
 
     def exit_battle(self, skip_first: bool = False) -> bool:
@@ -108,6 +110,7 @@ class ScriptTask(GameUi, SwitchSoul, GeneralBattle, DokanAssets):
         pages.page_dokan_rank.connect(pages.page_dokan, pages.random_click, key="page_dokan_rank->page_dokan")
 
     def run(self):
+        self.before_run()
         self.conf = self.config.model.dokan
         if self.conf.dokan_config.monday_to_thursday and datetime.now().weekday() >= 4:
             logger.warning("weekend, exit")
@@ -115,23 +118,30 @@ class ScriptTask(GameUi, SwitchSoul, GeneralBattle, DokanAssets):
             raise TaskEnd
         # 初始化相关动态参数,从配置文件读取相关记录,如果没有当天的记录则设置为默认值
         self.conf.attack_count_config.init_attack_count(callback=self.config.save)
-        unknown_page_timer = Timer(15).start()
+        unknown_page_timer = Timer(10)
+        self.goto_page(pages.page_dokan_map)
         try:
             while True:
                 self.screenshot()
                 current_page = self.get_current_page()
                 match current_page:
+                    case None:
+                        self.device.click_record_clear()
+                        self.device.stuck_record_clear()
+                        time.sleep(0.5)
                     case pages.page_dokan_map:
-                        unknown_page_timer.reset()
                         self.run_on_dokan_map()
                     case pages.page_dokan:
-                        unknown_page_timer.reset()
                         self.run_on_dokan()
                     case pages.page_battle_prepare | pages.page_battle:
-                        unknown_page_timer.reset()
                         self.run_on_battle()
+                    case pages.page_battle_result:
+                        self.click(pages.random_click(ltrb=(False, False, True, False)), interval=1.5)
                     case _:
-                        if unknown_page_timer.reached():  # 15秒都是非道馆界面, 则尝试回到道馆
+                        if not unknown_page_timer.started():
+                            unknown_page_timer.start()
+                        if unknown_page_timer.started() and unknown_page_timer.reached():  # 10秒都是非道馆界面, 则尝试回到道馆
+                            unknown_page_timer = Timer(10)
                             self.goto_page(pages.page_dokan)
         except DokanFinishedError:
             is_dokan_activated = True
@@ -153,6 +163,7 @@ class ScriptTask(GameUi, SwitchSoul, GeneralBattle, DokanAssets):
             self.I_RYOU_DOKAN_FAILED_VOTE_BATTLE_AGAIN,
             self.I_RYOU_DOKAN_TODAY_ATTACK_COUNT,
             self.I_RYOU_DOKAN_REMAIN_ATTACK_COUNT_DONE,
+            self.I_DOKAN_BOSS_WAITING
         ])
         if self.appear(self.I_RYOU_DOKAN_GATHERING):  # 正在集结
             logger.debug(f"Dokan is gathering...")
@@ -161,7 +172,8 @@ class ScriptTask(GameUi, SwitchSoul, GeneralBattle, DokanAssets):
             self.device.click_record_clear()
             self.device.stuck_record_clear()
             return
-        if self.appear(self.I_RYOU_DOKAN_MASTER_BATTLE) and self.appear(self.I_RYOU_DOKAN_START_CHALLENGE):  # 馆主可挑战
+        if not self.appear(self.I_DOKAN_BOSS_WAITING) and self.appear(self.I_RYOU_DOKAN_MASTER_BATTLE) and \
+                self.appear(self.I_RYOU_DOKAN_START_CHALLENGE):  # 馆主可挑战
             count = self.conf.attack_count_config.attack_dokan_master_count()
             first_master_killed = False
             if self._battle_context is not None:
@@ -175,7 +187,7 @@ class ScriptTask(GameUi, SwitchSoul, GeneralBattle, DokanAssets):
             elif self.conf.dokan_config.try_start_dokan:
                 self.abandoned_toppa()
             return
-        if self.appear(self.I_RYOU_DOKAN_START_CHALLENGE):  # 非馆主且可挑战
+        if not self.appear(self.I_DOKAN_BOSS_WAITING) and self.appear(self.I_RYOU_DOKAN_START_CHALLENGE):  # 非馆主且可挑战
             self.switch_soul_in_dokan('member')
             if self.click_until_in_battle():
                 self.run_general_battle(self.conf.dokan_member_battle_conf, battle_key='dokan_member')
@@ -440,7 +452,6 @@ class ScriptTask(GameUi, SwitchSoul, GeneralBattle, DokanAssets):
         return res_list
 
     def start_cheering(self):
-        logger.info(f"Start battle in cd...")
         if not self.conf.dokan_config.dokan_auto_cheering_while_cd:
             return
         cd_text = self.O_DOKEN_FAIL_CD.detect_text(self.device.image)
