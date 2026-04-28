@@ -119,7 +119,7 @@
   {
     "itemName": "st_level_0",
     "imageName": "simple_st_level_0.png",
-    "roiFront": "85,235,45,26",
+    "roiFront": "85,235,45,25",
     "roiBack": "85,235,45,25",
     "method": "Template matching",
     "threshold": 0.9,

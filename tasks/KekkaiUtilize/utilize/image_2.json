@@ -56,8 +56,8 @@
   {
     "itemName": "check_friend_realm_2",
     "imageName": "utilize_check_friend_realm_2.png",
-    "roiFront": "637,194,41,52",
-    "roiBack": "538,99,181,250",
+    "roiFront": "590,143,44,52",
+    "roiBack": "538,106,161,158",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"

@@ -279,6 +279,8 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, DuelAssets, SwitchOnmyoji):
                 continue
             if self.appear_then_click(self.I_UI_CONFIRM, interval=0.6):
                 continue
+            if self.appear_then_click(self.I_D_CONFIRM, interval=0.8):
+                continue
             if self.appear_then_click(self.I_D_TEAM_SWTICH, interval=1):
                 click_count += 1
                 continue

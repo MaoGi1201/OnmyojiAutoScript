@@ -23,6 +23,8 @@ from tasks.GameUi.page import page_main, page_guild
 from module.base.utils import point2str
 import random
 
+from toolkit.Lib.asyncio import sleep
+
 """ 结界蹭卡 """
 
 

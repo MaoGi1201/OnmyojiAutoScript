@@ -2,7 +2,7 @@
   {
     "itemName": "seimi_battle",
     "imageName": "so_seimi_battle.png",
-    "roiFront": "253,429,79,78",
+    "roiFront": "250,426,79,78",
     "roiBack": "147,388,222,153",
     "method": "Template matching",
     "threshold": 0.8,
@@ -29,7 +29,7 @@
   {
     "itemName": "yao_bikuni_battle",
     "imageName": "so_yao_bikuni_battle.png",
-    "roiFront": "1017,428,79,78",
+    "roiFront": "985,428,79,78",
     "roiBack": "910,387,222,153",
     "method": "Template matching",
     "threshold": 0.8,

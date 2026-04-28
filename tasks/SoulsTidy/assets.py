@@ -45,7 +45,7 @@ class SoulsTidyAssets:
 	# 已弃置被选中 
 	I_ST_ABANDONED_SELECTED = RuleImage(roi_front=(32,112,107,52), roi_back=(15,89,139,87), threshold=0.8, method="Template matching", file="./tasks/SoulsTidy/simple/simple_st_abandoned_selected.png")
 	# 第一个御魂是+0的 
-	I_ST_LEVEL_0 = RuleImage(roi_front=(85,235,45,26), roi_back=(85,235,45,25), threshold=0.9, method="Template matching", file="./tasks/SoulsTidy/simple/simple_st_level_0.png")
+	I_ST_LEVEL_0 = RuleImage(roi_front=(85,235,45,25), roi_back=(85,235,45,25), threshold=0.9, method="Template matching", file="./tasks/SoulsTidy/simple/simple_st_level_0.png")
 	# 御魂奉纳后获得的金币 
 	I_ST_GOLD = RuleImage(roi_front=(170,100,950,500), roi_back=(170,100,950,500), threshold=0.9, method="Template matching", file="./tasks/SoulsTidy/simple/simple_st_gold.png")
 	# 御魂溢出 
@@ -69,7 +69,7 @@ class SoulsTidyAssets:
 	# 入手顺序 
 	O_ST_SORT_TIME = RuleOcr(roi=(387,118,110,42), area=(387,118,110,42), mode="Single", method="Default", keyword="入手顺序", name="st_sort_time")
 	# 等级/星级 最上边的 
-	O_ST_SORT_LEVEL_1 = RuleOcr(roi=(384,115,121,45), area=(384,115,121,45), mode="Single", method="Default", keyword="等级/星级", name="st_sort_level_1")
+	O_ST_SORT_LEVEL_1 = RuleOcr(roi=(449,116,86,41), area=(449,116,86,41), mode="Single", method="Default", keyword="久", name="st_sort_level_1")
 	# 等级/星 下边的 
 	O_ST_SORT_LEVEL_2 = RuleOcr(roi=(400,290,128,42), area=(400,290,128,42), mode="Single", method="Default", keyword="等级/星级", name="st_sort_level_2")
 	# 类型 
