@@ -65,8 +65,8 @@
   {
     "itemName": "sou_switch_sure_9",
     "imageName": "sk9_sou_switch_sure_9.png",
-    "roiFront": "669,401,190,61",
-    "roiBack": "669,401,190,61",
+    "roiFront": "669,401,175,59",
+    "roiBack": "669,401,176,60",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "确认切换"
@@ -164,7 +164,7 @@
   {
     "itemName": "st_souls_9",
     "imageName": "sk9_st_souls_9.png",
-    "roiFront": "1196,234,33,65",
+    "roiFront": "1196,228,34,71",
     "roiBack": "1170,220,70,90",
     "method": "Template matching",
     "threshold": 0.8,

@@ -370,7 +370,7 @@ class CostumeShikigamiAssets:
 	# 第四组切换 
 	I_SOU_SWITCH_4_9 = RuleImage(roi_front=(976,602,25,27), roi_back=(960,592,60,50), threshold=0.8, method="Template matching", file="./tasks/Component/CostumeShikigami/sk9/sk9_sou_switch_4_9.png")
 	# 确认切换 
-	I_SOU_SWITCH_SURE_9 = RuleImage(roi_front=(669,401,190,61), roi_back=(669,401,190,61), threshold=0.8, method="Template matching", file="./tasks/Component/CostumeShikigami/sk9/sk9_sou_switch_sure_9.png")
+	I_SOU_SWITCH_SURE_9 = RuleImage(roi_front=(669,401,175,59), roi_back=(669,401,176,60), threshold=0.8, method="Template matching", file="./tasks/Component/CostumeShikigami/sk9/sk9_sou_switch_sure_9.png")
 	# 用于判断是否在式神录里面 
 	I_SOU_CHECK_IN_9 = RuleImage(roi_front=(277,79,34,36), roi_back=(265,71,60,50), threshold=0.8, method="Template matching", file="./tasks/Component/CostumeShikigami/sk9/sk9_sou_check_in_9.png")
 	# 检查是否为第一组 
@@ -392,7 +392,7 @@ class CostumeShikigamiAssets:
 	# 需要切换的预设按钮(颜色深一点) 
 	I_SOU_CLICK_PRESENT_9 = RuleImage(roi_front=(975,296,25,27), roi_back=(965,132,49,500), threshold=0.8, method="Template matching", file="./tasks/Component/CostumeShikigami/sk9/sk9_sou_click_present_9.png")
 	# 选中的御魂 
-	I_ST_SOULS_9 = RuleImage(roi_front=(1196,234,33,65), roi_back=(1170,220,70,90), threshold=0.8, method="Template matching", file="./tasks/Component/CostumeShikigami/sk9/sk9_st_souls_9.png")
+	I_ST_SOULS_9 = RuleImage(roi_front=(1196,228,34,71), roi_back=(1170,220,70,90), threshold=0.8, method="Template matching", file="./tasks/Component/CostumeShikigami/sk9/sk9_st_souls_9.png")
 	# 更换 
 	I_ST_REPLACE_9 = RuleImage(roi_front=(878,224,63,39), roi_back=(855,175,110,130), threshold=0.8, method="Template matching", file="./tasks/Component/CostumeShikigami/sk9/sk9_st_replace_9.png")
 
