@@ -280,8 +280,8 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         logger.info('Switch friend list to %s', friend)
         if friend == SelectFriendList.SAME_SERVER:
             check_image = self.I_UTILIZE_FRIEND_GROUP
-        else:
-            check_image = self.I_UTILIZE_ZONES_GROUP
+    #    else:
+    #        check_image = self.I_UTILIZE_ZONES_GROUP
 
         timer_click = Timer(1)
         timer_click.start()
@@ -293,8 +293,8 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
                 timer_click.reset()
                 x, y = check_image.coord()
                 self.device.click(x=x, y=y, control_name=check_image.name)
-        if friend == SelectFriendList.DIFFERENT_SERVER:
-            time.sleep(1)
+    #    if friend == SelectFriendList.DIFFERENT_SERVER:
+    #        time.sleep(1)
         time.sleep(0.5)
 
     @cached_property
@@ -345,7 +345,8 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         # 不管什么时候进来都要切换刷新列表(同区与跨区保持一致先切换滑动再切换)
         if friend == SelectFriendList.SAME_SERVER:
             self.switch_friend_list(SelectFriendList.SAME_SERVER)
-            self.swipe(self.S_U_END, interval=3)
+        """"
+        #    self.swipe(self.S_U_END, interval=3)
             self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
             self.switch_friend_list(SelectFriendList.SAME_SERVER)
         else:  # 跨区必须切换两次, 否则结界卡不刷新到头部
@@ -353,7 +354,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
             self.swipe(self.S_U_END, interval=3)
             self.switch_friend_list(SelectFriendList.SAME_SERVER)
             self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
-
+        """
         # --------------- 结界卡选择 ---------------
         if not self._select_optimal_resource_card():
             return False
