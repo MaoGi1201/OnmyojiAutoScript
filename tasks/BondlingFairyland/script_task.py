@@ -253,7 +253,7 @@ class ScriptTask(GameUi, GeneralInvite, GeneralRoom, GeneralBattle, SwitchSoul, 
             if self.check_then_accept():
                 continue
 
-            if self.is_in_room():
+            if self.is_in_room(False):
                 logger.info("契灵：已经在组队房间中")
                 if self.wait_battle(wait_time=self.config.bondling_fairyland.invite_config.wait_time):
                     self.run_general_battle(self.config.bondling_fairyland.battle_config)
@@ -272,7 +272,7 @@ class ScriptTask(GameUi, GeneralInvite, GeneralRoom, GeneralBattle, SwitchSoul, 
 
         while 1:
             # 有一种情况是本来要退出的，但是队长邀请了进入的战斗的加载界面
-            if self.appear(self.I_GI_HOME) or self.appear(self.I_GI_EXPLORE) or self.appear(
+            if self.appear(self.I_CHECK_MAIN) or self.appear(self.I_CHECK_EXPLORATION) or self.appear(
                     self.I_BALL_AREA) or self.appear(self.I_BALL_HELP):
                 break
             # 如果可能在房间就退出
@@ -340,7 +340,7 @@ class ScriptTask(GameUi, GeneralInvite, GeneralRoom, GeneralBattle, SwitchSoul, 
             if self.in_search_ui():
                 break
             if self.in_catch_ui():
-                self.appear_then_click(self.I_BACK_Y, interval=1)
+                self.appear_then_click(self.I_UI_BACK_YELLOW, interval=1)
         logger.info('BondlingFairyland task finished')
 
         self.goto_page(page_main)
@@ -654,7 +654,7 @@ class ScriptTask(GameUi, GeneralInvite, GeneralRoom, GeneralBattle, SwitchSoul, 
             self.screenshot()
 
             # 如果自己在探索界面或者是庭院，那就是房间已经被销毁了
-            if self.appear(self.I_GI_HOME) or self.appear(self.I_GI_EXPLORE) or self.appear(
+            if self.appear(self.I_CHECK_MAIN) or self.appear(self.I_CHECK_EXPLORATION) or self.appear(
                     self.I_BALL_AREA) or self.appear(self.I_BALL_HELP):
                 logger.warning('Room destroyed')
                 success = False
@@ -680,20 +680,6 @@ class ScriptTask(GameUi, GeneralInvite, GeneralRoom, GeneralBattle, SwitchSoul, 
             self.exit_room()
 
         return success
-
-    def exit_team(self) -> bool:
-        """
-        在组队界面 退出组队的界面， 返回到庭院或者是你一开始进入的入口
-        :return:
-        """
-        if self.appear(self.I_CHECK_TEAM):
-            logger.info('Exit team ui')
-            while 1:
-                self.screenshot()
-                if not self.appear(self.I_CHECK_TEAM):
-                    return True
-                if self.appear_then_click(self.I_GR_BACK_YELLOW, interval=0.5):
-                    continue
 
     def in_catch_ui(self, screenshot=False) -> bool:
         """

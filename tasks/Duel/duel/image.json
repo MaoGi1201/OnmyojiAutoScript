@@ -101,7 +101,7 @@
   {
     "itemName": "d_celeb_honor",
     "imageName": "duel_d_celeb_honor.png",
-    "roiFront": "321,631,22,28",
+    "roiFront": "338,641,25,30",
     "roiBack": "199,606,222,76",
     "method": "Template matching",
     "threshold": 0.75,
@@ -180,12 +180,12 @@
     "description": "斗技荣誉图标"
   },
   {
-    "itemName": "d_confirm",
-    "imageName": "duel_d_confirm.png",
-    "roiFront": "550,399,177,63",
-    "roiBack": "550,399,177,63",
+    "itemName": "d_win_share",
+    "imageName": "d_win_share.png",
+    "roiFront": "1123,608,82,73",
+    "roiBack": "1123,608,82,73",
     "method": "Template matching",
     "threshold": 0.8,
-    "description": "误触式神弹出确定"
+    "description": "胜利分享"
   }
 ]

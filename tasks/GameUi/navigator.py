@@ -42,11 +42,9 @@ class GameUi(BaseTask, GameUiAssets):
         GlobalGameAssets.I_UI_BACK_RED,
         GlobalGameAssets.I_CHAT_CLOSE_BUTTON,
         ActivityShikigamiAssets.I_SKIP_BUTTON,
-        GeneralBattleAssets.I_CONFIRM,
-        GeneralBattleAssets.I_EXIT_ENSURE,
-        GameUiAssets.I_BACK_FRIENDS,
+        GlobalGameAssets.I_UI_CONFIRM_SAMLL,
+        GlobalGameAssets.I_UI_CONFIRM,
         GameUiAssets.I_BACK_DAILY,
-        GameUiAssets.I_REALM_RAID_GOTO_EXPLORATION,
         GameUiAssets.I_SIX_GATES_GOTO_EXPLORATION,
         GlobalGameAssets.I_UI_BACK_YELLOW,
         SixRealmsAssets.I_EXIT_SIXREALMS,
@@ -393,8 +391,9 @@ class GameUi(BaseTask, GameUiAssets):
         Returns:
             以页面 key 为索引的允许页面字典。
         """
-
-        pages = {page.key: page for page in self.navigator.all_pages(self._navigation_graph_categories(destination, current))}
+        categories = self._navigation_graph_categories(destination, current)
+        categories.add(self.navigator.task_category)
+        pages = {page.key: page for page in self.navigator.all_pages(categories)}
         if current is not None:
             pages[current.key] = current
         pages[destination.key] = destination
