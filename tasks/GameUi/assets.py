@@ -209,7 +209,7 @@ class GameUiAssets:
 	# 就是一个红叉 
 	I_REALM_RAID_GOTO_EXPLORATION = RuleImage(roi_front=(1192,107,36,43), roi_back=(1122,53,136,143), threshold=0.8, method="Template matching", file="./tasks/GameUi/page/page_realm_raid_goto_exploration.png")
 	# description 
-	I_MAIN_GOTO_TRAVEL = RuleImage(roi_front=(170,590,64,61), roi_back=(170,590,120,100), threshold=0.8, method="Template matching", file="./tasks/GameUi/page/page_main_goto_travel.png")
+	I_MAIN_GOTO_TRAVEL = RuleImage(roi_front=(200,606,64,61), roi_back=(170,590,120,100), threshold=0.8, method="Template matching", file="./tasks/GameUi/page/page_main_goto_travel.png")
 	# 珍旅居 
 	I_CHECK_TRAVEL = RuleImage(roi_front=(1134,583,78,77), roi_back=(1134,583,78,77), threshold=0.8, method="Template matching", file="./tasks/GameUi/page/page_check_travel.png")
 	# 活动列表页前往活动 

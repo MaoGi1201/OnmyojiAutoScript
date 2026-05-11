@@ -56,7 +56,7 @@
   {
     "itemName": "mall_bondlings_on",
     "imageName": "navbar_mall_bondlings_on.png",
-    "roiFront": "99,417,1021,37",
+    "roiFront": "99,417,140,37",
     "roiBack": "99,417,1021,37",
     "method": "Template matching",
     "threshold": 0.8,

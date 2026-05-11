@@ -74,7 +74,7 @@
   {
     "itemName": "me_check_black",
     "imageName": "medal_me_check_black.png",
-    "roiFront": "592,508,100,51",
+    "roiFront": "595,513,100,51",
     "roiBack": "548,482,185,101",
     "method": "Template matching",
     "threshold": 0.8,
@@ -101,7 +101,7 @@
   {
     "itemName": "me_check_souls",
     "imageName": "medal_me_check_souls.png",
-    "roiFront": "591,480,100,52",
+    "roiFront": "596,493,100,52",
     "roiBack": "541,453,192,106",
     "method": "Template matching",
     "threshold": 0.8,

@@ -110,7 +110,7 @@ class Buy(BaseTask, BuyAssets):
         # 设置购买的数量
         if number is None:
             self.appear_then_click(self.I_BUY_PLUS, interval=0.4)
-            time.sleep(0.5)
+            time.sleep(1)
             self.appear_then_click(self.I_BUY_PLUS, interval=0.4)
         else:
             # 四次截图数字都一样，就可以退出了
@@ -142,7 +142,7 @@ class Buy(BaseTask, BuyAssets):
             self.screenshot()
 
             if self.ui_reward_appear_click():
-                time.sleep(0.5)
+                time.sleep(1)
                 while 1:
                     self.screenshot()
                     # 等待动画结束

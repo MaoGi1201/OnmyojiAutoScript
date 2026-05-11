@@ -115,7 +115,7 @@ class Guild(Buy, GameUi, RichManAssets):
         logger.warning(result)
         result = result.replace('？', '2').replace('?', '2').replace(':', '；')
         try:
-            result = re.findall(r'本周剩余数量(\d+)', result)[0]
+            result = re.findall(r'今调残）：(\d+)', result)[0]
             result = int(result)
         except:
             result = 0

@@ -180,8 +180,8 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, SecretAssets):
             :param roi:
             :return:
             """
-            ocr_target.roi[0] = int(roi[0]) - 118
-            ocr_target.roi[1] = int(roi[1]) + 37
+            ocr_target.roi[0] = int(roi[0]) - 101
+            ocr_target.roi[1] = int(roi[1]) + 38
             # print(f'检测到的未通过ROI: {roi}')
             # print(f'检测到的勾玉数量ROI: {ocr_target.roi}')
             jade_num = ocr_target.ocr(self.device.image)

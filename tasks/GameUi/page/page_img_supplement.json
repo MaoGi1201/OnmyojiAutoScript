@@ -38,7 +38,7 @@
   {
     "itemName": "main_goto_travel",
     "imageName": "page_main_goto_travel.png",
-    "roiFront": "170,590,64,61",
+    "roiFront": "200,606,64,61",
     "roiBack": "170,590,120,100",
     "method": "Template matching",
     "threshold": 0.8,
