@@ -17,7 +17,7 @@ from tasks.Component.Login.service import LoginService
 from tasks.DailyTrifles.assets import DailyTriflesAssets
 from tasks.GlobalGame.assets import GlobalGameAssets
 from tasks.GameUi.assets import GameUiAssets
-from tasks.GameUi.matcher import any_of
+from tasks.GameUi.matcher import any_of, all_of
 from tasks.GameUi.page_definition import Page
 from tasks.KekkaiUtilize.assets import KekkaiUtilizeAssets
 from tasks.Restart.assets import RestartAssets
@@ -34,7 +34,7 @@ def random_click(
     Args:
         low: 当需要返回点击序列时，序列长度的最小值。
         high: 当需要返回点击序列时，序列长度的最大值。
-        ltrb: 允许参与随机的区域开关，依次对应左、偏左、偏右、右区域。
+        ltrb: 允许参与随机的区域开关，依次对应左、上、右、下区域。
 
     Returns:
         单个 `RuleClick`，或一个由多个 `RuleClick` 组成的列表。
@@ -57,12 +57,10 @@ def handle_login_page(task) -> bool:
 page_login = Page(SwitchAccountAssets.I_CHECK_LOGIN_FORM, category="global")
 page_login.add_enter_success_hooks(handle_login_page)
 
-# 庭院主页。
+# 庭院主页(此处通过提高阈值来处理部分探索章节会识别成原始庭院的问题, 后续有其他更好方法需改善)
 page_main = Page(GameUiAssets.I_CHECK_MAIN, category="global")
 page_main.add_enter_success_hooks(
-    GameUiAssets.I_AD_CLOSE_RED,
-    GlobalGameAssets.I_UI_BACK_RED,
-    RestartAssets.I_CANCEL_BATTLE,
+    GameUiAssets.I_AD_CLOSE_RED, GlobalGameAssets.I_UI_BACK_RED, RestartAssets.I_CANCEL_BATTLE,
     conditional_action(RestartAssets.I_LOGIN_COURTYARD, RestartAssets.C_LOGIN_SCROLL_CLOSE_AREA),
 )
 
@@ -124,10 +122,10 @@ page_travel.connect(page_main, GlobalGameAssets.I_UI_BACK_YELLOW, key="page_trav
 page_main.connect(page_travel, GameUiAssets.I_MAIN_GOTO_TRAVEL, key="page_main->page_travel")
 
 # 活动列表页。
-page_act_list = Page(GameUiAssets.I_CHECK_ACT_LIST, category="global")
+page_act_list = Page(GameUiAssets.I_CHECK_ACT_LIST, category="global", priority=25)
 page_act_list.add_enter_success_hooks(GameUiAssets.I_PAPER_DOLL_CLOSE)
 page_main.connect(page_act_list, GameUiAssets.I_ACT_LIST_EXPAND, key="page_main->page_act_list")
-page_act_list.connect(page_main, GlobalGameAssets.I_UI_BACK_RED, key="page_act_list->page_main")
+page_act_list.connect(page_main, GlobalGameAssets.I_UI_BACK_YELLOW, key="page_act_list->page_main")
 
 # 召唤页。
 page_summon = Page(GameUiAssets.I_CHECK_SUMMON, category="global")
@@ -215,9 +213,24 @@ page_heian_kitan = Page(GameUiAssets.I_CHECK_HEIAN_KITAN, category="global")
 page_heian_kitan.connect(page_exploration, GameUiAssets.I_CHECK_HEIAN_KITAN, key="page_heian_kitan->page_exploration")
 page_exploration.connect(page_heian_kitan, GameUiAssets.I_EXPLORATION_GOTO_HEIAN_KITAN, key="page_exploration->page_heian_kitan")
 
-page_six_gates = Page(GameUiAssets.I_CHECK_SIX_GATES, category="global")
-page_six_gates.connect(page_exploration, GameUiAssets.I_SIX_GATES_GOTO_EXPLORATION, key="page_six_gates->page_exploration")
-page_exploration.connect(page_six_gates, GameUiAssets.I_EXPLORATION_GOTO_SIX_GATES, key="page_exploration->page_six_gates")
+
+def exploration_to_six_gates(task) -> bool:
+    """探索前往六道之门, 处理不同入口情况"""
+    if task.appear_then_click(GameUiAssets.I_EXPLORATION_TO_MOON_SEA) or \
+            task.appear_then_click(GameUiAssets.I_EXPLORATION_TO_INCENSE_REALM) or \
+            task.appear_then_click(GameUiAssets.I_EXPLORATION_TO_SEASONRIFT_FOREST) or \
+            task.appear_then_click(GameUiAssets.I_EXPLORATION_TO_PURE_BUDDHA_REALM) or \
+            task.appear_then_click(GameUiAssets.I_EXPLORATION_TO_MANTRA_TOWER) or \
+            task.appear_then_click(GameUiAssets.I_EXPLORATION_TO_PEACOCK_KINGDOM):
+        return True
+    return False
+
+page_six_gates = Page(any_of(GameUiAssets.I_CHECK_MOON_SEA, GameUiAssets.I_CHECK_INCENSE_REALM,
+                             GameUiAssets.I_CHECK_SEASONRIFT_FOREST, GameUiAssets.I_CHECK_PURE_BUDDHA_REALM,
+                             GameUiAssets.I_CHECK_MANTRA_TOWER, GameUiAssets.I_CHECK_PEACOCK_KINGDOM),
+                      category="global", priority=25)
+page_six_gates.connect(page_exploration, GlobalGameAssets.I_UI_BACK_BLUE, key="page_six_gates->page_exploration")
+page_exploration.connect(page_six_gates, action=exploration_to_six_gates, key="page_exploration->page_six_gates")
 
 page_bondling_fairyland = Page(GameUiAssets.I_CHECK_BONDLING_FAIRYLAND, category="global")
 page_bondling_fairyland.connect(page_exploration, GlobalGameAssets.I_UI_BACK_YELLOW, key="page_bondling_fairyland->page_exploration")
@@ -277,6 +290,7 @@ page_battle_result.add_enter_success_hooks(lambda _task: random_click())
 page_reward = Page(
     any_of(
         GeneralBattleAssets.I_REWARD,
+        GeneralBattleAssets.I_REWARD_STATISTICS,
         GeneralBattleAssets.I_REWARD_GOLD,
         GeneralBattleAssets.I_REWARD_EXP_SOUL_4,
         GeneralBattleAssets.I_REWARD_GOLD_SNAKE_SKIN,

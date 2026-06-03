@@ -13,7 +13,7 @@ from module.exception import TaskEnd, GamePageUnknownError
 
 from tasks.GameUi.game_ui import GameUi
 from tasks.KekkaiUtilize.page import page_guild_realm, page_guild_realm_utilize, page_guild_realm_growth, \
-    page_friend_utilize
+    page_friend_utilize, page_gr_ap_box, page_gr_exp_jug
 from tasks.Utils.config_enum import ShikigamiClass
 from tasks.KekkaiUtilize.assets import KekkaiUtilizeAssets
 from tasks.KekkaiUtilize.config import UtilizeRule, SelectFriendList
@@ -168,98 +168,72 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
     def check_box_ap_or_exp(self, ap_enable: bool = True, exp_enable: bool = True, exp_waste: bool = True) -> bool:
         """
         顺路检查盒子
+        :param exp_waste:
         :param ap_enable:
         :param exp_enable:
         :return:
         """
 
-        # 先是体力盒子
-        def _check_ap_box(appear: bool = False):
-            if not appear:
-                return False
-            # 点击盒子
+        def _harvest_ap_box():
+            """收取体力"""
             timer_ap = Timer(6)
             timer_ap.start()
-            while 1:
+            while True:
+                if timer_ap.reached():
+                    logger.warning('Extract ap box done')
+                    break
                 self.screenshot()
-
                 if self.appear(self.I_UI_REWARD):
-                    while 1:
-                        self.screenshot()
-                        if not self.appear(self.I_UI_REWARD):
-                            break
-                        if self.appear_then_click(self.I_UI_REWARD, self.C_UI_REWARD, interval=1, threshold=0.6):
-                            continue
+                    self.ui_click_until_smt_disappear(self.C_UI_REWARD, self.I_UI_REWARD, interval=1)
                     logger.info('Reward box')
                     break
-
-                if self.appear_then_click(self.I_BOX_AP, interval=1):
-                    continue
                 if self.appear_then_click(self.I_AP_EXTRACT, interval=2):
                     continue
-                if timer_ap.reached():
-                    logger.warning('Extract ap box timeout')
-                    break
-            logger.info('Extract AP box finished')
             return True
 
-        # 经验盒子
-        def _check_exp_box(appear: bool = False):
-            if not appear:
-                logger.info('No exp box')
-                return False
-
+        def _harvest_exp_jug():
             time_exp = Timer(12)
             time_exp.start()
-            while 1:
+            max_tries = random.randint(2, 3)
+            while True:
+                if time_exp.reached():
+                    logger.warning('Extract exp jug done')
+                    break
+                if max_tries <= 0:
+                    logger.info('Exp maybe already full, ocr failed, exit')
+                    break
                 self.screenshot()
                 # 如果出现结界皮肤， 表示收取好了
-                if self.appear(self.I_REALM_SHIN) and not self.appear(self.I_BOX_EXP, threshold=0.6):
+                if self.get_current_page() == page_guild_realm:
                     break
                 # 如果出现收取确认，表明进入到了有满级的
-                if self.appear(self.I_UI_CONFIRM):
-                    self.screenshot()
-                    if not self.appear(self.I_UI_CANCEL):
-                        logger.info('No cancel button')
-                        continue
-                    if exp_waste:
-                        target_button = self.I_UI_CONFIRM
-                    else:
-                        target_button = self.I_UI_CANCEL
-                    while 1:
-                        self.screenshot()
-                        if not self.appear(target_button):
-                            break
-                        if self.appear_then_click(target_button, interval=1):
-                            continue
+                if self.appear(self.I_UI_CONFIRM) and self.appear(self.I_UI_CANCEL):
+                    target_button = self.I_UI_CONFIRM if exp_waste else self.I_UI_CANCEL
+                    self.ui_click_until_disappear(target_button)
                     break
-
-                if self.appear(self.I_EXP_EXTRACT):
+                if self.appear(self.I_EXP_EXTRACT, interval=1):
                     # 如果达到今日领取的最大，就不领取了
-                    cur, res, totol = self.O_BOX_EXP.ocr(self.device.image)
-                    if cur == res == totol == 0:
+                    cur, res, total = self.O_BOX_EXP.ocr(self.device.image)
+                    if total <= 0:
+                        logger.warning('Exp box OCR no data, retry')
                         continue
-                    if cur == totol and cur + res == totol:
+                    if cur == total:
                         logger.info('Exp box reach max do not collect')
                         break
-                if self.appear_then_click(self.I_BOX_EXP, threshold=0.6, interval=1):
-                    continue
-                if self.appear_then_click(self.I_EXP_EXTRACT, interval=1):
-                    continue
-
-                if time_exp.reached():
-                    logger.warning('Extract exp box timeout')
-                    break
+                    self.click(self.I_EXP_EXTRACT)
+                    max_tries -= 1
             return True
 
         self.screenshot()
-        box_ap = self.appear(self.I_BOX_AP)
-        box_exp = self.appear(self.I_BOX_EXP, threshold=0.6) or self.appear(self.I_BOX_EXP_MAX, threshold=0.6)
-        if ap_enable:
-            _check_ap_box(box_ap)
-        if exp_enable:
-            _check_exp_box(box_exp)
-        self.goto_page(page_guild_realm)
+        if ap_enable and self.appear(self.I_BOX_AP):
+            self.goto_page(page_gr_ap_box)
+            _harvest_ap_box()
+            self.goto_page(page_guild_realm)
+        if exp_enable and (self.appear(self.I_BOX_EXP) or self.appear(self.I_BOX_EXP_MAX)):
+            self.goto_page(page_gr_exp_jug)
+            _harvest_exp_jug()
+            self.goto_page(page_guild_realm)
+        return True
 
     def check_utilize_harvest(self) -> bool:
         """
