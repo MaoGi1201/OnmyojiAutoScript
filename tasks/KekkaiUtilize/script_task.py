@@ -354,6 +354,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
             logger.warning('Appear friend realm failed')
             return None
         # 判断好友的有两个位置还是一个坑位
+        time.sleep(3)
         stop_image = None
         self.screenshot()
         if self.appear(self.I_U_ADD_1):  # 右侧第一个有（无论左侧有没有）
