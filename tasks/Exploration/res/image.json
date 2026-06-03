@@ -74,7 +74,7 @@
   {
     "itemName": "e_ratate_exsit",
     "imageName": "res_e_ratate_exsit.png",
-    "roiFront": "561,578,33,35",
+    "roiFront": "570,580,33,35",
     "roiBack": "163,574,970,46",
     "method": "Template matching",
     "threshold": 0.8,
