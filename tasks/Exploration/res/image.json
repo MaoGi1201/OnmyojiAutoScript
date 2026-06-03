@@ -218,7 +218,7 @@
   {
     "itemName": "e_check_exit",
     "imageName": "res_e_check_exit.png",
-    "roiFront": "528,299,216,50",
+    "roiFront": "493,278,296,47",
     "roiBack": "344,258,597,209",
     "method": "Template matching",
     "threshold": 0.8,
