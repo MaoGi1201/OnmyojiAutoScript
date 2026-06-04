@@ -65,7 +65,7 @@
   {
     "itemName": "goto_1",
     "imageName": "wq_goto_1.png",
-    "roiFront": "978,234,87,45",
+    "roiFront": "979,245,87,45",
     "roiBack": "978,234,87,60",
     "method": "Template matching",
     "threshold": 0.8,
@@ -74,7 +74,7 @@
   {
     "itemName": "goto_2",
     "imageName": "wq_goto_2.png",
-    "roiFront": "979,305,88,43",
+    "roiFront": "979,318,88,43",
     "roiBack": "979,305,88,58",
     "method": "Template matching",
     "threshold": 0.8,
@@ -92,7 +92,7 @@
   {
     "itemName": "goto_4",
     "imageName": "wq_goto_4.png",
-    "roiFront": "979,447,87,42",
+    "roiFront": "979,458,87,42",
     "roiBack": "979,447,87,57",
     "method": "Template matching",
     "threshold": 0.8,

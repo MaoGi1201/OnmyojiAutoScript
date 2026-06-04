@@ -483,15 +483,15 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
                     logger.info("friend found and selected")
                     break
                 # TODO OCR识别到文字 但是没有选中 尝试重新选择  (选择好友时,弹出协作邀请导致选择好友失败)
-            # 检测跨服好友按钮是否高亮
-            while 1:
-                self.screenshot()
-                if not self.appear_highlight(self.I_WQ_INVITE_DIFF_SVR_HIGHLIGHT):
-                    self.click(self.I_WQ_INVITE_DIFF_SVR)
-                    continue
-                break
-            # 等待好友列表加载
-            self.wait_until_appear(self.I_WQ_INVITE_DIFF_SVR_HIGHLIGHT, wait_time=4)
+            # # 检测跨服好友按钮是否高亮
+            # while 1:
+            #     self.screenshot()
+            #     if not self.appear_highlight(self.I_WQ_INVITE_DIFF_SVR_HIGHLIGHT):
+            #         self.click(self.I_WQ_INVITE_DIFF_SVR)
+            #         continue
+            #     break
+            # # 等待好友列表加载
+            # self.wait_until_appear(self.I_WQ_INVITE_DIFF_SVR_HIGHLIGHT, wait_time=4)
         # 没有找到需要邀请的人,点击取消 返回悬赏封印界面
         if not find:
             self.screenshot()
