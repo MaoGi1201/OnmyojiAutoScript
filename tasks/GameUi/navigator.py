@@ -475,7 +475,7 @@ class GameUi(BaseTask, GameUiAssets):
             context="goto_page",
         )
 
-    def _wait_for_destination(self, destination: Page, timeout: float = 8.0) -> bool:
+    def _wait_for_destination(self, destination: Page, timeout: float = 10.0) -> bool:
         """等待下一页面稳定出现。
 
         Args:
@@ -508,7 +508,7 @@ class GameUi(BaseTask, GameUiAssets):
 
         logger.info(f"Page switch: {source} -> {destination}")
 
-        action_timer = Timer(6.0).start()
+        action_timer = Timer(8.0).start()
         action_done = False
         while not action_timer.reached():
             if self._execute_action(transition.action, interval=0.8, skip_first_screenshot=False):

@@ -41,7 +41,7 @@
     "roiBack": "0,589,133,128",
     "mode": "Single",
     "method": "Default",
-    "keyword": "自动",
+    "keyword": "自動",
     "description": "战斗界面自动标识"
   },
   {
@@ -50,7 +50,7 @@
     "roiBack": "0,589,136,129",
     "mode": "Single",
     "method": "Default",
-    "keyword": "手动",
+    "keyword": "手動",
     "description": "战斗页面手动标志"
   }
 ]
