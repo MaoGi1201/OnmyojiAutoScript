@@ -91,7 +91,7 @@ class GameUiAssets:
 	# 探索前往孔雀国 
 	I_EXPLORATION_TO_PEACOCK_KINGDOM = RuleImage(roi_front=(930,635,49,44), roi_back=(33,619,1150,99), threshold=0.8, method="Template matching", file="./tasks/GameUi/page/page_exploration_to_peacock_kingdom.png")
 	# 月之海标志 
-	I_CHECK_MOON_SEA = RuleImage(roi_front=(347,163,29,106), roi_back=(296,117,165,256), threshold=0.8, method="Template matching", file="./tasks/GameUi/page/page_check_moon_sea.png")
+	I_CHECK_MOON_SEA = RuleImage(roi_front=(346,160,29,106), roi_back=(295,120,165,256), threshold=0.8, method="Template matching", file="./tasks/GameUi/page/page_check_moon_sea.png")
 	# 香行域标志 
 	I_CHECK_INCENSE_REALM = RuleImage(roi_front=(347,163,29,106), roi_back=(296,117,165,256), threshold=0.8, method="Template matching", file="./tasks/GameUi/page/page_check_incense_realm.png")
 	# 错季森标志 

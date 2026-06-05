@@ -42,7 +42,7 @@ class SixRealmsAssets:
 	# description 
 	I_MSTART_CHECK = RuleImage(roi_front=(542,340,39,41), roi_back=(542,340,39,41), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_mstart_check.png")
 	#  
-	I_MSKIP = RuleImage(roi_front=(1117,28,58,36), roi_back=(1117,28,58,36), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_mskip.png")
+	I_MSKIP = RuleImage(roi_front=(1117,17,85,36), roi_back=(1117,17,85,36), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_mskip.png")
 	# 继续执行 
 	I_MCONINUE = RuleImage(roi_front=(1121,578,100,100), roi_back=(1121,578,100,100), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_mconinue.png")
 	# 选第一个柔风 
@@ -56,9 +56,9 @@ class SixRealmsAssets:
 	# 暂时离开六道之门 
 	I_EXIT_SIXREALMS = RuleImage(roi_front=(507.5,308,100,100), roi_back=(507.5,308,100,100), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_exit_sixrealms.png")
 	# 退出准备界面弹窗 
-	I_MS_CHECK_EXIT_PREPARE = RuleImage(roi_front=(528,288,210,57), roi_back=(436,223,414,249), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_ms_check_exit_prepare.png")
+	I_MS_CHECK_EXIT_PREPARE = RuleImage(roi_front=(480,285,326,57), roi_back=(436,223,414,249), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_ms_check_exit_prepare.png")
 	# 召唤商店弹窗 
-	I_MS_CHECK_OPEN_STORE = RuleImage(roi_front=(441,289,397,58), roi_back=(423,227,437,263), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_ms_check_open_store.png")
+	I_MS_CHECK_OPEN_STORE = RuleImage(roi_front=(425,285,432,60), roi_back=(423,227,437,263), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_ms_check_open_store.png")
 	# 技能解锁标志 
 	I_MS_SKILL_UNLOCK = RuleImage(roi_front=(538,137,211,50), roi_back=(1029,190,105,152), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_ms_skill_unlock.png")
 	# 月之海地图标志 
@@ -92,7 +92,7 @@ class SixRealmsAssets:
 
 	# Image Rule Assets
 	# 鏖战岛屿标志 
-	I_MS_LAND_FIRE = RuleImage(roi_front=(289,313,18,26), roi_back=(124,140,1013,515), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_ms_land_fire.png")
+	I_MS_LAND_FIRE = RuleImage(roi_front=(648,390,25,26), roi_back=(124,140,1013,515), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_ms_land_fire.png")
 	# 混沌岛屿标志 
 	I_MS_LAND_CHAOS = RuleImage(roi_front=(650,373,17,20), roi_back=(124,140,1013,515), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_ms_land_chaos.png")
 	# 星之屿岛屿标志 
@@ -116,7 +116,7 @@ class SixRealmsAssets:
 
 	# Image Rule Assets
 	# description 
-	I_CHAOS_BOX_EXIT = RuleImage(roi_front=(1161,597,69,70), roi_back=(1161,597,69,70), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_chaos_box_exit.png")
+	I_CHAOS_BOX_EXIT = RuleImage(roi_front=(1170,589,69,70), roi_back=(1170,589,69,70), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_chaos_box_exit.png")
 	# 动画完了就有这个东西 
 	I_CHAOS_ELITE_FLAG = RuleImage(roi_front=(543,601,100,100), roi_back=(543,601,100,100), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_chaos_elite_flag.png")
 
@@ -173,11 +173,11 @@ class SixRealmsAssets:
 	# 有多少钱 
 	O_COIN_NUM = RuleOcr(roi=(1171,23,59,31), area=(1171,23,59,31), mode="Digit", method="Default", keyword="", name="coin_num")
 	# 剩余回合 
-	O_REMAIN_TURNS = RuleOcr(roi=(1071,229,67,28), area=(1071,229,67,28), mode="Single", method="Default", keyword="", name="remain_turns")
+	O_REMAIN_TURNS = RuleOcr(roi=(1062,230,60,28), area=(1062,230,60,28), mode="Single", method="Default", keyword="", name="remain_turns")
 	# 获取的额外钱币数量 
-	O_EXTRA_COIN_NUM = RuleOcr(roi=(591,331,109,101), area=(591,331,109,101), mode="Digit", method="Default", keyword="", name="extra_coin_num")
+	O_EXTRA_COIN_NUM = RuleOcr(roi=(645,395,38,25), area=(645,395,38,25), mode="Digit", method="Default", keyword="", name="extra_coin_num")
 	# 商店刷新次数 
-	O_STORE_REFRESH_TIME = RuleOcr(roi=(538,661,110,27), area=(538,661,110,27), mode="Single", method="Default", keyword="", name="store_refresh_time")
+	O_STORE_REFRESH_TIME = RuleOcr(roi=(580,660,77,27), area=(580,660,77,27), mode="Single", method="Default", keyword="", name="store_refresh_time")
 
 
 	# Image Rule Assets

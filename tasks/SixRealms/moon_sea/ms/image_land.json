@@ -2,7 +2,7 @@
   {
     "itemName": "ms_land_fire",
     "imageName": "ms_ms_land_fire.png",
-    "roiFront": "289,313,18,26",
+    "roiFront": "648,390,25,26",
     "roiBack": "124,140,1013,515",
     "method": "Template matching",
     "threshold": 0.8,

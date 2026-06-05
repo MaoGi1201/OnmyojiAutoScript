@@ -2,8 +2,8 @@
   {
     "itemName": "chaos_box_exit",
     "imageName": "ms_chaos_box_exit.png",
-    "roiFront": "1161,597,69,70",
-    "roiBack": "1161,597,69,70",
+    "roiFront": "1170,589,69,70",
+    "roiBack": "1170,589,69,70",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"

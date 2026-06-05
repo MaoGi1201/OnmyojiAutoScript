@@ -56,8 +56,8 @@
   {
     "itemName": "mskip",
     "imageName": "ms_mskip.png",
-    "roiFront": "1117,28,58,36",
-    "roiBack": "1117,28,58,36",
+    "roiFront": "1117,17,85,36",
+    "roiBack": "1117,17,85,36",
     "method": "Template matching",
     "threshold": 0.8,
     "description": ""
@@ -119,7 +119,7 @@
   {
     "itemName": "ms_check_exit_prepare",
     "imageName": "ms_ms_check_exit_prepare.png",
-    "roiFront": "528,288,210,57",
+    "roiFront": "480,285,326,57",
     "roiBack": "436,223,414,249",
     "method": "Template matching",
     "threshold": 0.8,
@@ -128,7 +128,7 @@
   {
     "itemName": "ms_check_open_store",
     "imageName": "ms_ms_check_open_store.png",
-    "roiFront": "441,289,397,58",
+    "roiFront": "425,285,432,60",
     "roiBack": "423,227,437,263",
     "method": "Template matching",
     "threshold": 0.8,

@@ -77,8 +77,6 @@ class AbyssShadowsAssets:
 	# 前往 
 	I_ABYSS_GOTO_ENEMY = RuleImage(roi_front=(1120,610,75,45), roi_back=(1120,610,75,45), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_abyss_goto_enemy.png")
 	# description 
-	I_CHANGE_AREA = RuleImage(roi_front=(993,610,63,61), roi_back=(993,610,63,61), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_change_area.png")
-	# description 
 	I_ENSURE_BUTTON = RuleImage(roi_front=(672,405,169,55), roi_back=(672,405,169,55), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_ensure_button.png")
 	# 进攻中 
 	I_IS_ATTACK = RuleImage(roi_front=(586,62,75,30), roi_back=(576,54,91,45), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_is_attack.png")
@@ -99,7 +97,7 @@ class AbyssShadowsAssets:
 	# 选择难度按钮 
 	I_SELECT_DIFFICULTY = RuleImage(roi_front=(703,645,50,55), roi_back=(703,645,50,55), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_select_difficulty.png")
 	# 容易难度 
-	I_DIFFICULTY_EASY = RuleImage(roi_front=(620,445,90,210), roi_back=(620,445,90,210), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_difficulty_easy.png")
+	I_DIFFICULTY_EASY = RuleImage(roi_front=(660,383,112,310), roi_back=(660,383,112,310), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_difficulty_easy.png")
 	# 普通难度 
 	I_DIFFICULTY_NORMAL = RuleImage(roi_front=(620,445,90,210), roi_back=(620,445,90,210), threshold=0.8, method="Template matching", file="./tasks/AbyssShadows/res/res_difficulty_normal.png")
 	# 困难难度 
@@ -139,7 +137,7 @@ class AbyssShadowsAssets:
 
 	# List Rule Assets
 	# 神社进入狭间暗域列表 
-	L_SHENSHE_TO_ABYSS = RuleList(folder="./tasks/AbyssShadows/res", direction="vertical", mode="image", roi_back=(125,66,1029.6,629), size=(132, 125), 
+	L_SHENSHE_TO_ABYSS = RuleList(folder="./tasks/AbyssShadows/res", direction="vertical", mode="image", roi_back=(125,66,1030,629), size=(132, 125), 
 					 array=["abyss_in_shenshe"])
 
 

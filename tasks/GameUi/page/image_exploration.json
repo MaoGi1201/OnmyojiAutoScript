@@ -272,8 +272,8 @@
   {
     "itemName": "check_moon_sea",
     "imageName": "page_check_moon_sea.png",
-    "roiFront": "347,163,29,106",
-    "roiBack": "296,117,165,256",
+    "roiFront": "346,160,29,106",
+    "roiBack": "295,120,165,256",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "月之海标志"

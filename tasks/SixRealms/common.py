@@ -104,7 +104,7 @@ class SixRealmsCommon(GameUi, SixRealmsAssets):
         """
         logger.info('Refresh store')
         text = refresh_times_rule.ocr(self.device.image)
-        matches = re.search(f"剩\d+次", text)
+        matches = re.search(f"残\d+回", text)
         if not matches:
             logger.warning('Refresh time not match, exit')
             return False
