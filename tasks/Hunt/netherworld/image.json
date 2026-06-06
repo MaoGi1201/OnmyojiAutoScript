@@ -20,8 +20,8 @@
   {
     "itemName": "nw_done",
     "imageName": "netherworld_nw_done.png",
-    "roiFront": "237,601,305,42",
-    "roiBack": "237,601,305,42",
+    "roiFront": "302,601,234,40",
+    "roiBack": "302,601,234,40",
     "method": "Template matching",
     "threshold": 0.9,
     "description": "今日已挑战"

@@ -37,6 +37,6 @@ class HuntAssets:
 	# 点击挑战 
 	I_NW_CHALLAGE = RuleImage(roi_front=(306,590,171,63), roi_back=(306,590,171,63), threshold=0.8, method="Template matching", file="./tasks/Hunt/netherworld/netherworld_nw_challage.png")
 	# 今日已挑战 
-	I_NW_DONE = RuleImage(roi_front=(237,601,305,42), roi_back=(237,601,305,42), threshold=0.9, method="Template matching", file="./tasks/Hunt/netherworld/netherworld_nw_done.png")
+	I_NW_DONE = RuleImage(roi_front=(302,601,234,40), roi_back=(302,601,234,40), threshold=0.9, method="Template matching", file="./tasks/Hunt/netherworld/netherworld_nw_done.png")
 
 
