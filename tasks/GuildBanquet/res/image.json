@@ -11,7 +11,7 @@
   {
     "itemName": "banquet_exp_full",
     "imageName": "res_banquet_exp_full.png",
-    "roiFront": "28,408,18,16",
+    "roiFront": "21,282,33,20",
     "roiBack": "7,138,106,366",
     "method": "Template matching",
     "threshold": 0.8,
@@ -47,7 +47,7 @@
   {
     "itemName": "banquet_clear_all",
     "imageName": "res_banquet_clear_all.png",
-    "roiFront": "480,413,90,31",
+    "roiFront": "475,413,103,32",
     "roiBack": "416,377,233,105",
     "method": "Template matching",
     "threshold": 0.8,
