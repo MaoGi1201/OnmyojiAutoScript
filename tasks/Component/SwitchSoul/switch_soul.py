@@ -293,4 +293,4 @@ if __name__ == '__main__':
     s.click_preset()
     # s.switch_soul_one(4, 1)
     # s.switch_soul_by_name('契灵', '茨球')
-    s.switch_soul_by_name('默认分组', '队伍5')
+    s.switch_soul_by_name('逢魔之战', 'GeneralTeam')
