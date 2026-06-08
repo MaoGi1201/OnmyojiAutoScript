@@ -66,7 +66,7 @@ class ScriptTask(GameUi, GuildBanquetAssets):
             current_page = self.get_current_page()
             match current_page:
                 case None:
-                    time.sleep(0.5)
+                    time.sleep(1)
                 case pages.page_banquet_switch_shikigami:
                     if max_tries <= 0:
                         logger.warning('Maybe shikigami not enough, exit switch')

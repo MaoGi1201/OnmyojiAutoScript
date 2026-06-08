@@ -500,8 +500,8 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
                 self.ui_click(self.I_FLAG_2_OFF, self.I_FLAG_2_ON, interval=1.2)
             case 2:
                 self.ui_click(self.I_FLAG_3_OFF, self.I_FLAG_3_ON, interval=1.2)
-            case 3:
-                self.ui_click(self.I_FLAG_4_OFF, self.I_FLAG_4_ON, interval=1.2)
+        #   case 3:
+        #   self.ui_click(self.I_FLAG_4_OFF, self.I_FLAG_4_ON, interval=1.2)
 
     def _select_current_page_friends(self, friend_list: list[str], selected_set: set[str]) -> None:
         """

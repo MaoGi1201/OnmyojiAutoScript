@@ -101,7 +101,7 @@ class GeneralBattleAssets:
 	# 结算六星御魂 
 	I_REWARD_SOUL_6 = RuleImage(roi_front=(942,397,97,20), roi_back=(254,163,797,396), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_reward_soul_6.png")
 	# 针对封魔的特殊 
-	I_DE_WIN = RuleImage(roi_front=(472,49,100,100), roi_back=(239,36,399,133), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_de_win.png")
+	I_DE_WIN = RuleImage(roi_front=(501,45,100,100), roi_back=(239,36,399,133), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_de_win.png")
 	# description 
 	I_PRESENT_LESS_THAN_5 = RuleImage(roi_front=(222,648,418,43), roi_back=(222,648,418,43), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_present_less_than_5.png")
 	# 绿标 
@@ -130,7 +130,7 @@ class GeneralBattleAssets:
 	# 关闭御魂不一致提示弹窗 
 	I_CONFIRM_CLOSE_DIFF_SOUL = RuleImage(roi_front=(571,404,135,54), roi_back=(517,374,226,112), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_confirm_close_diff_soul.png")
 	# 禁用御魂不一致提示7天 
-	I_DISABLE_7DAYS_DIFF_SOUL = RuleImage(roi_front=(547,342,27,36), roi_back=(524,325,70,71), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_disable_7days_diff_soul.png")
+	I_DISABLE_7DAYS_DIFF_SOUL = RuleImage(roi_front=(509,342,36,36), roi_back=(504,324,70,71), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBattle/gb/gb_disable_7days_diff_soul.png")
 
 
 	# Ocr Rule Assets

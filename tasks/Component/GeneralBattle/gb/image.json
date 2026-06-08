@@ -173,7 +173,7 @@
   {
     "itemName": "de_win",
     "imageName": "gb_de_win.png",
-    "roiFront": "472,49,100,100",
+    "roiFront": "501,45,100,100",
     "roiBack": "239,36,399,133",
     "method": "Template matching",
     "threshold": 0.8,

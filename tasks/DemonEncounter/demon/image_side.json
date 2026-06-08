@@ -110,8 +110,8 @@
   {
     "itemName": "de_realm_fire",
     "imageName": "demon_de_realm_fire.png",
-    "roiFront": "696,421,129,63",
-    "roiBack": "162,99,1106,610",
+    "roiFront": "206,501,129,63",
+    "roiBack": "174,94,1106,610",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "结界-进攻"
