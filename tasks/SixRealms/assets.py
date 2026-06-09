@@ -329,8 +329,8 @@ class SixRealmsAssets:
 	# 双倍奖励使用标志 
 	I_SR_DOUBLE_REWARD_USE = RuleImage(roi_front=(669,417,126,53), roi_back=(651,407,164,71), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_double_reward_use.png")
 	# 是否前往购买万象赐福标志 
-	I_SR_CHECK_BUY_BOX = RuleImage(roi_front=(484,290,295,47), roi_back=(405,230,467,255), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_check_buy_box.png")
+	I_SR_CHECK_BUY_BOX = RuleImage(roi_front=(422,282,443,60), roi_back=(405,230,467,255), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_check_buy_box.png")
 	# 不再提醒 
-	I_SR_NOT_TIP = RuleImage(roi_front=(543,342,37,37), roi_back=(405,230,467,255), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_not_tip.png")
+	I_SR_NOT_TIP = RuleImage(roi_front=(586,342,37,37), roi_back=(405,230,467,255), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_not_tip.png")
 
 

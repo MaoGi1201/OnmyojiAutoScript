@@ -87,7 +87,7 @@ class SixRealmsCommon(GameUi, SixRealmsAssets):
         if boss_unlock and self.appear(boss_unlock):
             self.ui_click(boss_unlock, boss_lock, interval=0.8)
         self.device.stuck_record_clear()
-        timeout_timer = Timer(5).start()
+        timeout_timer = Timer(10).start()
         while not timeout_timer.reached():
             self.screenshot()
             if self.get_current_page() in (pages.page_battle_prepare, pages.page_battle, pages.page_battle_result):
@@ -132,7 +132,7 @@ class SixRealmsCommon(GameUi, SixRealmsAssets):
         :return: (剩余金币数量, 购买次数)
         """
         coin_num = coin_num_rule.ocr(self.device.image)
-        buy_interval_timer = Timer(1.5)  # 控制购买间隔
+        buy_interval_timer = Timer(3)  # 控制购买间隔
         buy_cnt = 0
         while True:
             self.screenshot()
@@ -172,10 +172,9 @@ class SixRealmsCommon(GameUi, SixRealmsAssets):
         """
         remain_turns_txt = remain_rule.ocr(self.device.image)
         match = re.search(r'\d{1,2}', remain_turns_txt)
-        remain_turns = 99
-        if not set(remain_turns_txt).isdisjoint(set('回合')) and match:
-            remain_turns = int(match.group())
-        return remain_turns
+        if match:
+            return int(match.group())
+        return 99
 
     def _filter_island(self, appeared_islands: list[RuleImage]) -> list[RuleImage]:
         """
