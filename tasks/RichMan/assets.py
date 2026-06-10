@@ -14,7 +14,7 @@ class RichManAssets:
 	# 神社 
 	I_GUILD_SHRINE = RuleImage(roi_front=(869,623,64,62), roi_back=(869,623,64,62), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_shrine.png")
 	# 功勋商店 
-	I_GUILD_STORE = RuleImage(roi_front=(651,420,212,161), roi_back=(651,420,212,180), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_store.png")
+	I_GUILD_STORE = RuleImage(roi_front=(402,430,212,161), roi_back=(402,430,212,161), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_store.png")
 	# 蓝票 
 	I_GUILD_BLUE = RuleImage(roi_front=(794,186,74,73), roi_back=(315,164,584,370), threshold=0.8, method="Template matching", file="./tasks/RichMan/guild/guild_guild_blue.png")
 	# 黑蛋碎片 
@@ -334,15 +334,8 @@ class RichManAssets:
 	I_S_CHECK_WHITE_FIVE = RuleImage(roi_front=(810,222,109,182), roi_back=(810,222,109,182), threshold=0.8, method="Template matching", file="./tasks/RichMan/shrine/shrine_s_check_white_five.png")
 	# description 
 	I_S_CHECK_WHITE_FOUR = RuleImage(roi_front=(808,222,113,181), roi_back=(808,222,113,181), threshold=0.8, method="Template matching", file="./tasks/RichMan/shrine/shrine_s_check_white_four.png")
-<<<<<<< HEAD
-	# description 
-	I_CENTER1 = RuleImage(roi_front=(1101,621,48,51), roi_back=(1071,596,209,120), threshold=0.8, method="Template matching", file="./tasks/RichMan/shrine/shrine_center1.png")
-	# description 
-	I_CENTER2 = RuleImage(roi_front=(76,590,79,75), roi_back=(65,575,100,100), threshold=0.8, method="Template matching", file="./tasks/RichMan/shrine/shrine_center2.png")
-=======
 	# 召唤页面前往神龛标志 
 	I_S_SUMMON_TO_SHRINE = RuleImage(roi_front=(1235,353,16,38), roi_back=(864,210,413,337), threshold=0.8, method="Template matching", file="./tasks/RichMan/shrine/shrine_s_summon_to_shrine.png")
->>>>>>> mine
 
 
 	# Ocr Rule Assets
