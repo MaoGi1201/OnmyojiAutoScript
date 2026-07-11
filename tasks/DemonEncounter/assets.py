@@ -29,7 +29,7 @@ class DemonEncounterAssets:
 	# 歌姬 
 	I_BOSS_SONGSTRESS = RuleImage(roi_front=(592,323,67,61), roi_back=(592,323,67,61), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/boss/boss_boss_songstress.png")
 	# 集结挑战 
-	I_BOSS_FIRE = RuleImage(roi_front=(1087,532,100,100), roi_back=(1087,532,100,100), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/boss/boss_boss_fire.png")
+	I_BOSS_FIRE = RuleImage(roi_front=(1059,547,100,100), roi_back=(1059,547,100,100), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/boss/boss_boss_fire.png")
 	# description 
 	I_BOSS_CONFIRM = RuleImage(roi_front=(671,400,175,61), roi_back=(671,400,175,61), threshold=0.8, method="Template matching", file="./tasks/DemonEncounter/boss/boss_boss_confirm.png")
 	# 已选中 

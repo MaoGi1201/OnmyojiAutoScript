@@ -74,9 +74,9 @@ class ScriptTask(GameUi, GuildBanquetAssets):
                     cur, _, total = self.O_BANQUET_SHIKIGAMI_NUM.ocr_digit_counter(self.device.image)
                     if cur != total or cur == 0:
                         max_tries -= 1
-                        if self.appear_then_click(self.I_BANQUET_CLEAR_ALL, interval=1.5):
-                            time.sleep(random.randrange(6, 20, 2)/10)  # 两次点击之间稍微加点延迟
-                        self.appear_then_click(self.I_BANQUET_ALL_PUT, interval=1.5)
+                        if self.appear_then_click(self.I_BANQUET_CLEAR_ALL, interval=3):
+                            time.sleep(random.randrange(30, 51, 5) / 10)  # 两次点击之间稍微加点延迟
+                        self.appear_then_click(self.I_BANQUET_ALL_PUT, interval=3)
                         continue
                     # 当前式神数量不为0且等于总数, 切换完毕
                     logger.info('Switch shikigami done, back to banquet')
