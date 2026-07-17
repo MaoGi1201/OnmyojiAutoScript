@@ -73,7 +73,7 @@ class ScriptTask(GameUi, WeeklyTriflesAssets):
             if self.appear_then_click(self.I_WT_COLLECT_TWITTER, interval=1):
                 continue
         logger.info('Click share')
-        get_timer = Timer(10)
+        get_timer = Timer(3)
         get_timer.start()
         while 1:
             self.screenshot()

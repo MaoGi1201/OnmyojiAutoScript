@@ -6,7 +6,8 @@ server = 'cn'  # Setting default to cn, will avoid errors when using dev_tools
 
 VALID_SERVER = ['cn', 'en', 'jp', 'tw']
 VALID_PACKAGE = {
-    'com.netease.onmyoji.wyzymnqsd_cps': 'cn'
+    'com.netease.onmyoji.wyzymnqsd_cps': 'cn',
+    'com.netease.onmyoji.na': 'jp',  # 日服
 }
 VALID_CHANNEL_PACKAGE = {
     # App stores
