@@ -10,7 +10,7 @@ page_collection.connect(page_shikigami_collection, GameUiAssets.I_CHECK_COLLECTI
 page_shikigami_collection.connect(page_collection, GlobalGameAssets.I_UI_BACK_YELLOW,
                                   key="page_shikigami_collection->page_collection")
 
-page_shikigami_share = Page(WeeklyTriflesAssets.I_WT_COLLECT_WECHAT)
+page_shikigami_share = Page(WeeklyTriflesAssets.I_WT_COLLECT_TWITTER)
 page_shikigami_collection.connect(page_shikigami_share, WeeklyTriflesAssets.I_WT_SHARE,
                                   key="page_shikigami_collection->page_shikigami_share")
 page_shikigami_share.connect(page_shikigami_collection, GlobalGameAssets.I_UI_BACK_RED,

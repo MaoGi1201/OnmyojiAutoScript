@@ -36,12 +36,12 @@
     "description": "分享勾玉"
   },
   {
-    "itemName": "wt_ab_wechat",
-    "imageName": "area_boss_wt_ab_wechat.png",
-    "roiFront": "910,647,50,41",
+    "itemName": "wt_ab_twitter",
+    "imageName": "area_boss_wt_ab_twitter.png",
+    "roiFront": "978,644,50,41",
     "roiBack": "680,617,594,95",
     "method": "Template matching",
     "threshold": 0.8,
-    "description": "微信分享"
+    "description": "twitter分享"
   }
 ]

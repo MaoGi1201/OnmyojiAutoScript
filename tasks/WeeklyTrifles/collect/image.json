@@ -27,22 +27,22 @@
     "description": "百妖风物鉴"
   },
   {
-    "itemName": "wt_collect_wechat",
-    "imageName": "collect_wt_collect_wechat.png",
-    "roiFront": "280,600,440,100",
-    "roiBack": "280,600,440,100",
+    "itemName": "wt_collect_twitter",
+    "imageName": "collect_wt_collect_twitter.png",
+    "roiFront": "528,616,440,100",
+    "roiBack": "528,616,440,100",
     "method": "Template matching",
     "threshold": 0.8,
-    "description": "微信分享"
+    "description": "twitter分享"
   },
   {
     "itemName": "wt_qr_code",
     "imageName": "collect_wt_qr_code.png",
-    "roiFront": "473,161,336,96",
-    "roiBack": "404,112,483,168",
+    "roiFront": "321,280,628,110",
+    "roiBack": "304,268,671,182",
     "method": "Template matching",
     "threshold": 0.65,
-    "description": "二维码"
+    "description": "分享提示"
   },
   {
     "itemName": "wt_share",
@@ -52,5 +52,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "式神图鉴头像旁边的分享按钮"
+  },
+  {
+    "itemName": "wt_qr_code_1",
+    "imageName": "collect_wt_qr_code_1.png",
+    "roiFront": "328,285,368,88",
+    "roiBack": "304,268,671,182",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": ""
   }
 ]

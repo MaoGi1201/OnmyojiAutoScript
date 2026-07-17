@@ -24,8 +24,8 @@ class WeeklyTriflesAssets:
 	I_WT_SHARE_AB = RuleImage(roi_front=(1183,308,45,39), roi_back=(1183,308,45,39), threshold=0.8, method="Template matching", file="./tasks/WeeklyTrifles/area_boss/area_boss_wt_share_ab.png")
 	# 分享勾玉 
 	I_WT_AB_JADE = RuleImage(roi_front=(977,552,44,47), roi_back=(977,552,44,47), threshold=0.8, method="Template matching", file="./tasks/WeeklyTrifles/area_boss/area_boss_wt_ab_jade.png")
-	# 微信分享 
-	I_WT_AB_WECHAT = RuleImage(roi_front=(910,647,50,41), roi_back=(680,617,594,95), threshold=0.8, method="Template matching", file="./tasks/WeeklyTrifles/area_boss/area_boss_wt_ab_wechat.png")
+	# twitter分享 
+	I_WT_AB_TWITTER = RuleImage(roi_front=(978,644,50,41), roi_back=(680,617,594,95), threshold=0.8, method="Template matching", file="./tasks/WeeklyTrifles/area_boss/area_boss_wt_ab_twitter.png")
 
 
 	# Image Rule Assets
@@ -49,8 +49,8 @@ class WeeklyTriflesAssets:
 
 
 	# Click Rule Assets
-	# 微信分享的点击 
-	C_WT_WECHAT = RuleClick(roi_front=(470,111,337,44), roi_back=(470,111,337,44), name="wt_wechat")
+	# twitter分享的点击 
+	C_WT_TWITTER = RuleClick(roi_front=(470,111,337,44), roi_back=(470,111,337,44), name="wt_twitter")
 
 
 	# Image Rule Assets
@@ -60,12 +60,14 @@ class WeeklyTriflesAssets:
 	I_WT_SCROLL_1 = RuleImage(roi_front=(1180,27,28,121), roi_back=(1159,12,65,152), threshold=0.7, method="Template matching", file="./tasks/WeeklyTrifles/collect/collect_wt_scroll_1.png")
 	# 百妖风物鉴 
 	I_WT_SCROLL_2 = RuleImage(roi_front=(1182,24,24,122), roi_back=(1163,12,63,155), threshold=0.7, method="Template matching", file="./tasks/WeeklyTrifles/collect/collect_wt_scroll_2.png")
-	# 微信分享 
-	I_WT_COLLECT_WECHAT = RuleImage(roi_front=(280,600,440,100), roi_back=(280,600,440,100), threshold=0.8, method="Template matching", file="./tasks/WeeklyTrifles/collect/collect_wt_collect_wechat.png")
-	# 二维码 
-	I_WT_QR_CODE = RuleImage(roi_front=(473,161,336,96), roi_back=(404,112,483,168), threshold=0.65, method="Template matching", file="./tasks/WeeklyTrifles/collect/collect_wt_qr_code.png")
+	# twitter分享 
+	I_WT_COLLECT_TWITTER = RuleImage(roi_front=(528,616,440,100), roi_back=(528,616,440,100), threshold=0.8, method="Template matching", file="./tasks/WeeklyTrifles/collect/collect_wt_collect_twitter.png")
+	# 分享提示 
+	I_WT_QR_CODE = RuleImage(roi_front=(321,280,628,110), roi_back=(304,268,671,182), threshold=0.65, method="Template matching", file="./tasks/WeeklyTrifles/collect/collect_wt_qr_code.png")
 	# 式神图鉴头像旁边的分享按钮 
 	I_WT_SHARE = RuleImage(roi_front=(331,282,60,53), roi_back=(133,243,270,120), threshold=0.8, method="Template matching", file="./tasks/WeeklyTrifles/collect/collect_wt_share.png")
+	#  
+	I_WT_QR_CODE_1 = RuleImage(roi_front=(328,285,368,88), roi_back=(304,268,671,182), threshold=0.8, method="Template matching", file="./tasks/WeeklyTrifles/collect/collect_wt_qr_code_1.png")
 
 
 	# Image Rule Assets
@@ -73,8 +75,8 @@ class WeeklyTriflesAssets:
 	I_WT_ENTER_SE = RuleImage(roi_front=(1145,598,100,100), roi_back=(1145,598,100,100), threshold=0.8, method="Template matching", file="./tasks/WeeklyTrifles/secret/secret_wt_enter_se.png")
 	# 秘闻分享 
 	I_WT_SE_SHARE = RuleImage(roi_front=(911,570,46,43), roi_back=(886,547,92,95), threshold=0.8, method="Template matching", file="./tasks/WeeklyTrifles/secret/secret_wt_se_share.png")
-	# 微信 
-	I_WT_SE_WECHAT = RuleImage(roi_front=(855,627,45,37), roi_back=(618,584,653,116), threshold=0.8, method="Template matching", file="./tasks/WeeklyTrifles/secret/secret_wt_se_wechat.png")
+	# twitter 
+	I_WT_SE_TWITTER = RuleImage(roi_front=(988,627,45,37), roi_back=(618,584,653,116), threshold=0.8, method="Template matching", file="./tasks/WeeklyTrifles/secret/secret_wt_se_twitter.png")
 	# 勾玉 
 	I_WT_SE_JADE = RuleImage(roi_front=(1126,533,35,39), roi_back=(1118,525,50,55), threshold=0.8, method="Template matching", file="./tasks/WeeklyTrifles/secret/secret_wt_se_jade.png")
 	# 排行 
