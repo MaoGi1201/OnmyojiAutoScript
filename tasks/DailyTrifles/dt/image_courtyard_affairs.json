@@ -38,7 +38,7 @@
   {
     "itemName": "check_in_daily",
     "imageName": "dt_check_in_daily.png",
-    "roiFront": "1131,115,106,88",
+    "roiFront": "1131,115,94,89",
     "roiBack": "1128,94,151,281",
     "method": "Template matching",
     "threshold": 0.8,
