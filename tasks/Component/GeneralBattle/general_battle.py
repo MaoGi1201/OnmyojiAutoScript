@@ -972,7 +972,7 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
         logger.info("Preset is enable")
         timeout_warning = "Switch preset timeout, use current team"
 
-        wait_preset_timer = Timer(4).start()
+        wait_preset_timer = Timer(8).start()
         while 1:
             if wait_preset_timer.reached():
                 logger.warning(timeout_warning)
@@ -999,7 +999,7 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
         color_size = [self.C_PRESET_GROUP_1.roi_back[2], self.C_PRESET_GROUP_1.roi_back[3]]
         unselected_color = (224.9, 208.3, 187.4)
         logger.info("Select preset group")
-        choose_group_timer = Timer(4).start()
+        choose_group_timer = Timer(8).start()
         while True:
             if choose_group_timer.reached():
                 logger.warning(timeout_warning)
@@ -1037,7 +1037,7 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
             break
         self.click(tmp)
         logger.info("Click preset ensure")
-        wait_ensure_timer = Timer(4).start()
+        wait_ensure_timer = Timer(6).start()
         while 1:
             if wait_ensure_timer.reached():
                 logger.warning(timeout_warning)

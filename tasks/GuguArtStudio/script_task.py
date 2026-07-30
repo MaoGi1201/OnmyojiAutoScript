@@ -52,6 +52,8 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, GuguArtStudioAssets):
                         continue
                     self.switch_lock()
                     if self.appear_then_click(self.I_GAS_CAN_FIRE, interval=1.2):  # 点击挑战
+                        # 等待战斗真正开始，避免误判
+                        time.sleep(2)  # 等待加载
                         self.run_general_battle(config=self.conf.general_battle_config, exit_matcher=pages.page_gugu_fire)
                 case _:
                     if not unknown_page_timer.started():
