@@ -66,7 +66,7 @@ class ScriptTask(GameUi, WeeklyTriflesAssets):
         logger.hr('Share collect')
         self.goto_page(page_shikigami_share)
         # 点击分享
-        appeared = self.ui_click_until_appear_or_timeout(self.I_WT_COLLECT_WECHAT, self.I_WT_QR_CODE, 1.2, 5)
+        appeared = self.ui_click_until_appear_or_timeout(self.I_WT_COLLECT_TWITTER, self.I_WT_QR_CODE, 1.2, 5)
         if not appeared:
             logger.info('Not appear qr code, maybe already shared, skip')
             return
