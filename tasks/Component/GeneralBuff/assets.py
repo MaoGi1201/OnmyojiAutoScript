@@ -20,9 +20,9 @@ class GeneralBuffAssets:
 	# description 
 	I_GOLD_50 = RuleImage(roi_front=(373,269,52,36), roi_back=(367,120,64,391), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBuff/gb/gb_gold_50.png")
 	# description 
-	I_GOLD_100 = RuleImage(roi_front=(378,338,43,39), roi_back=(365,121,74,407), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBuff/gb/gb_gold_100.png")
+	I_GOLD_100 = RuleImage(roi_front=(379,268,43,39), roi_back=(365,121,74,407), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBuff/gb/gb_gold_100.png")
 	# description 
-	I_EXP_50 = RuleImage(roi_front=(379,406,44,43), roi_back=(365,127,70,393), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBuff/gb/gb_exp_50.png")
+	I_EXP_50 = RuleImage(roi_front=(375,338,44,43), roi_back=(365,127,70,393), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBuff/gb/gb_exp_50.png")
 	# description 
 	I_EXP_100 = RuleImage(roi_front=(383,406,30,40), roi_back=(368,126,58,386), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBuff/gb/gb_exp_100.png")
 	# description 

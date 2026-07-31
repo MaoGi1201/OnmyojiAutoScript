@@ -38,7 +38,7 @@
   {
     "itemName": "gold_100",
     "imageName": "gb_gold_100.png",
-    "roiFront": "378,338,43,39",
+    "roiFront": "379,268,43,39",
     "roiBack": "365,121,74,407",
     "method": "Template matching",
     "threshold": 0.8,
@@ -47,7 +47,7 @@
   {
     "itemName": "exp_50",
     "imageName": "gb_exp_50.png",
-    "roiFront": "379,406,44,43",
+    "roiFront": "375,338,44,43",
     "roiBack": "365,127,70,393",
     "method": "Template matching",
     "threshold": 0.8,
