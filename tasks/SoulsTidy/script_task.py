@@ -173,7 +173,7 @@ class ScriptTask(GameUi, SoulsTidyAssets):
             if not first_soul_level or first_soul_level.strip() == '':
                 logger.info('ocr result is Null')
                 return None
-            if first_soul_level.strip() in ['+0', '古']:
+            if first_soul_level.strip() in ['古', '+O', '+0', '0']:
                 logger.info('Find level 0 discard souls')
                 return True
         return False
