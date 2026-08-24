@@ -56,10 +56,19 @@
   {
     "itemName": "wt_qr_code_1",
     "imageName": "collect_wt_qr_code_1.png",
-    "roiFront": "328,285,368,88",
+    "roiFront": "321,280,628,110",
     "roiBack": "304,268,671,182",
     "method": "Template matching",
     "threshold": 0.8,
-    "description": ""
+    "description": "分享提示1"
+  },
+  {
+    "itemName": "wt_qr_code_2",
+    "imageName": "collect_wt_qr_code_2.png",
+    "roiFront": "321,280,628,110",
+    "roiBack": "304,268,671,182",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "分享提示2"
   }
 ]

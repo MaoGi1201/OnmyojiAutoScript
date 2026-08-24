@@ -40,7 +40,7 @@ class ScriptTask(GameUi, WeeklyTriflesAssets):
         # self.ui_click(wechat, self.I_WT_QR_CODE)
         while 1:
             self.screenshot()
-            if self.appear(self.I_WT_QR_CODE) or self.appear(self.I_WT_QR_CODE_1):
+            if self.appear(self.I_WT_QR_CODE) or self.appear(self.I_WT_QR_CODE_1) or self.appear(self.I_WT_QR_CODE_2):
                 break
             if self.appear_then_click(wechat, interval=2.5):
                 continue
@@ -52,7 +52,7 @@ class ScriptTask(GameUi, WeeklyTriflesAssets):
             if self.ui_reward_appear_click():
                 logger.info('Get reward')
                 return True
-            if self.appear_then_click(self.I_WT_QR_CODE, self.C_WT_TWITTER, interval=0.8) or self.appear_then_click(self.I_WT_QR_CODE_1, self.C_WT_TWITTER, interval=0.8):
+            if self.appear_then_click(self.I_WT_QR_CODE, self.C_WT_TWITTER, interval=0.8) or self.appear_then_click(self.I_WT_QR_CODE_1, self.C_WT_TWITTER, interval=0.8) or self.appear_then_click(self.I_WT_QR_CODE_2, self.C_WT_TWITTER, interval=0.8):
                 continue
             if get_timer.reached():
                 logger.warning('Share timeout. The reward may have been obtained')

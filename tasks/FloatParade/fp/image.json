@@ -47,7 +47,7 @@
   {
     "itemName": "fp_tasks",
     "imageName": "fp_fp_tasks.png",
-    "roiFront": "1186,584,54,39",
+    "roiFront": "1193,584,54,39",
     "roiBack": "1129,510,149,144",
     "method": "Template matching",
     "threshold": 0.8,
