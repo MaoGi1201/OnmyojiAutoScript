@@ -340,6 +340,7 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, QuickLoadout, BaseActivity, 
                 self.device.click_record_clear()
                 click_times += 1
                 logger.info(f'Try click challenge, remain times[{max_times - click_times}]')
+                time.sleep(3)
                 continue
         return False
 
@@ -365,6 +366,7 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, QuickLoadout, BaseActivity, 
                 self.device.click_record_clear()
                 click_times += 1
                 logger.info(f'Try click AP challenge, remain times[{max_times - click_times}]')
+                time.sleep(3)
                 continue
         return False
 

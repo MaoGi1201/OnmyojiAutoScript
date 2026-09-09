@@ -11,10 +11,10 @@
   {
     "itemName": "mt_pass",
     "imageName": "MT_mt_pass.png",
-    "roiFront": "1117,258,28,132",
-    "roiBack": "1004,96,236,439",
+    "roiFront": "1117,259,32,133",
+    "roiBack": "1004,97,235,441",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.6,
     "description": "活动进入日清门票界面"
   },
   {

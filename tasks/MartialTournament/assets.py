@@ -19,7 +19,7 @@ class MartialTournamentAssets:
 	# 庭院进入活动 
 	I_MT_ENTER = RuleImage(roi_front=(1189,462,36,29), roi_back=(1155,131,94,441), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_enter.png")
 	# 活动进入日清门票界面 
-	I_MT_PASS = RuleImage(roi_front=(1117,258,28,132), roi_back=(1004,96,236,439), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_pass.png")
+	I_MT_PASS = RuleImage(roi_front=(1117,259,32,133), roi_back=(1004,97,235,441), threshold=0.6, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_pass.png")
 	# 活动界面标志 
 	I_MT_CHECK = RuleImage(roi_front=(563,137,48,68), roi_back=(504,89,197,151), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_check.png")
 	# 日清活动界面标志 
