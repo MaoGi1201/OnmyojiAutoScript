@@ -225,6 +225,8 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, QuickLoadout, BaseActivity, 
             self.current_battle_conf = self.current_battle_conf.model_copy(
                 update={'preset_enable': False}
             )
+        # 锁定阵容前增加延迟
+        time.sleep(2)
         # 首领战每轮确认锁定状态；一键配置不受页面锁定开关影响
         self.lock_team(self.current_battle_conf)
         self.team_locked = True

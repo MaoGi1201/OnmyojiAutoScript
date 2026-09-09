@@ -47,7 +47,7 @@
   {
     "itemName": "mt_challenge",
     "imageName": "MT_mt_challenge.png",
-    "roiFront": "1104,573,77,37",
+    "roiFront": "1103,529,77,37",
     "roiBack": "944,488,314,232",
     "method": "Template matching",
     "threshold": 0.8,
@@ -66,7 +66,7 @@
     "itemName": "unlock",
     "imageName": "MT_unlock.png",
     "roiFront": "1101,454,20,25",
-    "roiBack": "840,445,421,245",
+    "roiBack": "1085,430,116,71",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "阵容解锁"
@@ -75,7 +75,7 @@
     "itemName": "lock",
     "imageName": "MT_lock.png",
     "roiFront": "1101,454,20,25",
-    "roiBack": "844,445,415,243",
+    "roiBack": "1077,443,120,59",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "阵容锁定"
@@ -101,7 +101,7 @@
   {
     "itemName": "boss_1",
     "imageName": "MT_boss_1.png",
-    "roiFront": "368,220,23,25",
+    "roiFront": "368,238,23,25",
     "roiBack": "288,84,182,418",
     "method": "Template matching",
     "threshold": 0.8,
@@ -110,7 +110,7 @@
   {
     "itemName": "boss_2",
     "imageName": "MT_boss_2.png",
-    "roiFront": "368,308,23,52",
+    "roiFront": "368,291,24,55",
     "roiBack": "288,84,182,418",
     "method": "Template matching",
     "threshold": 0.8,
