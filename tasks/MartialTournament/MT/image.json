@@ -39,7 +39,7 @@
     "itemName": "mt_search",
     "imageName": "MT_mt_search.png",
     "roiFront": "1107,607,72,24",
-    "roiBack": "944,488,314,232",
+    "roiBack": "1094,596,100,53",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "搜索boss（日清活动界面）"
@@ -48,7 +48,7 @@
     "itemName": "mt_challenge",
     "imageName": "MT_mt_challenge.png",
     "roiFront": "1103,529,77,37",
-    "roiBack": "944,488,314,232",
+    "roiBack": "1060,503,158,154",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "挑战boss（挑战boss界面）"

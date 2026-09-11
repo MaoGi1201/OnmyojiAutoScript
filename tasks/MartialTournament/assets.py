@@ -25,9 +25,9 @@ class MartialTournamentAssets:
 	# 日清活动界面标志 
 	I_MT_PASS_CHECK = RuleImage(roi_front=(158,14,121,44), roi_back=(22,0,393,112), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_pass_check.png")
 	# 搜索boss（日清活动界面） 
-	I_MT_SEARCH = RuleImage(roi_front=(1107,607,72,24), roi_back=(944,488,314,232), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_search.png")
+	I_MT_SEARCH = RuleImage(roi_front=(1107,607,72,24), roi_back=(1094,596,100,53), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_search.png")
 	# 挑战boss（挑战boss界面） 
-	I_MT_CHALLENGE = RuleImage(roi_front=(1103,529,77,37), roi_back=(944,488,314,232), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_challenge.png")
+	I_MT_CHALLENGE = RuleImage(roi_front=(1103,529,77,37), roi_back=(1060,503,158,154), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_challenge.png")
 	# 挑战boss界面式神录 
 	I_MT_RECORDS = RuleImage(roi_front=(1001,593,37,39), roi_back=(673,486,585,234), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_records.png")
 	# 阵容解锁 

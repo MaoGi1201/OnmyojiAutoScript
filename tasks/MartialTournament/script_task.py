@@ -225,8 +225,6 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, QuickLoadout, BaseActivity, 
             self.current_battle_conf = self.current_battle_conf.model_copy(
                 update={'preset_enable': False}
             )
-        # 锁定阵容前增加延迟
-        time.sleep(2)
         # 首领战每轮确认锁定状态；一键配置不受页面锁定开关影响
         self.lock_team(self.current_battle_conf)
         self.team_locked = True
@@ -281,10 +279,16 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, QuickLoadout, BaseActivity, 
         max_times = max_times or random.randint(3, 5)
         wait_timer = Timer(10).start()
         click_limit_logged = False
+
+        # 单次点击搜索后, 专属等待挑战弹窗的最长时间 (秒)
+        # 该值要足够长, 保证 boss 弹窗从弹出到动画结束都能被覆盖到
+        post_click_wait = 2.0
+
         while True:
             self.screenshot()
             if self.appear(self.I_MT_CHALLENGE):
                 logger.info('Search boss success')
+                time.sleep(3)
                 return True
             if wait_timer.reached():
                 logger.warning('Search boss timeout')
@@ -301,12 +305,41 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, QuickLoadout, BaseActivity, 
                     click_limit_logged = True
                 time.sleep(0.2)
                 continue
+
             # 根据检测到的门票类型选择搜索按钮
             search_btn = self.I_PASS_2 if self.ticket_type == 'pass_2' else self.I_MT_SEARCH
-            if self.appear_then_click(search_btn, interval=1.5):
-                search_times += 1
-                logger.info(f'Try search boss ({self.ticket_type}), remain times[{max_times - search_times}]')
+
+            # 点击前必须先确认搜索按钮真的可见 (弹窗覆盖时应不可见)
+            if not self.appear(search_btn):
+                # 搜索按钮不可见, 说明界面已经不在可搜索状态
+                # 可能是挑战浮窗已弹出但还没被识别, 给它一点时间
+                time.sleep(0.3)
                 continue
+
+            # 点击搜索按钮 (用 self.click 而不是 appear_then_click,
+            # 避免点击后下一轮循环再点击一次搜索位置)
+            self.click(search_btn, interval=1.5)
+            search_times += 1
+            logger.info(
+                f'Try search boss ({self.ticket_type}), remain times[{max_times - search_times}]'
+            )
+
+            # >>> 关键阶段: 点击后只等待挑战弹窗, 绝不点击搜索位置 <<<
+            # 在这个阶段, 脚本不执行任何点击操作, 直到:
+            #   - 检测到挑战弹窗 -> 返回 True
+            #   - 等待超时        -> 继续下一轮搜索
+            post_timer = Timer(post_click_wait).start()
+            while not post_timer.reached():
+                self.screenshot()
+                if self.appear(self.I_MT_CHALLENGE):
+                    logger.info('Search boss success')
+                    time.sleep(3)
+                    return True
+                time.sleep(0.15)
+            # 等待结束仍未出现挑战弹窗, 说明本次点击没搜到 boss
+            # 此时界面状态已经稳定, 下一轮循环再点击搜索是安全的
+            continue
+
         return False
 
     def search_boss_with_ticket(self, ticket_type: str, ticket_count: int) -> bool:
@@ -340,7 +373,6 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, QuickLoadout, BaseActivity, 
                 self.device.click_record_clear()
                 click_times += 1
                 logger.info(f'Try click challenge, remain times[{max_times - click_times}]')
-                time.sleep(3)
                 continue
         return False
 
@@ -366,7 +398,6 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, QuickLoadout, BaseActivity, 
                 self.device.click_record_clear()
                 click_times += 1
                 logger.info(f'Try click AP challenge, remain times[{max_times - click_times}]')
-                time.sleep(3)
                 continue
         return False
 
