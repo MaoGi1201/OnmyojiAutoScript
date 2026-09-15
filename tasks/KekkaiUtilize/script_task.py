@@ -472,18 +472,61 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
             raise ValueError('Unknown utilize rule')
         return result
 
-    def _reset_utilize_friend_list(self, friend: SelectFriendList) -> None:
-        """刷新好友列表并回到所选分组的顶部。"""
+    def _scroll_friend_list_to_top(self, max_swipes: int = 10) -> bool:
+        """向上滑动好友列表，直到顶部标识图片 I_U_TOP 出现。
+
+        滑动方向与 perform_swipe_action 相反：手指从上往下拖，
+        让列表内容向下位移，从而露出更靠前的卡片。
+
+        :param max_swipes: 最大滑动次数，避免死循环
+        :return: True 表示成功到达顶部（检测到 I_U_TOP）；False 表示滑动次数用尽仍未到达
+        """
+        logger.info('Scroll friend list back to top (until I_U_TOP appears)')
+        for index in range(max_swipes):
+            # 已经到达顶部：出现顶部标识即停止
+            self.screenshot()
+            if self.appear(self.I_U_TOP):
+                logger.info(f'Friend list top reached (after {index} swipe(s))')
+                self.device.click_record_clear()
+                time.sleep(0.3)
+                return True
+
+            # 手指自上而下滑动：p1 在屏幕偏上，p2 拖到屏幕偏下
+            x = random.randint(400, 600)
+            p1 = (x, 220)
+            p2 = (x, 660)
+            self.device.swipe_adb(p1, p2, duration=0.5)
+            self.device.click_record_clear()
+            time.sleep(0.4)
+
+        logger.warning(
+            f'Scroll to top failed: I_U_TOP not detected after {max_swipes} swipes'
+        )
+        return False
+
+    def _reset_utilize_friend_list(
+        self,
+        friend: SelectFriendList,
+        *,
+        scroll_to_top: bool = True,
+    ) -> None:
+        """刷新好友列表并回到所选分组的顶部。
+
+        :param scroll_to_top: 是否执行向上滑动。
+            首次进入蹭卡界面时列表本就位于顶部（I_U_TOP 会立即命中），
+            但仍会多花一次截图的时间；如调用方已知列表在顶部，
+            可传 False 完全跳过。默认 True。
+        """
         if friend == SelectFriendList.SAME_SERVER:
             self.switch_friend_list(SelectFriendList.SAME_SERVER)
-            self.swipe(self.S_U_END, interval=3)
-            self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
-            self.switch_friend_list(SelectFriendList.SAME_SERVER)
-        else:  # 跨区必须切换两次，否则结界卡不会刷新到顶部
-            self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
-            self.swipe(self.S_U_END, interval=3)
-            self.switch_friend_list(SelectFriendList.SAME_SERVER)
-            self.switch_friend_list(SelectFriendList.DIFFERENT_SERVER)
+
+        # 跨区分组已删除：切到同区标签不会让列表回到顶部，
+        # 必须靠 _scroll_friend_list_to_top 手动滑回顶部。
+        # 该方法内部通过 I_U_TOP 出现来判断是否到达顶部，
+        # 若列表本来就在顶部，第一次截图即可命中并立即返回。
+        if scroll_to_top:
+            self._scroll_friend_list_to_top()
+            time.sleep(0.5)
 
     def _record_utilize_failure(
         self,
@@ -539,7 +582,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         scan_scope = (
             '当前优先分组'
             if self.utilize_lazy_mode_active
-            else '同区和跨区'
+            else '同区'
         )
         target_name = {
             UtilizeRule.TAIKO: '太鼓',
@@ -571,55 +614,41 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
                     shikigami_class: ShikigamiClass = ShikigamiClass.N,
                     shikigami_order: int = 7):
         """
-        执行寄养
+        执行寄养（仅支持同区蹭卡，跨区功能已注释）
         :param shikigami_order:
         :param shikigami_class:
-        :param friend:
-        :param rule:
+        :param friend: 仅支持同区 SelectFriendList.SAME_SERVER
         :return:
         """
         logger.hr('Start utilize')
-        fallback_friend = (
-            SelectFriendList.DIFFERENT_SERVER
-            if friend == SelectFriendList.SAME_SERVER
-            else SelectFriendList.SAME_SERVER
-        )
-        selected_friend = None
 
-        # 普通模式会在优先分组无可用卡时扫描备选分组；怠惰模式只处理
-        # 当前配置的优先分组，确认无五星后在该分组回退选四星。
-        friend_groups = (
-            (friend,)
-            if self.utilize_lazy_mode_active
-            else (friend, fallback_friend)
-        )
-        for index, target_friend in enumerate(friend_groups, start=1):
-            priority_text = '优先' if index == 1 else '备选'
-            logger.hr(f'{priority_text}好友分组: {target_friend.value}', 2)
-            self._reset_utilize_friend_list(target_friend)
-            if self.utilize_lazy_mode_active:
-                select_result = self._select_lazy_resource_card(target_friend)
-            else:
-                select_result = self._select_optimal_resource_card(target_friend)
-            if select_result is True:
-                selected_friend = target_friend
-                logger.info(
-                    f'已在{priority_text}分组[{target_friend.value}]选中蹭卡目标，'
-                    '不再检查其他分组'
-                )
-                break
-            if select_result is False:
-                logger.warning(
-                    f'分组[{target_friend.value}]存在可用卡，但最优卡定位失败，'
-                    '本轮不切换分组'
-                )
-                return False
-            logger.info(
-                f'分组[{target_friend.value}]没有当前策略可用的'
-                '四星及以上结界卡'
+        # ==================== 跨区 / 备选分组逻辑（已注释，仅同区可用） ====================
+        # ...（原注释保留）...
+        # =============================================================================
+
+        # 仅支持同区蹭卡：忽略传入的 friend 参数，强制使用 SAME_SERVER
+        if friend != SelectFriendList.SAME_SERVER:
+            logger.warning(
+                f'当前仅支持同区蹭卡，已忽略传入分组 {friend}，强制使用 SAME_SERVER'
             )
+        target_friend = SelectFriendList.SAME_SERVER
+        logger.hr(f'同区好友分组: {target_friend.value}', 2)
 
-        if selected_friend is None:
+        # 首次进入蹭卡界面：列表本来就位于顶部（I_U_TOP 会在第一次截图命中），
+        # 这里传 scroll_to_top=False 以避免任何无谓滑动，直接进入选卡流程。
+        self._reset_utilize_friend_list(target_friend, scroll_to_top=False)
+
+        if self.utilize_lazy_mode_active:
+            select_result = self._select_lazy_resource_card(target_friend)
+        else:
+            select_result = self._select_optimal_resource_card(target_friend)
+        if select_result is False:
+            logger.warning(
+                f'分组[{target_friend.value}]存在可用卡，但最优卡定位失败，'
+                '本轮不切换分组'
+            )
+            return False
+        if select_result is None:
             return self._finish_low_value_utilize()
 
         # 找到卡,重置次数
@@ -788,7 +817,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
             '当前优先分组已确认没有五星以上目标，'
             '复位列表并回退选择四星卡'
         )
-        self._reset_utilize_friend_list(friend)
+        self._reset_utilize_friend_list(friend)  # 默认 scroll_to_top=True
         if self._locate_lazy_four_star_card():
             return True
         logger.warning('已发现四星目标，但复位后重新定位失败')
@@ -911,7 +940,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
             logger.info(f'🎯 最优决策: {card_type}@{card_value}')
             # 扫描过程中最后点击的卡不一定是最高值。回到当前好友分组顶部，
             # 在同一次选卡流程内按 OCR 数值重新定位，避免拿记录值冒充选择状态。
-            self._reset_utilize_friend_list(friend)
+            self._reset_utilize_friend_list(friend)  # 默认 scroll_to_top=True
             if self._locate_recorded_resource_card(card_type, card_value):
                 logger.info(f'✅ 已重新选中最优结界卡: {card_type}@{card_value}')
                 return True
@@ -1213,7 +1242,9 @@ if __name__ == "__main__":
     c = Config('日常1')
     d = Device(c)
     t = ScriptTask(c, d)
-    t.run_utilize(SelectFriendList.DIFFERENT_SERVER)
+    # 跨区调用已注释，仅支持同区蹭卡
+    # t.run_utilize(SelectFriendList.DIFFERENT_SERVER)
+    t.run_utilize(SelectFriendList.SAME_SERVER)
     # t.check_utilize_add()
     # t.check_card_num('勾玉', 67)
     # t.screenshot()

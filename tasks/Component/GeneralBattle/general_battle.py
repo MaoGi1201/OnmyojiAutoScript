@@ -1039,6 +1039,7 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
         self.click(tmp)
         logger.info("Click preset ensure")
         wait_ensure_timer = Timer(6).start()
+        preset_clicked = False
         while 1:
             if wait_ensure_timer.reached():
                 logger.warning(timeout_warning)

@@ -144,6 +144,8 @@ class KekkaiUtilizeAssets:
 	I_SELECT_REALM_ON_4 = RuleImage(roi_front=(607,516,21,59), roi_back=(607,516,21,59), threshold=0.8, method="Template matching", file="./tasks/KekkaiUtilize/utilize/select_realm_on_4.png")
 	# 好友列表已经无卡 
 	I_U_EMPTY_CARD = RuleImage(roi_front=(540,197,67,62), roi_back=(536,164,75,442), threshold=0.8, method="Template matching", file="./tasks/KekkaiUtilize/utilize/utilize_u_empty_card.png")
+	# 顶部 
+	I_U_TOP = RuleImage(roi_front=(534,168,87,43), roi_back=(534,168,87,43), threshold=0.8, method="Template matching", file="./tasks/KekkaiUtilize/utilize/utilize_u_top.png")
 
 
 	# Image Rule Assets

@@ -214,5 +214,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "好友列表已经无卡"
+  },
+  {
+    "itemName": "u_top",
+    "imageName": "utilize_u_top.png",
+    "roiFront": "534,168,87,43",
+    "roiBack": "534,168,87,43",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "顶部"
   }
 ]
