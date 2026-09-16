@@ -191,8 +191,8 @@
   {
     "itemName": "white_dog",
     "imageName": "duel_white_dog.png",
-    "roiFront": "388,327,70,62",
-    "roiBack": "308,254,215,249",
+    "roiFront": "389,328,69,61",
+    "roiBack": "308,255,214,251",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "小白弹窗"
