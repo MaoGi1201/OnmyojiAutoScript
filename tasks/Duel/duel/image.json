@@ -196,5 +196,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "小白弹窗"
+  },
+  {
+    "itemName": "d_team_confirm",
+    "imageName": "duel_d_team_confirm.png",
+    "roiFront": "550,402,180,62",
+    "roiBack": "550,402,180,62",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "误触式神录确定按钮"
   }
 ]
