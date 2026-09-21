@@ -17,7 +17,7 @@ page_shikigami_collection.connect(
     key="page_shikigami_collection->page_collection",
 )
 
-page_shikigami_share = Page(WeeklyTriflesAssets.I_WT_COLLECT_WECHAT)
+page_shikigami_share = Page(WeeklyTriflesAssets.I_WT_COLLECT_TWITTER)
 page_shikigami_collection.connect(
     page_shikigami_share,
     WeeklyTriflesAssets.I_WT_SHARE,
