@@ -5,7 +5,7 @@
 import json
 
 from module.config.config import Config
-from module.config.utils import convert_to_underscore
+from module.config.utils import convert_to_underscore, convert_gui_value
 from module.config.config_model import ConfigModel
 
 from module.logger import logger
@@ -61,13 +61,18 @@ class ConfigModify(Config):
             return False
 
         try:
+            # GUI 传来的永远是字符串，必须先按字段类型注解转换再写入。
+            # 否则 timedelta / datetime / time 字段里会存着一个 str，
+            # save() 序列化时 format_timedelta 会取 .days 直接抛
+            # PydanticSerializationError，整个配置都存不下去。
+            value = convert_gui_value(group_object, argument, value)
             setattr(group_object, argument, value)
             argument_object = getattr(group_object, argument, None)
             logger.info(f'gui_set_task {task}.{group}.{argument}.{argument_object}')
             super().save()  # 我是没有想到什么方法可以使得属性改变自动保存的
             return True
-        except ValidationError as e:
-            logger.error(e)
+        except (ValidationError, ValueError, TypeError) as e:
+            logger.error(f'gui_set_task {path} failed: {e}')
             return False
 
     def gui_task_list(self) -> str:

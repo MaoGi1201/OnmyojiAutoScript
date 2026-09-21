@@ -49,6 +49,15 @@ class ScriptTask(BaseTask):
         self.app_start()
 
     def recover_app(self):
+        if self.device.is_desktop:
+            # 桌面版（PC 客户端）模式：脚本是"接管"已经跑着的游戏，而不是重启它。
+            # 走全量重启会调用 app_stop 把游戏关掉，而桌面版通常没有配置
+            # 程序路径（desktop.exe_path），关了之后就拉不起来了。
+            # 这里只确保窗口可截图 + 走一次登录确认。
+            logger.info('Recovery branch (desktop): ensure game window is capturable')
+            self.app_start()
+            return
+
         if not self.device.app_is_alive():
             logger.info('Recovery branch: game process not alive and not in foreground -> full restart')
             self.app_restart()

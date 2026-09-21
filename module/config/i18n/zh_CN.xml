@@ -260,7 +260,21 @@
     </message>
     <message>
         <source>Device</source>
-        <translation>模拟器</translation>
+        <translation>设备</translation>
+    </message>
+    <message>
+        <source>Desktop</source>
+        <translation>桌面版</translation>
+    </message>
+    <message><source>DesktopScreenshotMethod</source><translation>桌面版截图方案</translation></message>
+    <message><source>DesktopControlMethod</source><translation>桌面版控制方案</translation></message>
+    <message>
+        <source>desktop_screenshot_method_help</source>
+        <translation>PrintWindow 后台截图，窗口被遮挡或失去焦点也能抓到画面。窗口最小化时只能抓到占位图，需先恢复窗口。</translation>
+    </message>
+    <message>
+        <source>desktop_control_method_help</source>
+        <translation>桌面版（PC 客户端）的控制方案，后台点击。</translation>
     </message>
     <message>
         <source>Serial</source>
@@ -279,41 +293,54 @@
 	<message><source>ControlMethod</source><translation>模拟器控制方案</translation></message>
 	<message>
 		<source>serial_help</source>
-		<translation>常见的模拟器 Serial 可以查询下方列表
-填 "auto" 自动检测模拟器，多个模拟器正在运行或使用不支持自动检测的模拟器时无法使用 "auto"，必须手动填写
-
-模拟器默认 Serial:
-[MuMu模拟器12]: 127.0.0.1:16384 
-[MuMu模拟器]: 127.0.0.1:7555 
-[雷电模拟器](全系列通用): emulator-5554 或 127.0.0.1:5555
-
-如果没有提及的那可能是还没有测试或者不推荐使用，可以自行尝试
-如果你使用了模拟器的多开功能，它们的 Serial 将不是默认的，可以在 console.bat 中执行 `adb devices` 查询，或根据模拟器官方的教程填写'</translation>
+        <translation>填 "auto" 自动检测；多开或模拟器不支持自动检测时必须手填。
+常见 Serial：MuMu模拟器12 = 127.0.0.1:16384；MuMu模拟器 = 127.0.0.1:7555；雷电（全系列）= emulator-5554 或 127.0.0.1:5555</translation>
 	</message>
 	<message>
         <source>handle_help</source>
-        <translation>填 "auto" 自动检测模拟器，多个模拟器正在运行或使用不支持自动检测的模拟器时无法使用 "auto"，必须手动填写
-输入为句柄标题或者是句柄号，每次启动模拟器时句柄号会变化。清空表示不使用window的操作方式。
-
-句柄标题 Handle:
-[MuMu模拟器12]: "MuMu模拟器12"
-[MuMu模拟器]: "MuMu模拟器" 
-[雷电模拟器](全系列通用): "雷电模拟器"
-
-句柄号 Handle:
-某些模拟器多开时具有相同的句柄标题（说的就是MuMu），此时需要手动获取模拟器的句柄号手动设置。
-获取工具请查阅文档：[模拟器支持] </translation>
+        <translation>填 "auto" 自动检测；多开或模拟器不支持自动检测时必须手填。
+句柄标题：MuMu模拟器12 / MuMu模拟器 / 雷电模拟器（全系列通用）
+句柄号：多开时标题可能相同（如 MuMu），需手动获取句柄号。留空表示不使用 window 操作方式。</translation>
     </message>
 	<message>
         <source>screenshot_method_help</source>
-        <translation>使用自动选择时，将执行一次性能测试并自动更改为最快的截图方案。一般情况下的速度: 
-window_background >>> DroidCast_raw >  ADB_nc >> DroidCast > uiautomator2 ~= ADB
-使用window_background来截图是10ms左右，对比DroidCast_raw是100ms左右（仅限作者的电脑）。但是window_background有一个致命的缺点是模拟器不可以最小化，望周知</translation>
+        <translation>选 auto 会先跑一次性能测试并自动选最快的。速度：window_background >>> DroidCast_raw > ADB_nc >> DroidCast > uiautomator2 ~= Adb</translation>
     </message>
 	<message>
         <source>control_method_help</source>
-        <translation>速度: window_message ~= minitouch > Hermit >>> uiautomator2 ~= ADB
-控制方式是模拟人类的速度，也不是越快越好 使用(window_message)会偶尔出现失效的情况</translation>
+        <translation>速度：window_message ~= minitouch > Hermit >>> uiautomator2 ~= ADB。并非越快越好，window_message 偶尔会失效。</translation>
+    </message>
+	<message><source>EmulatorControl</source><translation>运行方式</translation></message>
+	<message><source>Emulator Control</source><translation>运行方式</translation></message>
+	<message>
+        <source>emulator_control_help</source>
+        <translation>脚本操作的目标。桌面版（可不配置模拟器相关参数）/模拟器。</translation>
+    </message>
+	<message><source>Window Title</source><translation>窗口标题</translation></message>
+	<message>
+        <source>desktop_window_title_help</source>
+        <translation>桌面版窗口标题，用 | 分隔多个候选，完全匹配优先。多开时可用多开工具改成不同标题来区分实例。</translation>
+    </message>
+	<message><source>Window Class</source><translation>窗口类名</translation></message>
+	<message>
+        <source>desktop_window_class_help</source>
+        <translation>窗口类名，避免误匹配同名窗口。阴阳师桌面版通常是 Win32Window，留空不限制。</translation>
+    </message>
+	<message><source>Window Pid</source><translation>窗口进程 PID</translation></message>
+	<message>
+        <source>desktop_window_pid_help</source>
+        <translation>精确指定窗口的进程 PID，0 表示按标题自动查找。
+PID 每次游戏重启都会变，重启后需重新填写，否则会报"找不到窗口"。</translation>
+    </message>
+	<message><source>Exe Path</source><translation>游戏程序路径</translation></message>
+	<message>
+        <source>desktop_exe_path_help</source>
+        <translation>游戏启动程序完整路径（如 D:/Onmyoji/Onmyoji.exe）。填写后游戏未启动会自动拉起，留空只连已启动窗口。</translation>
+    </message>
+	<message><source>Restore Window</source><translation>自动恢复最小化窗口</translation></message>
+	<message>
+        <source>desktop_restore_window_help</source>
+        <translation>窗口被最小化时，PrintWindow 只能抓到一张占位图，必须恢复窗口才能正常截图。关闭后请保证窗口不要最小化；仅被其它窗口遮挡是没问题的。</translation>
     </message>
 	<message>
         <source>Adb Restart</source>
@@ -332,7 +359,38 @@ window_background >>> DroidCast_raw >  ADB_nc >> DroidCast > uiautomator2 ~= ADB
 	<message><source>screenshot_interval_help</source><translation>执行两次截图之间的最小间隔，限制在 0.1 ~ 0.3，对于高配置电脑能降低 CPU 占用</translation></message>
 	<message><source>combat_screenshot_interval_help</source><translation>执行两次截图之间的最小间隔，限制在 0.1 ~ 1.0，能降低战斗时的 CPU 占用</translation></message>
 	<message><source>task_hoarding_duration_help</source><translation>能在收菜期间降低操作游戏的频率,任务触发后，等待 X 分钟，再一次性执行囤积的任务</translation></message>
-	<message><source>when_task_queue_empty_help</source><translation>无任务时关闭游戏，能在收菜期间降低 CPU 占用，'goto_home'不可选，这项是为了兼容老代码</translation></message>
+	<message><source>when_task_queue_empty_help</source>        <translation>任务队列清空后的空闲策略：goto_main 回主界面等待；close_game 关闭游戏；
+close_emulator_or_* 空闲超过下方阈值时关闭模拟器。</translation></message>
+	<message><source>Close Game Limit Time</source><translation>关闭游戏阈值</translation></message>
+	<message><source>Close Emulator Limit Time</source><translation>关闭模拟器阈值</translation></message>
+	<message><source>Emulator Startup Lead Time</source><translation>模拟器提前启动时间</translation></message>
+	<message><source>close_game_limit_time_help</source><translation>下个任务距离现在超过该时长时，空闲期间关闭游戏以节省资源，格式 "HH:MM:SS"</translation></message>
+	<message><source>close_emulator_limit_time_help</source><translation>下个任务距离现在超过该时长时，空闲期间关闭模拟器以节省资源，格式 "HH:MM:SS"</translation></message>
+	<message><source>emulator_startup_lead_time_help</source><translation>在下个任务开始前提前这么久启动模拟器，避免因启动耗时错过任务时间，格式 "HH:MM:SS"</translation></message>
+	<message><source>AntiBan</source><translation>防封设置</translation></message>
+	<message><source>Sleep Start</source><translation>睡眠开始时间</translation></message>
+	<message><source>Sleep End</source><translation>睡眠结束时间</translation></message>
+	<message><source>Daily Active Limit</source><translation>每日活跃上限</translation></message>
+	<message><source>Long Rest Duration</source><translation>长休息时长</translation></message>
+	<message><source>antiban_enable_help</source><translation>开启后按下面的时间自动挂机与休息，降低被判定为脚本的风险</translation></message>
+	<message><source>sleep_start_help</source><translation>每天的休息起始时间，处于这段时间内脚本不操作游戏，格式 "HH:MM:SS"</translation></message>
+	<message><source>sleep_end_help</source><translation>每天的休息结束时间，到点后脚本恢复挂机，格式 "HH:MM:SS"</translation></message>
+	<message><source>daily_active_limit_help</source><translation>每天累计操作游戏达到该时长后强制休息一段时间，填 0 表示不限制，格式 "DD HH:MM:SS"</translation></message>
+	<message><source>long_rest_duration_help</source><translation>达到每日活跃上限后休息多久，休息结束当日累计清零，格式 "DD HH:MM:SS"</translation></message>
+	<message><source>Package Name</source><translation>游戏包名</translation></message>
+	<message><source>EmulatorInfoType</source><translation>模拟器类型</translation></message>
+	<message><source>Emulatorinfo Name</source><translation>模拟器实例名</translation></message>
+	<message><source>Emulatorinfo Path</source><translation>模拟器程序路径</translation></message>
+	<message><source>Emulator Window Minimize</source><translation>静默启动并最小化</translation></message>
+	<message><source>Run Background Only</source><translation>纯后台运行</translation></message>
+	<message><source>adb_restart_help</source><translation>检测不到设备时尝试重启 adb</translation></message>
+	<message><source>emulatorinfo_type_help</source><translation>模拟器类型，选 auto 自动检测；识别不准时手动指定</translation></message>
+	<message><source>emulatorinfo_name_help</source><translation>模拟器实例名，多开时用于指定具体实例，留空表示不限制</translation></message>
+	<message><source>emulatorinfo_path_help</source><translation>模拟器主程序的完整路径，用于脚本自动启动模拟器</translation></message>
+	<message><source>emulator_window_minimize_help</source><translation>模拟器启动后自动最小化窗口，避免遮挡其它程序</translation></message>
+	<message><source>run_background_only_help</source><translation>模拟器完全无 UI 后台运行（不显示窗口和任务栏）。关闭后重启脚本会重新显示窗口，无需重启 OAS</translation></message>
+	<message><source>Error Repeated</source><translation>重复出错时关闭模拟器</translation></message>
+	<message><source>error_repeated_help</source><translation>同一错误反复出现时，关闭模拟器后由调度器重新拉起</translation></message>
 </context>
 <context>
     <name>Args</name>
@@ -543,10 +601,8 @@ mode_3策略是刷到五个契灵后开始结契，选择高级、中级盘来�
 <context>
     <name>Args</name>
 	<message><source>ScheduleRule</source><translation>选择任务调度规则</translation></message>	
-	<message><source>schedule_rule_help</source><translation>这里所指的调度的对象是指Pending中的，Waiting中的任务不属于。
-基于过滤器(Filter)的调度：默认的选项，任务的执行顺序会根据开发时所确定的顺序来调度，一般是最优解
-基于先来后到(FIFO)的调度：是会按照下次执行时间进行排序，靠前的先执行
-基于优先级(Priority)的调度：高优先级先于低优先级执行，同优先级按照先来后到顺序</translation></message>	
+	<message><source>schedule_rule_help</source>        <translation>只对 Pending 中的任务生效（Waiting 不算）。
+Filter 按开发者设定的顺序（一般最优）；FIFO 按下次执行时间；Priority 优先级高者先执行，同级按先后。</translation></message>	
 </context>	
 <context>
     <name>Args</name>

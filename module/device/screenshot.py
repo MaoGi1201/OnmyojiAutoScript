@@ -17,12 +17,13 @@ from module.device.method.windows import Window
 from module.device.method.droidcast import DroidCast
 from module.device.method.scrcpy import Scrcpy
 from module.device.method.nemu_ipc import NemuIpc
+from module.device.method.window_win32 import WindowWin32
 from module.exception import RequestHumanTakeover, ScriptError
 from module.image.rpc import get_image_client
 from module.logger import logger
 
 
-class Screenshot(Adb, DroidCast, Scrcpy, Window, NemuIpc):
+class Screenshot(Adb, DroidCast, Scrcpy, Window, NemuIpc, WindowWin32):
     _screen_size_checked = False
     _screen_black_checked = False
     _minicap_uninstalled = False
@@ -55,6 +56,8 @@ class Screenshot(Adb, DroidCast, Scrcpy, Window, NemuIpc):
             methods.update({
                 'window_background': self.screenshot_window_background,
                 'nemu_ipc': self.screenshot_nemu_ipc,
+                # 桌面版（PC 客户端）后台截图，不依赖 ADB
+                'window_win32': self.screenshot_window_win32,
             })
         return methods
 
@@ -68,7 +71,7 @@ class Screenshot(Adb, DroidCast, Scrcpy, Window, NemuIpc):
 
         for _ in range(2):
             method = self.screenshot_methods.get(
-                self.config.script.device.screenshot_method,
+                self.screenshot_method,
                 self.screenshot_adb  # 第二个参数默认的是screenshot_adb
             )
             self.image = method()
@@ -191,7 +194,7 @@ class Screenshot(Adb, DroidCast, Scrcpy, Window, NemuIpc):
         # Screenshot interval in scrcpy is meaningless,
         # video stream is received continuously no matter you use it or not.
         # if self.config.script.device.screenshot_method == 'scrcpy':
-        if self.config.script.device.screenshot_method == 'scrcpy':
+        if self.screenshot_method == 'scrcpy':
             interval = 0.1
 
         if interval != self._screenshot_interval.limit:
@@ -260,7 +263,12 @@ class Screenshot(Adb, DroidCast, Scrcpy, Window, NemuIpc):
             #     logger.warning('Game not running on display 0, will be restarted')
             #     self.app_stop_uiautomator2()
             #     return False
-            if self.config.script.device.screenshot_method == 'uiautomator2':
+            if self.is_desktop:
+                logger.warning(f'Received pure black screenshot from desktop window, color: {color}')
+                logger.warning('The desktop game window may be minimized or not fully rendered')
+                self._screen_black_checked = False
+                return False
+            if self.screenshot_method == 'uiautomator2':
                 logger.warning(f'Received pure black screenshots from emulator, color: {color}')
                 logger.warning('Uninstall minicap and retry')
                 self.uninstall_minicap()
@@ -268,10 +276,10 @@ class Screenshot(Adb, DroidCast, Scrcpy, Window, NemuIpc):
                 return False
             else:
                 logger.warning(f'Received pure black screenshots from emulator, color: {color}')
-                logger.warning(f'Screenshot method {self.config.script.device.screenshot_method}'
+                logger.warning(f'Screenshot method {self.screenshot_method}'
                                f'may not work on emulator `{self.serial}`, or the emulator is not fully started')
                 if self.is_mumu_family:
-                    if self.config.script.device.screenshot_method == 'DroidCast':
+                    if self.screenshot_method == 'DroidCast':
                         self.droidcast_stop()
                     else:
                         logger.warning('If you are using MuMu X, please upgrade to version >= 12.1.5.0')

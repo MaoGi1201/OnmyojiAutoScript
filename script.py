@@ -22,11 +22,11 @@ from cached_property import cached_property
 from pydantic import BaseModel, ValidationError
 from threading import Thread
 from multiprocessing.queues import Queue
-from module.config.utils import convert_to_underscore
+from module.config.utils import convert_to_underscore, convert_gui_value
 from module.config.config import Config
 from module.config.anti_ban import AntiBanGuard
 from module.device.device import Device
-from module.device.env import IS_WINDOWS
+from module.device.env import IS_WINDOWS, is_desktop_mode
 from module.base.utils import load_module
 from module.base.decorator import del_cached_property
 from module.logger import logger
@@ -185,14 +185,6 @@ class Script:
         task = convert_to_underscore(task)
         group = convert_to_underscore(group)
         argument = convert_to_underscore(argument)
-        # pandtic验证
-        if isinstance(value, str):
-            if len(value) == 8:
-                try:
-                    value = datetime.strptime(value, '%H:%M:%S').time()
-                except ValueError:
-                    pass
-
 
         path = f'{task}.{group}.{argument}'
         task_object = getattr(self.config.model, task, None)
@@ -204,13 +196,18 @@ class Script:
             return False
 
         try:
+            # GUI 传来的永远是字符串，必须先按字段类型注解转换再写入。
+            # 否则 timedelta / datetime / time 字段里会存着一个 str，
+            # save() 序列化时 format_timedelta 会取 .days 直接抛
+            # PydanticSerializationError，整个配置都存不下去。
+            value = convert_gui_value(group_object, argument, value)
             setattr(group_object, argument, value)
             argument_object = getattr(group_object, argument, None)
             logger.info(f'Set arg {task}.{group}.{argument}.{argument_object}')
             self.config.save()  # 我是没有想到什么方法可以使得属性改变自动保存的
             return True
-        except ValidationError as e:
-            logger.error(e)
+        except (ValidationError, ValueError, TypeError) as e:
+            logger.error(f'Set arg {path} failed: {e}')
             return False
 
     @zerorpc.stream
@@ -464,7 +461,9 @@ class Script:
         self.anti_ban_guard.reset()
 
         # Update GUI 防呆, 读取设置并立刻显示后台模拟器到前台
-        if not self.config.script.device.run_background_only and IS_WINDOWS:
+        # 桌面版模式下目标是本机游戏窗口，不做模拟器窗口的前后台处理
+        if not self.config.script.device.run_background_only and IS_WINDOWS \
+                and not is_desktop_mode(self.config):
             from module.device.platform2.platform_windows import minimize_by_name, show_window_by_name
             target_window_name = self.config.script.device.handle  # 在这里输入你的具体窗口名称
             if self.config.script.device.emulator_window_minimize:

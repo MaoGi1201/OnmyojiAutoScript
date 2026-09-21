@@ -3,15 +3,55 @@
 # github https://github.com/runhey
 import os
 import json
+import re
 import yaml
 
 from filelock import FileLock
 from datetime import datetime, timedelta, timezone, time
+from typing import Annotated
+
+from pydantic import TypeAdapter
 
 from module.config.atomicwrites import atomic_write
 from module.logger import logger
 
 DEFAULT_TIME = datetime(2023, 1, 1, 0, 0)
+
+
+def convert_gui_value(model_obj, field_name: str, value):
+    """
+    把 GUI 传来的值按字段的类型注解转换成真正的 Python 对象。
+
+    为什么必须做这一步：GUI 传来的永远是字符串，而配置里有不少字段是
+    `timedelta` / `datetime` / `time`（见 tasks/Component/config_base.py）。
+    直接 `setattr` 会让模型里存着一个 str，之后 `save()` 序列化时
+    `format_timedelta` 会拿到 str 去取 `.days`，直接抛
+    `PydanticSerializationError: 'str' object has no attribute 'days'`，
+    结果就是配置根本存不下去（整个 dump 都会失败）。
+
+    这里重建字段的 Annotated 注解（pydantic 会把 BeforeValidator 等元数据
+    放在 `field.metadata` 里，而不是 `field.annotation`），再用 TypeAdapter
+    走一遍项目自己的校验器，保证格式规则只有一处定义。
+
+    Args:
+        model_obj: pydantic 模型实例（某个分组，如 Scheduler / Device）
+        field_name: 字段名
+        value: GUI 传来的值（通常是字符串）
+
+    Returns:
+        转换后的值
+
+    Raises:
+        ValidationError: 值不合法时抛出，由调用方转成"设置失败"
+    """
+    field = type(model_obj).model_fields.get(field_name)
+    if field is None:
+        return value
+    annotation = field.annotation
+    if field.metadata:
+        annotation = Annotated[tuple([annotation, *field.metadata])]
+    return TypeAdapter(annotation).validate_python(value)
+
 
 def filepath_config(filename, mod_name='script') -> str:
     """

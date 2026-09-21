@@ -22,6 +22,7 @@ class PackageName(str, Enum):
     NETEASE_NA = 'com.netease.onmyoji.na'  # 日服
 
 class ScreenshotMethod(str, Enum):
+    """模拟器截图方案。桌面版方案见 DesktopScreenshotMethod，两者互不混用。"""
     AUTO = 'auto'
     ADB = 'ADB'
     ADB_NC = 'ADB_nc'
@@ -34,10 +35,27 @@ class ScreenshotMethod(str, Enum):
 
 
 class ControlMethod(str, Enum):
+    """模拟器控制方案。桌面版方案见 DesktopControlMethod，两者互不混用。"""
     ADB = 'adb'
     UIAUTOMATOR2 = 'uiautomator2'
     MINITOUCH = 'minitouch'
     WINDOW_MESSAGE = 'window_message'
+
+
+class EmulatorControl(str, Enum):
+    """脚本操作的目标：模拟器（ADB）或桌面版游戏窗口（Win32）。"""
+    EMULATOR = 'emulator'
+    DESKTOP = 'desktop'
+
+
+class DesktopScreenshotMethod(str, Enum):
+    """桌面版（PC 客户端）截图方案：PrintWindow 后台截图，窗口被遮挡也能抓。"""
+    WINDOW_WIN32 = 'window_win32'
+
+
+class DesktopControlMethod(str, Enum):
+    """桌面版（PC 客户端）控制方案：PostMessage 后台点击，不移动真实鼠标、不抢焦点。"""
+    WINDOW_WIN32 = 'window_win32'
 
 
 class EmulatorInfoType(str, Enum):
@@ -59,6 +77,8 @@ class EmulatorInfoType(str, Enum):
 
 
 class Device(BaseModel):
+    """模拟器（ADB）相关设置。运行方式选 desktop 时本组除 emulator_control 外都不生效。"""
+    emulator_control: EmulatorControl = Field(default=EmulatorControl.EMULATOR, description='emulator_control_help')
     serial: str = Field(default="auto", description='serial_help')
     handle: str = Field(default='', description='handle_help')
     package_name: PackageName = Field(title='Package Name', default=PackageName.AUTO, description='package_name_help')
@@ -69,10 +89,25 @@ class Device(BaseModel):
     emulatorinfo_name: str = Field(default='', description='emulatorinfo_name_help')
     emulatorinfo_path: str = Field(default='', description='emulatorinfo_path_help')
     # 举例, E:\ProgramFiles\MuMuPlayer-12.0\shell\MuMuPlayer.exe
-    # 模拟器启动时最小化
-    emulator_window_minimize: bool = Field(default=False, description='模拟器静默启动并最小化')
-    # 启动时纯后台运行模拟器，不显示窗口和任务栏
-    run_background_only: bool = Field(default=False, description='模拟器无UI后台运行，关掉后重启脚本会重新显示（无需重启OAS）')
+    emulator_window_minimize: bool = Field(default=False, description='emulator_window_minimize_help')
+    run_background_only: bool = Field(default=False, description='run_background_only_help')
+
+
+class Desktop(BaseModel):
+    """桌面版（PC 客户端）设置。
+
+    与模拟器配置完全独立：运行方式选 desktop 后，截图/控制方案直接跟随本组，
+    不需要也不应该再去改模拟器那两个下拉框。字段说明见 zh_CN.xml。
+    """
+    screenshot_method: DesktopScreenshotMethod = Field(
+        default=DesktopScreenshotMethod.WINDOW_WIN32, description='desktop_screenshot_method_help')
+    control_method: DesktopControlMethod = Field(
+        default=DesktopControlMethod.WINDOW_WIN32, description='desktop_control_method_help')
+    window_title: str = Field(default='陰陽師Onmyoji|阴阳师', description='desktop_window_title_help')
+    window_class: str = Field(default='Win32Window', description='desktop_window_class_help')
+    window_pid: int = Field(default=0, description='desktop_window_pid_help')
+    exe_path: str = Field(default='', description='desktop_exe_path_help')
+    restore_window: bool = Field(default=True, description='desktop_restore_window_help')
 
 
 if __name__ == '__main__':

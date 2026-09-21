@@ -11,10 +11,11 @@ from module.device.method.minitouch import Minitouch
 from module.device.method.adb import Adb
 from module.device.method.scrcpy import Scrcpy
 from module.device.method.windows import Window
+from module.device.method.window_win32 import WindowWin32
 from module.logger import logger
 
 
-class Control(Minitouch, Adb, Scrcpy, Window):
+class Control(Minitouch, Adb, Scrcpy, Window, WindowWin32):
     def handle_control_check(self, button):
         # Will be overridden in Device
         pass
@@ -39,6 +40,8 @@ class Control(Minitouch, Adb, Scrcpy, Window):
         }
         if IS_WINDOWS:
             methods['window_message'] = self.click_window_message
+            # 桌面版（PC 客户端）后台点击，不依赖 ADB
+            methods['window_win32'] = self.click_window_win32
         return methods
 
     @cached_property
@@ -53,6 +56,8 @@ class Control(Minitouch, Adb, Scrcpy, Window):
         }
         if IS_WINDOWS:
             methods['window_message'] = self.long_click_window_message
+            # 桌面版（PC 客户端）后台长按，不依赖 ADB
+            methods['window_win32'] = self.long_click_window_win32
         return methods
 
     def click(self, x: int, y: int, control_check=True, control_name='Click') -> None:
@@ -69,7 +74,7 @@ class Control(Minitouch, Adb, Scrcpy, Window):
         x, y = ensure_int(x, y)
         self._invalidate_image_batch_cache()
         method = self.click_methods.get(
-            self.config.script.device.control_method,
+            self.control_method,
             self.click_adb
         )
         start = time.perf_counter()
@@ -112,18 +117,34 @@ class Control(Minitouch, Adb, Scrcpy, Window):
         duration = ensure_time(duration)
         self._invalidate_image_batch_cache()
         method = self.long_click_methods.get(
-            self.config.script.device.control_method,
+            self.control_method,
             self.long_click_adb)
         start = time.perf_counter()
         method(x, y, duration)
         elapsed = time.perf_counter() - start
         logger.info(f'{self._format_action_duration(elapsed)}Click {point2str(x, y)} @ {control_name} {duration}')
 
+    def swipe_adb(self, p1, p2, duration=0.1):
+        """桌面模式下没有 ADB，把对底层原语的直接调用重定向到窗口滑动。
+
+        项目里有几个 task 为了精确控制滑动时长，直接调用了 `swipe_adb`
+        （绕过了 swipe() 的模式分发，如 RyouToppa 的调参值 0.352s）。
+        桌面模式下这行代码会直接抛 EmulatorNotRunningError 打断脚本，
+        所以在这里统一兜住：桌面模式走窗口滑动，模拟器模式行为完全不变
+        （仍然交给 Adb.swipe_adb，duration 不做任何缩放）。
+
+        新增代码请优先用 swipe()，它会自动按当前模式分发。
+        """
+        if self.is_desktop:
+            self.swipe_window_win32(p1, p2, duration=duration)
+            return
+        super().swipe_adb(p1, p2, duration=duration)
+
     def swipe(self, p1, p2, duration=(0.1, 0.2), control_name='SWIPE', distance_check=True):
         self.handle_control_check(control_name)
         p1, p2 = ensure_int(p1, p2)
         duration = ensure_time(duration)
-        method = self.config.script.device.control_method
+        method = self.control_method
         swipe_log = None
         if method == 'minitouch':
             swipe_log = 'Swipe %s -> %s' % (point2str(*p1), point2str(*p2))
@@ -132,6 +153,8 @@ class Control(Minitouch, Adb, Scrcpy, Window):
         elif method == 'uiautomator2':
             swipe_log = 'Swipe %s -> %s, %s' % (point2str(*p1), point2str(*p2), duration)
         elif method == 'scrcpy':
+            swipe_log = 'Swipe %s -> %s' % (point2str(*p1), point2str(*p2))
+        elif method == 'window_win32':
             swipe_log = 'Swipe %s -> %s' % (point2str(*p1), point2str(*p2))
         # elif method == 'MaaTouch':
         #     logger.info('Swipe %s -> %s' % (point2str(*p1), point2str(*p2)))
@@ -164,6 +187,9 @@ class Control(Minitouch, Adb, Scrcpy, Window):
             self.swipe_uiautomator2(p1, p2, duration=duration)
         elif method == 'scrcpy':
             self.swipe_scrcpy(p1, p2)
+        elif method == 'window_win32':
+            # 桌面滑动按 duration 均分轨迹点间隔，不传会瞬间滑完导致翻过头
+            self.swipe_window_win32(p1, p2, duration=duration)
         # elif method == 'MaaTouch':
         #     self.swipe_maatouch(p1, p2)
         else:
@@ -204,7 +230,8 @@ class Control(Minitouch, Adb, Scrcpy, Window):
         self.handle_control_check(name)
         p1, p2 = ensure_int(p1, p2)
         drag_log = 'Drag %s -> %s' % (point2str(*p1), point2str(*p2))
-        method = self.config.script.emulator.control_method
+        # 原先这里误写成 self.config.script.emulator，会直接抛 AttributeError
+        method = self.control_method
         start = time.perf_counter()
         if method == 'minitouch':
             self.drag_minitouch(p1, p2, point_random=point_random)
@@ -214,6 +241,8 @@ class Control(Minitouch, Adb, Scrcpy, Window):
                 swipe_duration=swipe_duration, shake_duration=shake_duration)
         elif method == 'scrcpy':
             self.drag_scrcpy(p1, p2, point_random=point_random)
+        elif method == 'window_win32':
+            self.swipe_window_win32(p1, p2, duration=ensure_time(swipe_duration))
         # elif method == 'MaaTouch':
         #     self.drag_maatouch(p1, p2, point_random=point_random)
         else:

@@ -15,6 +15,7 @@ from adbutils.errors import AdbError
 from module.base.decorator import Config, cached_property, del_cached_property
 from module.base.utils import ensure_time
 from module.device.connection_attr import ConnectionAttr
+from module.device.env import is_desktop_mode
 from module.device.method.utils import (
     RETRY_TRIES, remove_shell_warning, retry_sleep,
     handle_adb_error, PackageNotInstalled,
@@ -95,6 +96,14 @@ class Connection(ConnectionAttr):
             config (AzurLaneConfig, str): Name of the user config under ./config
         """
         super().__init__(config)
+
+        # 桌面版（PC 客户端）模式：不连接 ADB，也不检测 Android 包名
+        if is_desktop_mode(self.config):
+            logger.info('Desktop mode enabled, skip adb connect and package detect')
+            self.package = 'desktop'
+            logger.attr('PackageName', self.package)
+            return
+
         if not self.is_over_http:
             self.detect_device()
 
@@ -748,6 +757,12 @@ class Connection(ConnectionAttr):
                 2: 'HOME key on the top'
                 3: 'HOME key on the left'
         """
+        # 桌面版窗口不存在旋转，也不该走 adb shell dumpsys
+        if is_desktop_mode(self.config):
+            self.orientation = 0
+            logger.attr('Device Orientation', '0 (Normal, desktop mode)')
+            return 0
+
         _DISPLAY_RE = re.compile(
             r'.*DisplayViewport{.*valid=true, .*orientation=(?P<orientation>\d+), .*deviceWidth=(?P<width>\d+), deviceHeight=(?P<height>\d+).*'
         )

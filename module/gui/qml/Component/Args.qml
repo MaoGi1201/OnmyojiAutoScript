@@ -78,6 +78,16 @@ Item {
                         return
                     }
                 }
+                // time / time_delta / date_time 复用文本框：
+                // 值本身已经是应用格式的字符串（HH:MM:SS、DD HH:MM:SS、YYYY-MM-DD HH:MM:SS），
+                // 后端 config.utils.convert_gui_value 会按字段类型转换后再落盘
+                else if(arg.type === "time" || arg.type === "time_delta" || arg.type === "date_time"){
+                    object = string_item.createObject(group_column)
+                    if(object === null){
+                        console.error("can not create component string_item", arg.title)
+                        return
+                    }
+                }
                 else if(arg.type === "integer"){
                     object = int_item.createObject(group_column)
                     if(object === null){

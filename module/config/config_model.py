@@ -4,7 +4,7 @@
 from tasks.GuguArtStudio.config import GuguArtStudio
 from tasks.GuildActivityMonitor.config import GuildActivityMonitor
 from tasks.OtherWorldTwilight.config import OtherWorldTwilight
-from typing import Dict, Any
+from typing import Dict, Any, ClassVar
 
 import re
 import inflection
@@ -16,7 +16,7 @@ from module.config.utils import *
 from module.logger import logger
 
 # 导入配置的Python文件
-from tasks.Component.config_base import ConfigBase, TimeDelta
+from tasks.Component.config_base import ConfigBase, TimeDelta, format_timedelta
 from tasks.Exploration.config import Exploration
 from tasks.RyouToppa.config import RyouToppa
 from tasks.Dokan.config import Dokan
@@ -84,6 +84,138 @@ from tasks.MysteryShop.config import MysteryShop
 from tasks.Duel.config import Duel
 from tasks.Chess.config import Chess
 # ----------------------------------------------------------------------------------------------------------------------
+
+# pydantic 把 timedelta 的默认值序列化成 ISO 8601 时长，例如 PT0S / PT2H / P1DT2H30M / P1W
+_ISO_DURATION_RE = re.compile(
+    r'^(?P<sign>-)?P'
+    r'(?:(?P<weeks>\d+(?:\.\d+)?)W)?'
+    r'(?:(?P<days>\d+(?:\.\d+)?)D)?'
+    r'(?:T'
+    r'(?:(?P<hours>\d+(?:\.\d+)?)H)?'
+    r'(?:(?P<minutes>\d+(?:\.\d+)?)M)?'
+    r'(?:(?P<seconds>\d+(?:\.\d+)?)S)?'
+    r')?$'
+)
+
+
+def parse_iso_duration(text):
+    """
+    把 ISO 8601 时长解析成 timedelta，不是合法时长则返回 None。
+
+    Args:
+        text: 例如 'PT0S'、'PT2H'、'P1DT2H30M'、'P1W'
+
+    Returns:
+        datetime.timedelta | None
+    """
+    if not isinstance(text, str):
+        return None
+    match = _ISO_DURATION_RE.match(text.strip())
+    if not match:
+        return None
+    parts = match.groupdict()
+    if not any(parts[key] is not None for key in ('weeks', 'days', 'hours', 'minutes', 'seconds')):
+        return None
+    delta = timedelta(
+        weeks=float(parts['weeks'] or 0),
+        days=float(parts['days'] or 0),
+        hours=float(parts['hours'] or 0),
+        minutes=float(parts['minutes'] or 0),
+        seconds=float(parts['seconds'] or 0),
+    )
+    return -delta if parts['sign'] else delta
+
+
+def format_schema_default(field_type, default):
+    """
+    把 schema 里的 default 统一成应用自己的显示格式。
+
+    pydantic 生成的 default 用的是 ISO 8601，而字段的实际值用的是应用格式，
+    两者不一致会让前端把 default 当占位提示时显示成 PT2H / 2023-01-01T00:00:00 这种
+    看不懂的东西：
+
+    - time_delta : 'PT2H'                  -> '00 02:00:00'
+    - date_time  : '2023-01-01T00:00:00'   -> '2023-01-01 00:00:00'
+    - time       : '09:00:00'              -> 本来就是应用格式，不动
+
+    转换失败（不是 ISO 格式）时原样返回，避免误伤。
+
+    Args:
+        field_type: schema 里的 type
+        default: schema 里的 default
+
+    Returns:
+        转换后的 default
+    """
+    if not isinstance(default, str):
+        return default
+    if field_type == 'time_delta':
+        delta = parse_iso_duration(default)
+        return format_timedelta(delta) if delta is not None else default
+    if field_type == 'date_time':
+        try:
+            return datetime.fromisoformat(default).strftime('%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            return default
+    return default
+
+
+def to_gui_schema(schema: dict) -> dict:
+    """
+    把 pydantic v2 的 JSON Schema 归一化成前端(QML ModelParse.js)期望的 v1 结构。
+
+    背景：`module/gui/qml/Component/ModelParse.js` 是按 pydantic v1 的产物写的，
+    而项目依赖 pydantic 2.x，两者结构不同，导致设置页的枚举字段拿不到
+    title/type，整组渲染失败：
+
+    - 定义区   : v2 用 `$defs`，v1 用 `definitions`
+    - 引用前缀 : v2 是 `#/$defs/X`，v1 是 `#/definitions/X`
+    - 枚举字段 : v2 直接给 `$ref`，v1 用 `allOf: [{$ref: ...}]` 包裹，
+                 而前端只识别 `allOf`（见 ModelParse.js::parseArgument）
+
+    同时把 default 里的 ISO 8601 时间格式统一成应用格式（见 format_schema_default）。
+
+    Args:
+        schema: pydantic 生成的 JSON Schema
+
+    Returns:
+        dict: v1 结构的 JSON Schema
+    """
+    def convert(node):
+        if isinstance(node, dict):
+            result = {}
+            for key, value in node.items():
+                if key == '$defs':
+                    result['definitions'] = {k: convert(v) for k, v in value.items()}
+                elif key == '$ref' and isinstance(value, str):
+                    result['$ref'] = value.replace('#/$defs/', '#/definitions/')
+                else:
+                    result[key] = convert(value)
+            return result
+        if isinstance(node, list):
+            return [convert(item) for item in node]
+        return node
+
+    result = convert(schema)
+
+    for definition in (result.get('definitions') or {}).values():
+        properties = definition.get('properties')
+        if not isinstance(properties, dict):
+            continue
+        for name, prop in properties.items():
+            if not isinstance(prop, dict):
+                continue
+            # 枚举字段：把裸 $ref 包成 allOf，前端才会识别为 enum 下拉框
+            if '$ref' in prop and 'allOf' not in prop:
+                ref = prop.pop('$ref')
+                new_prop = {'allOf': [{'$ref': ref}]}
+                new_prop.update(prop)
+                properties[name] = prop = new_prop
+            # 时间字段：把 ISO 8601 的 default 换成应用显示格式
+            if 'default' in prop:
+                prop['default'] = format_schema_default(prop.get('type'), prop['default'])
+    return result
+
 
 class ConfigModel(ConfigBase):
     config_name: str = "oas"
@@ -159,6 +291,63 @@ class ConfigModel(ConfigBase):
     demon_retreat: DemonRetreat = Field(default_factory=DemonRetreat)
     guild_activity_monitor: GuildActivityMonitor = Field(default_factory=GuildActivityMonitor)
 
+    # 早期版本的桌面版方案被写进了模拟器字段，现在归属到 script.desktop 下，需要迁移
+    # 注意必须声明为 ClassVar，否则 pydantic 会把下划线开头的类属性当成私有字段
+    _LEGACY_DESKTOP_FIELDS: ClassVar[dict] = {
+        'desktop_window_title': 'window_title',
+        'desktop_window_class': 'window_class',
+        'desktop_window_pid': 'window_pid',
+        'desktop_exe_path': 'exe_path',
+        'desktop_restore_window': 'restore_window',
+    }
+    # window_win32 现在是桌面版专用方案，不再属于模拟器的枚举，遇到就归位
+    _LEGACY_DEVICE_METHODS: ClassVar[dict] = {
+        'screenshot_method': 'auto',
+        'control_method': 'minitouch',
+    }
+
+    @classmethod
+    def migrate_legacy_config(cls, data: dict) -> dict:
+        """
+        迁移旧配置。
+
+        1. `script.device.desktop_*` 搬到 `script.desktop.*`（桌面版设置独立成组）
+        2. 模拟器的 screenshot_method / control_method 若残留 window_win32，
+           归位到默认值 —— 该值现在只属于桌面版，留在模拟器字段里会导致校验失败
+        """
+        if not isinstance(data, dict):
+            return data
+        script = data.get('script')
+        if not isinstance(script, dict):
+            return data
+
+        device = script.get('device')
+        if not isinstance(device, dict):
+            return data
+
+        # 1. 桌面版字段搬迁
+        desktop = script.get('desktop')
+        if not isinstance(desktop, dict):
+            desktop = {}
+        moved = {}
+        for old_key, new_key in cls._LEGACY_DESKTOP_FIELDS.items():
+            if old_key in device:
+                value = device.pop(old_key)
+                # 新字段已有值时以新字段为准
+                desktop.setdefault(new_key, value)
+                moved[old_key] = new_key
+        if moved:
+            logger.info(f'Migrate legacy desktop config: {moved}')
+        script['desktop'] = desktop
+
+        # 2. 模拟器字段里的桌面版方案归位
+        for key, default in cls._LEGACY_DEVICE_METHODS.items():
+            if device.get(key) == 'window_win32':
+                logger.warning(f'Migrate legacy desktop method: script.device.{key} '
+                               f'window_win32 -> {default}')
+                device[key] = default
+        return data
+
     def __init__(self, config_name: str=None, **data) -> None:
         """
 
@@ -173,6 +362,7 @@ class ConfigModel(ConfigBase):
             super().__init__()
             return
         data = self.read_json(config_name)
+        data = self.migrate_legacy_config(data)
         data["config_name"] = config_name
         super().__init__(**data)
 
@@ -220,7 +410,9 @@ class ConfigModel(ConfigBase):
             logger.warning(f'{task} is no inexistence')
             return ''
 
-        schema2 = task_gui.schema()
+        # pydantic v2 输出的是 $defs / 裸 $ref，前端 ModelParse.js 只认 v1 的
+        # definitions / allOf，这里先归一化，否则设置页会整组渲染失败
+        schema2 = to_gui_schema(task_gui.schema())
         # https://github.com/pydantic/pydantic/discussions/5687
         if 'definitions' in schema2:
             if 'Scheduler' in schema2['definitions']:

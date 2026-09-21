@@ -10,6 +10,7 @@ from adbutils import AdbClient, AdbDevice
 from module.base.decorator import cached_property
 from module.config.config import Config
 from module.config.utils import deep_iter
+from module.device.env import is_desktop_mode
 from module.exception import RequestHumanTakeover
 from module.logger import logger
 
@@ -33,6 +34,14 @@ class ConnectionAttr:
             self.config = Config(config, task=None)
         else:
             self.config = config
+
+        # 桌面版（PC 客户端）模式：目标是本机的 Win32 窗口，与 ADB 完全无关，
+        # 因此跳过 adb client / serial 的全部初始化。
+        if is_desktop_mode(self.config):
+            logger.info('Desktop mode enabled, skip adb client init')
+            self.serial = str(self.config.script.device.serial)
+            self.config.DEVICE_OVER_HTTP = False
+            return
 
         # Init adb client
         logger.attr('AdbBinary', self.adb_binary)
@@ -68,6 +77,16 @@ class ConnectionAttr:
         self.serial = str(self.config.script.device.serial)
         self.serial_check()
         self.config.DEVICE_OVER_HTTP = self.is_over_http
+
+    @property
+    def is_desktop(self) -> bool:
+        """
+        当前是否使用桌面版（PC 客户端）模式。
+
+        定义在初始化链最底层（config 所在的类）上，这样截图/控制/应用控制等
+        各个 mixin 都能直接用，也不必关心谁先初始化。
+        """
+        return is_desktop_mode(self.config)
 
     def serial_check(self):
         """

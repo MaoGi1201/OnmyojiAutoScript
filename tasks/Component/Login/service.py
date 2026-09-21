@@ -2,6 +2,7 @@
 # @author runhey
 # github https://github.com/runhey
 from module.base.timer import Timer
+from module.device.env import is_desktop_mode
 from module.exception import RequestHumanTakeover, GameTooManyClickError, GameStuckError
 from module.logger import logger
 from tasks.GameUi.assets import GameUiAssets
@@ -156,15 +157,24 @@ class LoginService(
         return login_success
 
     def app_handle_login(self) -> bool:
-        self.device.stuck_record_clear()
-        self.device.click_record_clear()
-        try:
-            self._app_handle_login()
-            return True
-        except (GameTooManyClickError, GameStuckError) as e:
-            logger.warning(e)
-            self.device.app_stop()
-            self.device.app_start()
+        """处理登录；卡住时按运行模式决定是否重启游戏。"""
+        desktop = is_desktop_mode(self.config)
+        for _ in range(2 if desktop else 1):
+            self.device.stuck_record_clear()
+            self.device.click_record_clear()
+            try:
+                self._app_handle_login()
+                return True
+            except (GameTooManyClickError, GameStuckError) as e:
+                logger.warning(e)
+                if not desktop:
+                    # 模拟器：重启 app 后交给上层处理
+                    self.device.app_stop()
+                    self.device.app_start()
+                    break
+                # 桌面版通常没配 exe_path，app_stop() 关掉游戏就拉不回来了，
+                # 因此只清掉卡住记录重试一次，绝不重启游戏。
+                logger.warning('Login stuck; desktop mode cannot restart the game, retry login once')
 
         logger.critical('Login failed')
         logger.critical('Onmyoji server may be under maintenance, or you may lost network connection')

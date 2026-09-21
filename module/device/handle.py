@@ -17,6 +17,7 @@ from win32con import (SRCCOPY, DESKTOPHORZRES, DESKTOPVERTRES, WM_LBUTTONUP,
                       WM_LBUTTONDOWN, WM_ACTIVATE, WA_ACTIVE, MK_LBUTTON,
                       WM_NCHITTEST, WM_SETCURSOR, HTCLIENT, WM_MOUSEMOVE)
 from module.config.config import Config
+from module.device.env import is_desktop_mode
 from module.logger import logger
 
 
@@ -168,6 +169,11 @@ class Handle:
                 self.config = Config(config, task=None)
             else:
                 self.config = config
+        # 桌面版模式下目标是本机 Win32 窗口，没有模拟器句柄树的概念，
+        # 必须跳过，否则残留的 handle(如 'auto') 会导致 GetWindowRect(0) 报错
+        if is_desktop_mode(self.config):
+            logger.info('Desktop mode enabled, skip emulator handle init')
+            return
         if not self.config.script.device.handle:
             logger.info('Handle is empty. oas not use handle')
             return

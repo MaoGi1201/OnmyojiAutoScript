@@ -31,7 +31,9 @@ def Press_and_Drag(
         point2str(*p1),
         point2str(*p2),
     )
-    method = device.config.script.device.control_method
+    # 用 device.control_method（会按模式解析），不要直接读配置，
+    # 否则桌面模式下会读到模拟器的方案
+    method = device.control_method
     start = time.perf_counter()
     device._invalidate_image_batch_cache()
 
@@ -60,6 +62,10 @@ def Press_and_Drag(
             hold_duration=hold_duration,
             point_random=point_random,
         )
+    elif method == 'window_win32':
+        # 桌面版：后台按住后拖动，不依赖 ADB
+        device.press_and_drag_window_win32(p1, p2, hold_duration=hold_duration,
+                                           swipe_duration=swipe_duration)
     else:
         logger.warning(
             f'Control method {method} cannot hold before moving; '

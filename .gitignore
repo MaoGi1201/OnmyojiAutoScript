@@ -275,3 +275,6 @@ console.bat
 .vscode/*
 tasks/AutoCheckinBigGod/frida-server-17.6.2-android-x86_64
 oas.bat
+
+# AI 助手工作目录（记忆、临时测试脚本、调试截图），不进版本库
+.workbuddy-ai/

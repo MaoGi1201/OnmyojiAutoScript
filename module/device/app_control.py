@@ -1,5 +1,6 @@
 from lxml import etree
 
+from module.device.env import is_desktop_mode
 from module.device.method.adb import Adb
 from module.device.method.uiautomator_2 import Uiautomator2
 from module.device.method.utils import HierarchyButton
@@ -17,6 +18,10 @@ class AppControl(Adb, Uiautomator2):
 
         这用于区分“应用被切到后台”和“应用已经被真正杀掉”两种情况。
         """
+        if is_desktop_mode(self.config):
+            # 桌面版没有 Android 包名概念，窗口存在即视为存活
+            return self.app_is_alive_win32()
+
         if not package_name:
             package_name = self.package
 
@@ -31,7 +36,10 @@ class AppControl(Adb, Uiautomator2):
         return bool(result)
 
     def app_is_running(self) -> bool:
-        method = self.config.script.device.control_method
+        if is_desktop_mode(self.config):
+            return self.app_is_running_win32()
+
+        method = self.control_method
         # if self.is_wsa:
         #     package = self.app_current_wsa()
         if method in AppControl._app_u2_family:
@@ -44,7 +52,11 @@ class AppControl(Adb, Uiautomator2):
         return package == self.package
 
     def app_start(self):
-        method = self.config.script.device.screenshot_method
+        if is_desktop_mode(self.config):
+            self.app_start_win32()
+            return
+
+        method = self.screenshot_method
         logger.info(f'App start: {self.package}')
         # if self.config.Emulator_Serial == 'wsa-0':
         #     self.app_start_wsa(display=0)
@@ -54,7 +66,11 @@ class AppControl(Adb, Uiautomator2):
             self.app_start_adb()
 
     def app_stop(self):
-        method = self.config.script.device.screenshot_method
+        if is_desktop_mode(self.config):
+            self.app_stop_win32()
+            return
+
+        method = self.screenshot_method
         logger.info(f'App stop: {self.package}')
         if method in AppControl._app_u2_family:
             self.app_stop_uiautomator2()
@@ -66,7 +82,13 @@ class AppControl(Adb, Uiautomator2):
         Returns:
             etree._Element: Select elements with `self.hierarchy.xpath('//*[@text="Hermit"]')` for example.
         """
-        method = self.config.script.device.screenshot_method
+        if is_desktop_mode(self.config):
+            # 桌面版窗口没有 Android 的控件树，只能基于图像识别
+            logger.warning('dump_hierarchy is not supported in desktop mode, return empty hierarchy')
+            self.hierarchy = etree.Element('hierarchy')
+            return self.hierarchy
+
+        method = self.screenshot_method
         if method in AppControl._app_u2_family:
             self.hierarchy = self.dump_hierarchy_uiautomator2()
         else:

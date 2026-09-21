@@ -15,26 +15,26 @@ from typing_extensions import Annotated
 
 
 def format_timedelta(tdelta: timedelta):
+    """把 timedelta 格式化为 'DD HH:MM:SS'。"""
     days = tdelta.days
     hours, rem = divmod(tdelta.seconds, 3600)
     minutes, seconds = divmod(rem, 60)
     return f"{days:02d} {hours:02d}:{minutes:02d}:{seconds:02d}"
 
-def datadelta_validator(v: Any) -> timedelta:
-    if isinstance(v, str):
-        try:
-            pattern = r'(\d{1,2})\s+(\d{1,2}):(\d{1,2}):(\d{1,2})'
-            match = re.match(pattern, v)
-            if match:
-                days = int(match.group(1))
-                hours = int(match.group(2))
-                minutes = int(match.group(3))
-                seconds = int(match.group(4))
-                return TimeDelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
-            return TimeDelta(days=1, hours=0, minutes=0, seconds=0)
-        except ValueError:
-            raise ValueError('Invalid interval value. Expected format: seconds')
-    return v
+def timedelta_validator(v: Any) -> timedelta:
+    """把 'DD HH:MM:SS' 解析成 timedelta（与 format_timedelta 对应）。
+
+    解析失败必须报错：原先对无法识别的字符串直接返回 1 天，
+    用户在 GUI 里输入乱码会被静默改成"1 天"，既没提示也很难排查。
+    """
+    if not isinstance(v, str):
+        return v
+    match = re.fullmatch(r'\s*(-?)(\d{1,2})\s+(\d{1,2}):(\d{1,2}):(\d{1,2})\s*', v)
+    if match is None:
+        raise ValueError(f'Invalid time delta: {v!r}, expected "DD HH:MM:SS" (例如 "00 02:00:00")')
+    sign, days, hours, minutes, seconds = match.groups()
+    delta = TimeDelta(days=int(days), hours=int(hours), minutes=int(minutes), seconds=int(seconds))
+    return -delta if sign else delta
 
 
 def datetime_validator(v: Any) -> datetime:
@@ -54,7 +54,7 @@ MultiLine = Annotated[str,
 
 
 TimeDelta = Annotated[timedelta,
-                      BeforeValidator(datadelta_validator),
+                      BeforeValidator(timedelta_validator),
                       PlainSerializer(format_timedelta, return_type=str),
                       WithJsonSchema({'type': 'time_delta'}),]
 
@@ -86,11 +86,7 @@ class ConfigBase(BaseModel):
         try:
             super().__init__(*args, **kwargs)
         except ValidationError as exc:
-            """
-            During the initialization of the ConfigBase class, 
-            if a ValidationError occurs, the default value of the field is used to initialize the field, 
-            and the exception is re-raised after the initialization is complete.
-            """
+            # 初始化失败时用字段默认值兜底，等初始化完成后再重新抛出异常
             exc_info = exc.errors()[0]
             val_error_type = exc_info.get('type', None)
             val_error_key = exc_info.get('loc', None)[0]

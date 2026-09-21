@@ -6,6 +6,7 @@ from module.exception import RequestHumanTakeover, GameNotRunningError
 from typing import Any, Callable, Protocol
 
 from module.device.device import Device
+from module.device.env import is_desktop_mode
 from module.device.platform2 import Platform
 from module.logger import logger
 
@@ -278,6 +279,12 @@ class ScriptRuntimeController:
         """
         确保模拟器已启动，但游戏处于关闭状态。
         """
+        if is_desktop_mode(self.config):
+            # 桌面版通常没配 exe_path，关掉游戏即不可恢复。调用方已提前降级，
+            # 这里是最后一道防线。
+            logger.warning('Close game is not supported in desktop mode, keep game running')
+            return ScriptRuntimeDecision.READY
+
         self._ensure_emulator_running('Wake emulator before ensuring close_game state')
         if self.device.app_is_running():
             logger.info('Ensure game is closed during wait')
@@ -292,9 +299,12 @@ class ScriptRuntimeController:
         将空闲状态调整为“模拟器开启、游戏运行且位于主界面”。
         停服窗口内改为关闭游戏，避免停留在停服弹窗。
         """
-        if self._is_server_update_wait_active():
+        if self._is_server_update_wait_active() and not is_desktop_mode(self.config):
             logger.info('Server update active, close game instead of going to main')
             return self._ensure_game_closed()
+        if self._is_server_update_wait_active():
+            # 桌面版不能关游戏，改为回主界面，让 GotoMain 自己处理停服弹窗
+            logger.info('Server update active, desktop mode keeps game running and goes to main')
         return self._ensure_game_running(require_main=True, allow_server_update_skip=True)
 
     def _prepare_idle_close_game(self) -> ScriptRuntimeDecision:
@@ -557,6 +567,16 @@ class ScriptRuntimeController:
             ScriptRuntimeDecision: 当前等待分支的处理结果。
         """
         method = self.config.script.optimization.when_task_queue_empty
+
+        # 桌面版既没有模拟器可关，通常也没配 exe_path 重启游戏，
+        # 所以除 goto_main 外的空闲策略都无意义，统一降级为保持游戏运行。
+        if is_desktop_mode(self.config) and method != 'goto_main':
+            logger.warning(
+                f'Optimization_WhenTaskQueueEmpty={method} is not supported in desktop mode '
+                f'(no emulator to close, no exe_path to restart the game), fallback to goto_main'
+            )
+            method = 'goto_main'
+
         strategy_map = {
             'close_game': self._wait_close_game,
             'goto_main': self._wait_goto_main,
