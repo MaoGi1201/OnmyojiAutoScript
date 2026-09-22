@@ -583,6 +583,14 @@ button:disabled {
   display: none !important;
 }
 
+/* 字段下方的补充说明（如桌面版的配置前提） */
+.field-hint {
+  margin: 4px 0 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .small-output {
   margin: 8px 0 0;
   padding: 8px;

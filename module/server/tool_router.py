@@ -24,6 +24,9 @@ class EmulatorStartBody(BaseModel):
     session_id: str
     config_name: str
     frame_rate: int = 2
+    # "emulator"（默认）或 "desktop"。两种来源走同一条采集链路，
+    # 具体用哪个截图后端由配置里的 emulator_control 决定
+    source: str = "emulator"
 
 
 class SessionBody(BaseModel):
@@ -282,37 +285,44 @@ async def annotator_rule_image_delete(data: RuleImageDeleteBody):
         _raise_annotator_error(e)
 
 
+# 路径里的 "preview" 是「画面预览/采集」的通用入口，
+# 兼容旧路径 "/api/emulator/*"（见下方 *_legacy 别名）
+@tool_app.post('/annotator/api/preview/start')
 @tool_app.post('/annotator/api/emulator/start')
-async def annotator_start_emulator(data: EmulatorStartBody):
+async def annotator_start_capture(data: EmulatorStartBody):
     try:
-        status = annotator_manager.start_emulator(data.session_id, data.config_name, data.frame_rate)
-        return {"code": "ok", "emulator": status}
+        status = annotator_manager.start_capture(data.session_id, data.config_name,
+                                                 data.frame_rate, source=data.source)
+        return {"code": "ok", "capture": status, "emulator": status}
     except AnnotatorError as e:
         _raise_annotator_error(e)
 
 
+@tool_app.post('/annotator/api/preview/stop')
 @tool_app.post('/annotator/api/emulator/stop')
-async def annotator_stop_emulator(data: SessionBody):
+async def annotator_stop_capture(data: SessionBody):
     try:
-        status = annotator_manager.stop_emulator(data.session_id)
-        return {"code": "ok", "emulator": status}
+        status = annotator_manager.stop_capture(data.session_id)
+        return {"code": "ok", "capture": status, "emulator": status}
     except AnnotatorError as e:
         _raise_annotator_error(e)
 
 
+@tool_app.get('/annotator/api/preview/status')
 @tool_app.get('/annotator/api/emulator/status')
-async def annotator_emulator_status(session_id: str):
+async def annotator_capture_status(session_id: str):
     try:
-        status = annotator_manager.emulator_status(session_id)
-        return {"code": "ok", "emulator": status}
+        status = annotator_manager.capture_status(session_id)
+        return {"code": "ok", "capture": status, "emulator": status}
     except AnnotatorError as e:
         _raise_annotator_error(e)
 
 
+@tool_app.post('/annotator/api/preview/capture')
 @tool_app.post('/annotator/api/emulator/capture')
 async def annotator_capture_frame(data: SessionBody):
     try:
-        image = annotator_manager.capture_from_emulator(data.session_id)
+        image = annotator_manager.capture_frame(data.session_id)
         return {"code": "ok", "image": image}
     except AnnotatorError as e:
         _raise_annotator_error(e)
@@ -375,12 +385,12 @@ async def annotator_frame_ws(websocket: WebSocket, session_id: str):
     try:
         annotator_manager.get_session_snapshot(session_id)
         while True:
-            frame = annotator_manager.latest_emulator_frame(session_id)
+            frame = annotator_manager.latest_capture_frame(session_id)
             if frame:
                 await websocket.send_bytes(frame)
                 continue
 
-            status = annotator_manager.emulator_status(session_id)
+            status = annotator_manager.capture_status(session_id)
             if status.get("state") == "error":
                 log_ws_event(f"annotator_ws[{session_id}] event: emulator_error")
                 await websocket.send_json(

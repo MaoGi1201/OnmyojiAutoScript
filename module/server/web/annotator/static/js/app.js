@@ -56,7 +56,13 @@
     ws: null,
     wsImageUrl: "",
     wsCloseExpected: false,
-    emulatorStatus: { state: "stopped" },
+    // 实时预览的来源（"emulator" / "desktop"）。两种来源各自独立记录状态，
+    // 避免切换模式时互相覆盖对方的连接状态
+    previewSources: {
+      emulator: { status: { state: "stopped" }, socket: null, imageUrl: "" },
+      desktop: { status: { state: "stopped" }, socket: null, imageUrl: "" },
+    },
+    captureImageMap: new Map(),
     statusTimer: null,
     sessionRecovering: false,
     sessionClosing: false,
@@ -69,6 +75,7 @@
     sourceMode: document.getElementById("sourceMode"),
     localControls: document.getElementById("localControls"),
     emulatorControls: document.getElementById("emulatorControls"),
+    desktopControls: document.getElementById("desktopControls"),
 
     imageUpload: document.getElementById("imageUpload"),
     uploadBtn: document.getElementById("uploadBtn"),
@@ -85,6 +92,14 @@
     captureBtn: document.getElementById("captureBtn"),
     emulatorPreview: document.getElementById("emulatorPreview"),
     emulatorStatus: document.getElementById("emulatorStatus"),
+
+    desktopConfigName: document.getElementById("desktopConfigName"),
+    desktopFrameRate: document.getElementById("desktopFrameRate"),
+    startDesktopBtn: document.getElementById("startDesktopBtn"),
+    stopDesktopBtn: document.getElementById("stopDesktopBtn"),
+    desktopCaptureBtn: document.getElementById("desktopCaptureBtn"),
+    desktopPreview: document.getElementById("desktopPreview"),
+    desktopStatus: document.getElementById("desktopStatus"),
 
     stageWrap: document.getElementById("stageWrap"),
     imageStage: document.getElementById("imageStage"),
@@ -463,7 +478,7 @@
 
     state.sessionRecovering = true;
     try {
-      closeFrameSocket();
+      closeAllFrameSockets();
       state.images = [];
       state.currentImageId = "";
       state.selectedImageIds.clear();
@@ -473,13 +488,14 @@
       clearTestOverlay();
       setMainImage("");
       updateTestButtonVisibility();
-      updateEmulatorStatusView({ state: "stopped", message: "session_invalid" });
+      updatePreviewStatusView("emulator", { state: "stopped", message: "session_invalid" });
+      updatePreviewStatusView("desktop", { state: "stopped", message: "session_invalid" });
       showMessage("会话已失效，正在重建会话...", "error");
 
       await createSession();
       await refreshImages();
-      if (state.sourceMode === "emulator") {
-        await refreshEmulatorStatus();
+      if (PREVIEW_SOURCES[state.sourceMode]) {
+        await refreshPreviewStatus(state.sourceMode);
       }
 
       showMessage("会话已重新创建，请重试刚才的操作", "ok");
@@ -2488,19 +2504,61 @@
     appendOutput("测试结果", result);
   }
 
-  function updateEmulatorStatusView(data) {
+  // 预览来源配置。模拟器与桌面版走**同一套**采集接口，只是来源参数与
+  // DOM 控件不同，所以这里用一张表把两者统一起来，避免写两遍相同逻辑。
+  const PREVIEW_SOURCES = {
+    emulator: {
+      label: "模拟器",
+      errorLabel: "模拟器预览",
+      configSelect: () => el.configName,
+      frameRateInput: () => el.frameRate,
+      preview: () => el.emulatorPreview,
+      statusBox: () => el.emulatorStatus,
+      startedMessage: "模拟器会话已启动",
+      stoppedMessage: "模拟器会话已停止",
+      capturedMessage: "已将模拟器当前帧加入图片列表",
+    },
+    desktop: {
+      label: "桌面版",
+      errorLabel: "桌面版预览",
+      configSelect: () => el.desktopConfigName,
+      frameRateInput: () => el.desktopFrameRate,
+      preview: () => el.desktopPreview,
+      statusBox: () => el.desktopStatus,
+      startedMessage: "桌面版会话已启动",
+      stoppedMessage: "桌面版会话已停止",
+      capturedMessage: "已将桌面版当前帧加入图片列表",
+    },
+  };
+
+  function previewSourceConfig(source) {
+    return PREVIEW_SOURCES[source] || PREVIEW_SOURCES.emulator;
+  }
+
+  function previewBucket(source) {
+    const key = PREVIEW_SOURCES[source] ? source : "emulator";
+    if (!state.previewSources[key]) {
+      state.previewSources[key] = { status: { state: "stopped" }, socket: null, imageUrl: "" };
+    }
+    return state.previewSources[key];
+  }
+
+  function updatePreviewStatusView(source, data) {
+    const bucket = previewBucket(source);
     const status = data && typeof data === "object" ? { ...data } : {};
     if (!status.state) {
       status.state = "stopped";
     }
-    state.emulatorStatus = status;
-    el.emulatorStatus.textContent = JSON.stringify(status, null, 2);
+    bucket.status = status;
+    previewSourceConfig(source).statusBox().textContent = JSON.stringify(status, null, 2);
   }
 
-  function setEmulatorErrorStatus(message, extra = {}) {
-    const text = String(message || extra.error || "模拟器预览出错").trim() || "模拟器预览出错";
-    const base = state.emulatorStatus && typeof state.emulatorStatus === "object" ? state.emulatorStatus : {};
-    updateEmulatorStatusView({
+  function setPreviewErrorStatus(source, message, extra = {}) {
+    const config = previewSourceConfig(source);
+    const bucket = previewBucket(source);
+    const text = String(message || extra.error || `${config.errorLabel}出错`).trim() || `${config.errorLabel}出错`;
+    const base = bucket.status && typeof bucket.status === "object" ? bucket.status : {};
+    updatePreviewStatusView(source, {
       ...base,
       ...extra,
       state: extra.state || "error",
@@ -2509,11 +2567,11 @@
     return text;
   }
 
-  async function syncEmulatorStatusAfterSocketIssue(message) {
-    const text = setEmulatorErrorStatus(message);
+  async function syncPreviewStatusAfterSocketIssue(source, message) {
+    const text = setPreviewErrorStatus(source, message);
     showMessage(text, "error");
     try {
-      await refreshEmulatorStatus();
+      await refreshPreviewStatus(source);
     } catch (error) {
       if (isInvalidSessionError(error)) {
         const recovered = await recoverSessionAfterInvalid();
@@ -2521,34 +2579,43 @@
           return;
         }
       }
-      const finalMessage = setEmulatorErrorStatus(error.message || String(error));
+      const finalMessage = setPreviewErrorStatus(source, error.message || String(error));
       showMessage(finalMessage, "error");
     }
   }
 
-  function closeFrameSocket(markExpected = true) {
-    if (state.ws) {
-      state.wsCloseExpected = Boolean(markExpected);
-      state.ws.close();
-      state.ws = null;
+  function closeFrameSocket(source = "emulator", markExpected = true) {
+    const bucket = previewBucket(source);
+    if (bucket.socket) {
+      bucket.socketExpectedClose = Boolean(markExpected);
+      bucket.socket.close();
+      bucket.socket = null;
     } else {
-      state.wsCloseExpected = false;
+      bucket.socketExpectedClose = false;
     }
-    if (state.wsImageUrl) {
-      URL.revokeObjectURL(state.wsImageUrl);
-      state.wsImageUrl = "";
+    if (bucket.imageUrl) {
+      URL.revokeObjectURL(bucket.imageUrl);
+      bucket.imageUrl = "";
     }
   }
 
-  function openFrameSocket() {
+  /** 关闭所有来源的预览连接（切换会话/模式时用）。 */
+  function closeAllFrameSockets(markExpected = true) {
+    Object.keys(PREVIEW_SOURCES).forEach((source) => closeFrameSocket(source, markExpected));
+  }
+
+  function openFrameSocket(source = "emulator") {
     if (!state.sessionId) {
       return;
     }
-    if (state.ws && (state.ws.readyState === WebSocket.OPEN || state.ws.readyState === WebSocket.CONNECTING)) {
+    const bucket = previewBucket(source);
+    const config = previewSourceConfig(source);
+    if (bucket.socket && (bucket.socket.readyState === WebSocket.OPEN
+        || bucket.socket.readyState === WebSocket.CONNECTING)) {
       return;
     }
 
-    state.wsCloseExpected = false;
+    bucket.socketExpectedClose = false;
     const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
     const wsUrl = `${wsProtocol}://${window.location.host}${API_PREFIX}/ws/${encodeURIComponent(state.sessionId)}`;
     const socket = new WebSocket(wsUrl);
@@ -2559,8 +2626,8 @@
         try {
           const data = JSON.parse(event.data);
           if (data.event === "error") {
-            closeFrameSocket();
-            syncEmulatorStatusAfterSocketIssue(data.message || "模拟器预览出错").catch((error) => {
+            closeFrameSocket(source);
+            syncPreviewStatusAfterSocketIssue(source, data.message || `${config.errorLabel}出错`).catch((error) => {
               console.error(error);
             });
           }
@@ -2571,125 +2638,137 @@
       }
 
       const url = URL.createObjectURL(event.data);
-      if (state.wsImageUrl) {
-        URL.revokeObjectURL(state.wsImageUrl);
+      if (bucket.imageUrl) {
+        URL.revokeObjectURL(bucket.imageUrl);
       }
-      state.wsImageUrl = url;
-      el.emulatorPreview.src = url;
+      bucket.imageUrl = url;
+      config.preview().src = url;
     };
 
     socket.onerror = () => {
-      closeFrameSocket();
-      syncEmulatorStatusAfterSocketIssue("模拟器预览连接异常").catch((error) => {
+      closeFrameSocket(source);
+      syncPreviewStatusAfterSocketIssue(source, `${config.errorLabel}连接异常`).catch((error) => {
         console.error(error);
       });
     };
 
     socket.onclose = () => {
-      const expectedClose = state.wsCloseExpected;
-      if (state.ws === socket) {
-        state.ws = null;
+      const expectedClose = bucket.socketExpectedClose;
+      if (bucket.socket === socket) {
+        bucket.socket = null;
       }
-      state.wsCloseExpected = false;
-      if (expectedClose || state.sourceMode !== "emulator" || state.sessionClosing) {
+      bucket.socketExpectedClose = false;
+      if (expectedClose || state.sourceMode !== source || state.sessionClosing) {
         return;
       }
-      syncEmulatorStatusAfterSocketIssue("模拟器预览连接已断开").catch((error) => {
+      syncPreviewStatusAfterSocketIssue(source, `${config.errorLabel}连接已断开`).catch((error) => {
         console.error(error);
       });
     };
 
-    state.ws = socket;
+    bucket.socket = socket;
   }
-  async function refreshEmulatorStatus() {
+
+  async function refreshPreviewStatus(source = "emulator") {
     if (!state.sessionId) {
       return;
     }
-    const res = await api(`${API_PREFIX}/api/emulator/status?session_id=${encodeURIComponent(state.sessionId)}`);
-    const status = res.emulator || {};
-    updateEmulatorStatusView(status);
+    const res = await api(`${API_PREFIX}/api/preview/status?session_id=${encodeURIComponent(state.sessionId)}`);
+    const status = res.capture || res.emulator || {};
+    updatePreviewStatusView(source, status);
 
-    if (state.sourceMode === "emulator" && status.state === "running") {
-      openFrameSocket();
+    if (state.sourceMode === source && status.state === "running") {
+      openFrameSocket(source);
     }
 
     if (status.state !== "running" && status.state !== "starting") {
-      closeFrameSocket();
+      closeFrameSocket(source);
     }
   }
 
-  async function startEmulator() {
+  async function startPreviewCapture(source = "emulator") {
     if (!state.sessionId) {
       throw new Error("会话未初始化");
     }
-    const configName = el.configName.value;
+    const config = previewSourceConfig(source);
+    const configName = config.configSelect().value;
     if (!configName) {
       throw new Error("请先选择脚本配置");
     }
 
-    const frameRate = Number.parseInt(el.frameRate.value, 10);
+    const frameRate = Number.parseInt(config.frameRateInput().value, 10);
     const body = {
       session_id: state.sessionId,
       config_name: configName,
       frame_rate: Number.isFinite(frameRate) ? frameRate : 2,
+      source,
     };
 
-    const res = await api(`${API_PREFIX}/api/emulator/start`, {
+    const res = await api(`${API_PREFIX}/api/preview/start`, {
       method: "POST",
       body: JSON.stringify(body),
     });
 
-    updateEmulatorStatusView(res.emulator || {});
-    await refreshEmulatorStatus();
-    showMessage("模拟器会话已启动", "ok");
+    updatePreviewStatusView(source, res.capture || res.emulator || {});
+    await refreshPreviewStatus(source);
+    showMessage(config.startedMessage, "ok");
   }
 
-  async function stopEmulator() {
+  async function stopPreviewCapture(source = "emulator") {
     if (!state.sessionId) {
       return;
     }
-    const res = await api(`${API_PREFIX}/api/emulator/stop`, {
+    const config = previewSourceConfig(source);
+    const res = await api(`${API_PREFIX}/api/preview/stop`, {
       method: "POST",
       body: JSON.stringify({ session_id: state.sessionId }),
     });
-    closeFrameSocket();
-    updateEmulatorStatusView(res.emulator || {});
-    showMessage("模拟器会话已停止", "ok");
+    closeFrameSocket(source);
+    updatePreviewStatusView(source, res.capture || res.emulator || {});
+    showMessage(config.stoppedMessage, "ok");
   }
 
-  async function captureEmulatorFrame() {
+  async function capturePreviewFrame(source = "emulator") {
     if (!state.sessionId) {
       throw new Error("会话未初始化");
     }
-    const result = await api(`${API_PREFIX}/api/emulator/capture`, {
+    const config = previewSourceConfig(source);
+    const result = await api(`${API_PREFIX}/api/preview/capture`, {
       method: "POST",
       body: JSON.stringify({ session_id: state.sessionId }),
     });
     appendImages(result && result.image ? [result.image] : []);
-    showMessage("已将当前帧加入图片列表", "ok");
+    showMessage(config.capturedMessage, "ok");
   }
 
   function setSourceMode(mode) {
+    const previous = state.sourceMode;
     state.sourceMode = mode;
     el.sourceMode.value = mode;
 
     const isLocal = mode === "local";
     el.localControls.classList.toggle("hidden", !isLocal);
-    el.emulatorControls.classList.toggle("hidden", isLocal);
+    el.emulatorControls.classList.toggle("hidden", mode !== "emulator");
+    el.desktopControls.classList.toggle("hidden", mode !== "desktop");
+
+    // 离开某个预览来源时断开它的连接，避免后台空转采集
+    if (previous !== mode && PREVIEW_SOURCES[previous]) {
+      closeFrameSocket(previous);
+    }
 
     if (isLocal) {
-      closeFrameSocket();
-    } else {
-      refreshEmulatorStatus().catch(async (error) => {
-        if (isInvalidSessionError(error)) {
-          const recovered = await recoverSessionAfterInvalid();
-          if (recovered) {
-            return;
-          }
-        }
-        showMessage(error.message || String(error), "error");
-      });
+      return;
     }
+
+    refreshPreviewStatus(mode).catch(async (error) => {
+      if (isInvalidSessionError(error)) {
+        const recovered = await recoverSessionAfterInvalid();
+        if (recovered) {
+          return;
+        }
+      }
+      showMessage(error.message || String(error), "error");
+    });
   }
 
   async function createSession() {
@@ -2697,12 +2776,14 @@
     const session = res.session || {};
     state.sessionId = session.session_id || "";
     state.sessionClosing = false;
-    el.sessionId.textContent = state.sessionId || "-";
+    el.sessionId.textContent = session.session_id || "-";
   }
 
   async function loadConfigs() {
     const res = await api(`${API_PREFIX}/api/configs`);
-    fillSelect(el.configName, res.configs || [], "请选择脚本配置");
+    const configs = res.configs || [];
+    fillSelect(el.configName, configs, "请选择脚本配置");
+    fillSelect(el.desktopConfigName, configs, "请选择脚本配置");
   }
 
   function bindEvents() {
@@ -2714,9 +2795,13 @@
     el.clearImagesBtn.addEventListener("click", withError(clearImages));
     updateRemoveImagesButtonState();
 
-    el.startEmulatorBtn.addEventListener("click", withError(startEmulator));
-    el.stopEmulatorBtn.addEventListener("click", withError(stopEmulator));
-    el.captureBtn.addEventListener("click", withError(captureEmulatorFrame));
+    el.startEmulatorBtn.addEventListener("click", withError(() => startPreviewCapture("emulator")));
+    el.stopEmulatorBtn.addEventListener("click", withError(() => stopPreviewCapture("emulator")));
+    el.captureBtn.addEventListener("click", withError(() => capturePreviewFrame("emulator")));
+
+    el.startDesktopBtn.addEventListener("click", withError(() => startPreviewCapture("desktop")));
+    el.stopDesktopBtn.addEventListener("click", withError(() => stopPreviewCapture("desktop")));
+    el.desktopCaptureBtn.addEventListener("click", withError(() => capturePreviewFrame("desktop")));
 
     el.mainImage.addEventListener("load", adjustStageByImage);
 
@@ -2803,7 +2888,7 @@
       clearInterval(state.statusTimer);
       state.statusTimer = null;
     }
-    closeFrameSocket();
+    closeAllFrameSockets();
     closeSession(reason, true).catch(() => {
       // 页面关闭阶段忽略网络错误
     });
@@ -2833,7 +2918,11 @@
     clearSaveStatus();
 
     state.statusTimer = window.setInterval(() => {
-      refreshEmulatorStatus().catch((error) => {
+      // 只轮询当前来源，避免两种来源在后台都启动采集进程
+      if (!PREVIEW_SOURCES[state.sourceMode]) {
+        return;
+      }
+      refreshPreviewStatus(state.sourceMode).catch((error) => {
         console.error(error);
         if (isInvalidSessionError(error)) {
           recoverSessionAfterInvalid().catch((recoverError) => {

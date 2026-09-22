@@ -12,14 +12,31 @@ from module.logger import logger
 EMULATOR_CAPTURE_MAX_RETRIES = 3
 EMULATOR_CAPTURE_RETRY_BACKOFF_SECONDS = 1.0
 
+# 来源 → 界面文案，用于日志与报错提示（两种来源走同一条采集链路）
+SOURCE_LABEL = {
+    "emulator": "模拟器画面",
+    "desktop": "桌面版画面",
+}
 
-def _build_device(session_id: str, config_name: str, config: Config, interval: float) -> Device:
+
+def _source_label(source: str) -> str:
+    return SOURCE_LABEL.get(source, SOURCE_LABEL["emulator"])
+
+
+def _build_device(session_id: str, config_name: str, config: Config, interval: float,
+                  source: str = "emulator") -> Device:
+    """构建采集用的 Device。
+
+    **不区分来源**：`Device.screenshot()` 会按配置里的 `emulator_control` 自动
+    分发到 ADB 后端或桌面版窗口后端，所以模拟器与桌面版共用这一条路径。
+    桌面版还依赖 `DesktopWindow` 的账号绑定来定位正确的窗口（多开时必需）。
+    """
     device = Device(config=config)
     device.disable_stuck_detection()
     device.screenshot_interval_set(interval)
     logger.info(
-        f"[annotator] emulator device ready, session={session_id}, "
-        f"config={config_name}, interval={interval:.3f}"
+        f"[annotator] capture device ready, session={session_id}, "
+        f"source={source}, config={config_name}, interval={interval:.3f}"
     )
     return device
 
@@ -127,11 +144,14 @@ def run_annotator_capture_worker(
     session_id: str,
     config_name: str,
     frame_rate: int,
+    source: str,
     state_queue,
     frame_queue,
     command_queue,
     response_queue,
 ) -> None:
+    source = source if source in SOURCE_LABEL else "emulator"
+    label = _source_label(source)
     device: Device | None = None
     latest_frame = None
     retry_count = 0
@@ -145,6 +165,7 @@ def run_annotator_capture_worker(
         state_queue,
         {
             "state": "starting",
+            "source": source,
             "error": "",
             "retry_count": 0,
             "max_retries": max_retries,
@@ -160,11 +181,12 @@ def run_annotator_capture_worker(
 
             if device is None:
                 try:
-                    device = _build_device(session_id, config_name, config, interval)
+                    device = _build_device(session_id, config_name, config, interval, source)
                     _put_state(
                         state_queue,
                         {
                             "state": "running",
+                            "source": source,
                             "error": "",
                             "retry_count": retry_count,
                             "max_retries": max_retries,
@@ -181,6 +203,7 @@ def run_annotator_capture_worker(
                         state_queue,
                         {
                             "state": "starting" if should_retry else "error",
+                            "source": source,
                             "error": message,
                             "retry_count": retry_count,
                             "max_retries": max_retries,
@@ -189,8 +212,9 @@ def run_annotator_capture_worker(
                     )
                     if should_retry:
                         logger.warning(
-                            f"[annotator] emulator capture retry, session={session_id}, config={config_name}, "
-                            f"stage=connect, attempt={retry_count}/{max_retries}, error={message}"
+                            f"[annotator] capture retry, session={session_id}, source={source}, "
+                            f"config={config_name}, stage=connect, "
+                            f"attempt={retry_count}/{max_retries}, error={message}"
                         )
                         if _sleep_with_commands(
                             EMULATOR_CAPTURE_RETRY_BACKOFF_SECONDS * retry_count,
@@ -202,8 +226,9 @@ def run_annotator_capture_worker(
                         continue
 
                     logger.error(
-                        f"[annotator] emulator capture failed, session={session_id}, config={config_name}, "
-                        f"stage=connect, attempt={retry_count}/{max_retries}, error={message}"
+                        f"[annotator] capture failed, session={session_id}, source={source}, "
+                        f"config={config_name}, stage=connect, "
+                        f"attempt={retry_count}/{max_retries}, error={message}"
                     )
                     final_state = "error"
                     break
@@ -222,6 +247,7 @@ def run_annotator_capture_worker(
                     state_queue,
                     {
                         "state": "starting" if should_retry else "error",
+                        "source": source,
                         "error": message,
                         "retry_count": retry_count,
                         "max_retries": max_retries,
@@ -230,8 +256,9 @@ def run_annotator_capture_worker(
                 )
                 if should_retry:
                     logger.warning(
-                        f"[annotator] emulator capture retry, session={session_id}, config={config_name}, "
-                        f"stage=capture, attempt={retry_count}/{max_retries}, error={message}"
+                        f"[annotator] capture retry, session={session_id}, source={source}, "
+                        f"config={config_name}, stage=capture, "
+                        f"attempt={retry_count}/{max_retries}, error={message}"
                     )
                     if _sleep_with_commands(
                         EMULATOR_CAPTURE_RETRY_BACKOFF_SECONDS * retry_count,
@@ -243,8 +270,9 @@ def run_annotator_capture_worker(
                     continue
 
                 logger.error(
-                    f"[annotator] emulator capture failed, session={session_id}, config={config_name}, "
-                    f"stage=capture, attempt={retry_count}/{max_retries}, error={message}"
+                    f"[annotator] capture failed, session={session_id}, source={source}, "
+                    f"config={config_name}, stage=capture, "
+                    f"attempt={retry_count}/{max_retries}, error={message}"
                 )
                 final_state = "error"
                 break
@@ -259,6 +287,7 @@ def run_annotator_capture_worker(
                     state_queue,
                     {
                         "state": "running",
+                        "source": source,
                         "error": "",
                         "retry_count": 0,
                         "max_retries": max_retries,
@@ -271,10 +300,11 @@ def run_annotator_capture_worker(
     except Exception:
         final_state = "error"
         if not final_error:
-            final_error = "模拟器采集进程异常退出"
+            final_error = f"{label}采集进程异常退出"
             final_error_at = time.time()
         logger.exception(
-            f"[annotator] emulator capture loop crashed, session={session_id}, config={config_name}"
+            f"[annotator] capture loop crashed, session={session_id}, "
+            f"source={source}, config={config_name}"
         )
     finally:
         _release_device(device)
@@ -284,7 +314,8 @@ def run_annotator_capture_worker(
                 state_queue,
                 {
                     "state": "error",
-                    "error": final_error or "模拟器采集进程异常退出",
+                    "source": source,
+                    "error": final_error or f"{label}采集进程异常退出",
                     "retry_count": retry_count,
                     "max_retries": max_retries,
                     "last_error_at": final_error_at or time.time(),
@@ -295,6 +326,7 @@ def run_annotator_capture_worker(
                 state_queue,
                 {
                     "state": "stopped",
+                    "source": source,
                     "error": "",
                     "retry_count": 0,
                     "max_retries": max_retries,

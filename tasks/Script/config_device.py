@@ -109,7 +109,7 @@ class Desktop(BaseModel):
     window_pid: int = Field(default=0, description='desktop_window_pid_help')
     exe_path: str = Field(default='', description='desktop_exe_path_help')
     restore_window: bool = Field(default=True, description='desktop_restore_window_help')
-    resize_window: bool = Field(default=False, description='desktop_resize_window_help')
+    resize_window: bool = Field(default=True, description='desktop_resize_window_help')
     window_width: int = Field(default=1280, ge=320, le=7680, description='desktop_window_width_help')
     window_height: int = Field(default=720, ge=240, le=4320, description='desktop_window_height_help')
 

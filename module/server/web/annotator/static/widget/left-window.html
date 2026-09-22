@@ -12,6 +12,7 @@
             <select id="sourceMode">
               <option value="local" selected>本地图片</option>
               <option value="emulator">模拟器画面</option>
+              <option value="desktop">桌面版画面</option>
             </select>
           </label>
 
@@ -38,6 +39,27 @@
             </div>
             <button id="captureBtn" type="button">截取当前帧到图片列表</button>
             <pre id="emulatorStatus" class="small-output"></pre>
+          </div>
+
+          <div id="desktopControls" class="block hidden">
+            <label>脚本配置
+              <select id="desktopConfigName"></select>
+            </label>
+            <p class="field-hint">
+              需在所选配置里把「模拟器/桌面版」设为桌面版，并绑定要截图的账号。
+            </p>
+            <label>帧率（1-10）
+              <input id="desktopFrameRate" type="number" min="1" max="10" value="2">
+            </label>
+            <div class="row">
+              <button id="startDesktopBtn" type="button">连接桌面版</button>
+              <button id="stopDesktopBtn" type="button">停止连接</button>
+            </div>
+            <div class="preview-card">
+              <img id="desktopPreview" alt="桌面版预览" />
+            </div>
+            <button id="desktopCaptureBtn" type="button">截取当前帧到图片列表</button>
+            <pre id="desktopStatus" class="small-output"></pre>
           </div>
         </div>
       </section>

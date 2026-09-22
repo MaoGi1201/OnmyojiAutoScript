@@ -48,11 +48,24 @@ ALLOWED_SWIPE_MODE = set(field_options("swipe", "mode"))
 
 SESSION_IDLE_TIMEOUT_SECONDS = 10 * 60
 SESSION_SWEEP_INTERVAL_SECONDS = 30
-EMULATOR_CAPTURE_MAX_RETRIES = 3
-EMULATOR_CAPTURE_PROCESS_JOIN_TIMEOUT_SECONDS = 2.5
-EMULATOR_CAPTURE_COMMAND_TIMEOUT_SECONDS = 5.0
+CAPTURE_MAX_RETRIES = 3
+CAPTURE_PROCESS_JOIN_TIMEOUT_SECONDS = 2.5
+CAPTURE_COMMAND_TIMEOUT_SECONDS = 5.0
 
-_EMULATOR_CAPTURE_CONTEXT = multiprocessing.get_context("spawn")
+_CAPTURE_CONTEXT = multiprocessing.get_context("spawn")
+
+# 采集来源。两种来源走**同一条采集链路**（`Device.screenshot()`），
+# 区别只在 `script.device.emulator_control`：Device 会据此把截图分发到
+# ADB 后端或桌面版窗口后端。所以这里只需要标注来源用于展示与日志。
+CAPTURE_SOURCE_EMULATOR = "emulator"
+CAPTURE_SOURCE_DESKTOP = "desktop"
+CAPTURE_SOURCES = (CAPTURE_SOURCE_EMULATOR, CAPTURE_SOURCE_DESKTOP)
+
+# 来源 → 界面文案，报错时用来提示用户该去检查什么
+SOURCE_LABEL = {
+    CAPTURE_SOURCE_EMULATOR: "模拟器画面",
+    CAPTURE_SOURCE_DESKTOP: "桌面版画面",
+}
 
 
 class AnnotatorError(Exception):
@@ -83,9 +96,18 @@ class SessionImage:
         }
 
 
-class EmulatorCaptureSession:
-    def __init__(self, session_id: str) -> None:
+class FrameCaptureSession:
+    """持续采集设备画面的一帧，供标注工具预览与截取。
+
+    **同时支持模拟器与桌面版**：采集子进程只调 `Device.screenshot()`，
+    而 `Device` 会按配置里的 `emulator_control` 自动分发到 ADB 后端或
+    桌面版窗口后端（`module/device/screenshot.py`）。所以这里不需要为
+    两种来源写两套逻辑，只用 `source` 记录来源以便提示与日志。
+    """
+
+    def __init__(self, session_id: str, source: str = CAPTURE_SOURCE_EMULATOR) -> None:
         self.session_id = session_id
+        self.source = source if source in CAPTURE_SOURCES else CAPTURE_SOURCE_EMULATOR
         self.state = "stopped"
         self.config_name = ""
         self.frame_rate = 2
@@ -99,8 +121,13 @@ class EmulatorCaptureSession:
         self._latest_jpeg: bytes | None = None
         self._updated_at = 0.0
         self._retry_count = 0
-        self._max_retries = EMULATOR_CAPTURE_MAX_RETRIES
+        self._max_retries = CAPTURE_MAX_RETRIES
         self._last_error_at = 0.0
+
+    @property
+    def label(self) -> str:
+        """界面文案，如"桌面版画面"。"""
+        return SOURCE_LABEL.get(self.source, SOURCE_LABEL[CAPTURE_SOURCE_EMULATOR])
 
     def _drain_status_queue(self) -> None:
         if self._state_queue is None:
@@ -165,10 +192,10 @@ class EmulatorCaptureSession:
         self._sync_process_state()
 
     def _create_ipc(self) -> None:
-        self._state_queue = _EMULATOR_CAPTURE_CONTEXT.Queue()
-        self._frame_queue = _EMULATOR_CAPTURE_CONTEXT.Queue(maxsize=1)
-        self._command_queue = _EMULATOR_CAPTURE_CONTEXT.Queue()
-        self._response_queue = _EMULATOR_CAPTURE_CONTEXT.Queue()
+        self._state_queue = _CAPTURE_CONTEXT.Queue()
+        self._frame_queue = _CAPTURE_CONTEXT.Queue(maxsize=1)
+        self._command_queue = _CAPTURE_CONTEXT.Queue()
+        self._response_queue = _CAPTURE_CONTEXT.Queue()
 
     def _dispose_ipc(self) -> None:
         for name in ("_state_queue", "_frame_queue", "_command_queue", "_response_queue"):
@@ -186,6 +213,7 @@ class EmulatorCaptureSession:
         with self._frame_lock:
             return {
                 "state": self.state,
+                "source": self.source,
                 "config_name": self.config_name,
                 "frame_rate": self.frame_rate,
                 "error": self.error,
@@ -196,9 +224,10 @@ class EmulatorCaptureSession:
                 "last_error_at": self._last_error_at,
             }
 
-    def start(self, config_name: str, frame_rate: int) -> int:
+    def start(self, config_name: str, frame_rate: int, source: str = CAPTURE_SOURCE_EMULATOR) -> int:
         self.stop(clear_error=True)
         with self._frame_lock:
+            self.source = source if source in CAPTURE_SOURCES else CAPTURE_SOURCE_EMULATOR
             self.config_name = config_name
             self.frame_rate = max(1, min(int(frame_rate), 10))
             self.state = "starting"
@@ -208,12 +237,13 @@ class EmulatorCaptureSession:
             self._last_error_at = 0.0
             self._latest_jpeg = None
         self._create_ipc()
-        self._process = _EMULATOR_CAPTURE_CONTEXT.Process(
+        self._process = _CAPTURE_CONTEXT.Process(
             target=run_annotator_capture_worker,
             args=(
                 self.session_id,
                 self.config_name,
                 self.frame_rate,
+                self.source,
                 self._state_queue,
                 self._frame_queue,
                 self._command_queue,
@@ -234,7 +264,7 @@ class EmulatorCaptureSession:
                 pass
 
         if process and process.is_alive():
-            process.join(timeout=EMULATOR_CAPTURE_PROCESS_JOIN_TIMEOUT_SECONDS)
+            process.join(timeout=CAPTURE_PROCESS_JOIN_TIMEOUT_SECONDS)
             if process.is_alive():
                 process.terminate()
                 process.join(timeout=1.0)
@@ -265,14 +295,15 @@ class EmulatorCaptureSession:
             error = self.error
 
         if state != "running":
+            label = self.label
             if state == "error":
-                raise AnnotatorError("emulator_error", f"模拟器画面不可用: {error or 'unknown'}", 409)
+                raise AnnotatorError("emulator_error", f"{label}不可用: {error or 'unknown'}", 409)
             if state == "starting":
-                raise AnnotatorError("emulator_starting", "模拟器画面尚未就绪，请稍后重试", 409)
-            raise AnnotatorError("emulator_not_running", "模拟器画面未启动", 409)
+                raise AnnotatorError("emulator_starting", f"{label}尚未就绪，请稍后重试", 409)
+            raise AnnotatorError("emulator_not_running", f"{label}未启动", 409)
 
         if self._command_queue is None or self._response_queue is None:
-            raise AnnotatorError("emulator_not_running", "模拟器画面未启动", 409)
+            raise AnnotatorError("emulator_not_running", f"{self.label}未启动", 409)
 
         request_id = uuid.uuid4().hex
         try:
@@ -286,7 +317,7 @@ class EmulatorCaptureSession:
         except Exception as e:
             raise AnnotatorError("capture_failed", "提交截图请求失败", 500) from e
 
-        deadline = time.time() + EMULATOR_CAPTURE_COMMAND_TIMEOUT_SECONDS
+        deadline = time.time() + CAPTURE_COMMAND_TIMEOUT_SECONDS
         while time.time() < deadline:
             self._drain_updates()
             wait_seconds = min(0.1, deadline - time.time())
@@ -324,7 +355,7 @@ class AnnotatorSession:
         self.image_order: list[str] = []
         self.current_image_id: str | None = None
         self.lock = threading.Lock()
-        self.capture_session = EmulatorCaptureSession(session_id)
+        self.capture_session = FrameCaptureSession(session_id)
         self.last_active_at = time.time()
 
     def touch(self) -> float:
@@ -661,36 +692,46 @@ class AnnotatorManager:
     def rule_schema() -> dict[str, Any]:
         return get_schema_payload()
 
-    def start_emulator(self, session_id: str, config_name: str, frame_rate: int) -> dict[str, Any]:
+    def start_capture(self, session_id: str, config_name: str, frame_rate: int,
+                      source: str = CAPTURE_SOURCE_EMULATOR) -> dict[str, Any]:
+        """开始持续采集画面。
+
+        来源只影响提示文案与日志 —— 两种来源都调 `Device.screenshot()`，
+        具体走 ADB 还是桌面版由配置里的 `emulator_control` 决定。
+        """
         session = self._get_session(session_id)
         if config_name not in self.list_configs():
             raise AnnotatorError("invalid_config", f"配置不存在: {config_name}", 400)
-        applied_rate = session.capture_session.start(config_name, frame_rate)
+        source = source if source in CAPTURE_SOURCES else CAPTURE_SOURCE_EMULATOR
+        applied_rate = session.capture_session.start(config_name, frame_rate, source=source)
         logger.info(
-            f"[annotator] emulator start, session={session_id}, config={config_name}, frame_rate={applied_rate}"
+            f"[annotator] capture start, session={session_id}, source={source}, "
+            f"config={config_name}, frame_rate={applied_rate}"
         )
         return session.capture_session.status()
 
-    def stop_emulator(self, session_id: str) -> dict[str, Any]:
+    def stop_capture(self, session_id: str) -> dict[str, Any]:
         session = self._get_session(session_id)
         session.capture_session.stop(clear_error=True)
-        logger.info(f"[annotator] emulator stop, session={session_id}")
+        logger.info(f"[annotator] capture stop, session={session_id}, "
+                    f"source={session.capture_session.source}")
         return session.capture_session.status()
 
-    def emulator_status(self, session_id: str) -> dict[str, Any]:
+    def capture_status(self, session_id: str) -> dict[str, Any]:
         session = self._get_session(session_id)
         return session.capture_session.status()
 
-    def latest_emulator_frame(self, session_id: str) -> bytes | None:
+    def latest_capture_frame(self, session_id: str) -> bytes | None:
         session = self._get_session(session_id)
         return session.capture_session.latest_jpeg()
 
-    def capture_from_emulator(self, session_id: str) -> dict[str, Any]:
+    def capture_frame(self, session_id: str) -> dict[str, Any]:
         session = self._get_session(session_id)
         target = session.capture_dir / f"capture_{int(time.time() * 1000)}.png"
         session.capture_session.capture_latest_frame(target)
         image = session.add_image(target, "capture", target.name)
-        logger.info(f"[annotator] capture frame, session={session_id}, target={target}")
+        logger.info(f"[annotator] capture frame, session={session_id}, "
+                    f"source={session.capture_session.source}, target={target}")
         return image.to_dict(session_id)
 
     @staticmethod
