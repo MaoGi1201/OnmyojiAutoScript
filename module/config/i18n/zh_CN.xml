@@ -321,6 +321,12 @@
         <source>desktop_window_title_help</source>
         <translation>桌面版窗口标题，用 | 分隔多个候选，完全匹配优先。多开时可用多开工具改成不同标题来区分实例。</translation>
     </message>
+	<message><source>DesktopAccountId</source><translation>绑定账号</translation></message>
+	<message><source>Account Id</source><translation>绑定账号</translation></message>
+	<message>
+        <source>desktop_account_id_help</source>
+        <translation>多开时用它精确匹配要操作的窗口，选好后游戏重启也不用改。留空则只按窗口标题匹配。</translation>
+    </message>
 	<message><source>Window Class</source><translation>窗口类名</translation></message>
 	<message>
         <source>desktop_window_class_help</source>
@@ -341,6 +347,21 @@ PID 每次游戏重启都会变，重启后需重新填写，否则会报"找不
 	<message>
         <source>desktop_restore_window_help</source>
         <translation>窗口被最小化时，PrintWindow 只能抓到一张占位图，必须恢复窗口才能正常截图。关闭后请保证窗口不要最小化；仅被其它窗口遮挡是没问题的。</translation>
+    </message>
+	<message><source>Resize Window</source><translation>自动调整窗口大小</translation></message>
+	<message>
+        <source>desktop_resize_window_help</source>
+        <translation>开启后自动把游戏窗口拉到下面的尺寸。客户区小于 1280x720 时截图会被放大、画面变糊，容易识别失败。</translation>
+    </message>
+	<message><source>Window Width</source><translation>窗口宽度</translation></message>
+	<message>
+        <source>desktop_window_width_help</source>
+        <translation>目标窗口宽度（客户区像素），建议 1280</translation>
+    </message>
+	<message><source>Window Height</source><translation>窗口高度</translation></message>
+	<message>
+        <source>desktop_window_height_help</source>
+        <translation>目标窗口高度（客户区像素），建议 720</translation>
     </message>
 	<message>
         <source>Adb Restart</source>

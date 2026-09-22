@@ -8,6 +8,9 @@ from typing import Dict, Any, ClassVar
 
 import re
 import inflection
+# 注意：下面的 `from module.config.utils import *` 会把 `time` 覆盖成 datetime.time，
+# 所以这里用别名，别改回 `import time`
+import time as _time
 
 from pathlib import Path
 from pydantic import BaseModel, ValidationError, Field
@@ -217,6 +220,88 @@ def to_gui_schema(schema: dict) -> dict:
     return result
 
 
+# ------------------------- 桌面版「选择账号」下拉框 -------------------------
+# 选项由正在运行的游戏窗口动态生成，用户不用手抄账号 ID。
+# 配置页一次渲染会多次取 schema，所以扫描结果缓存几秒 —— 每次扫描都要
+# 枚举全部窗口并读各进程命令行，不缓存会明显拖慢设置页。
+_DESKTOP_ACCOUNT_OPTIONS_CACHE: dict = {'at': 0.0, 'options': []}
+_DESKTOP_ACCOUNT_OPTIONS_TTL = 3.0
+
+
+def desktop_account_options() -> list:
+    """扫描正在运行的桌面版游戏窗口，返回下拉选项（带几秒缓存）。
+
+    选项形如 `"690806847 · 窗口位置 (29,32)"`：
+    - 账号 ID 取自游戏启动参数 `/viewer_id=xxx`，**游戏重启后不变**，选一次就能一直用
+    - 带上窗口位置，是因为 ID 里不含角色名，用户需要靠位置认出是哪个窗口
+
+    写入配置时会用 `window_account.parse_account_id()` 把纯 ID 取出来，
+    所以标签怎么写都不影响绑定结果。
+    """
+    now = _time.time()
+    if now - _DESKTOP_ACCOUNT_OPTIONS_CACHE['at'] < _DESKTOP_ACCOUNT_OPTIONS_TTL:
+        return _DESKTOP_ACCOUNT_OPTIONS_CACHE['options']
+
+    from module.device.window_account import list_game_account_options
+    options = list_game_account_options()
+
+    _DESKTOP_ACCOUNT_OPTIONS_CACHE['at'] = now
+    _DESKTOP_ACCOUNT_OPTIONS_CACHE['options'] = options
+    return options
+
+
+def _options_with_current(options: list, current) -> list:
+    """把当前已选值并入选项列表。
+
+    已选账号当前没在运行时也要留在选项里，否则下拉框会显示空白，
+    用户会以为配置丢了。
+    """
+    values = list(options)
+    if current and current not in values:
+        values.insert(0, current)
+    return values
+
+
+def inject_desktop_account_options(items: list) -> list:
+    """Web UI 路径（script_task）：把 account_id 变成带选项的 enum 字段。"""
+    options = desktop_account_options()
+    if not options:
+        return items
+    for item in items:
+        if item.get('name') != 'account_id':
+            continue
+        item['type'] = 'enum'
+        item['enumEnum'] = _options_with_current(options, item.get('value'))
+    return items
+
+
+def inject_desktop_account_options_v1(schema: dict) -> dict:
+    """Qt GUI 路径（gui_args）：同样注入，但要写成 v1 结构。
+
+    ModelParse.js 只认 allOf + definitions[类名].enum，所以这里现造一个同名定义。
+    """
+    options = desktop_account_options()
+    definitions = schema.get('definitions')
+    if not options or not definitions:
+        return schema
+    prop = definitions.get('Desktop', {}).get('properties', {}).get('account_id')
+    if prop is None:
+        return schema
+
+    current = prop.get('default')
+    values = _options_with_current(options, current)
+
+    definitions['DesktopAccountId'] = {
+        'title': 'DesktopAccountId',
+        'type': 'string',
+        'enum': values,
+    }
+    prop.pop('type', None)
+    prop['allOf'] = [{'$ref': '#/definitions/DesktopAccountId'}]
+    prop['default'] = current if current else (values[0] if values else '')
+    return schema
+
+
 class ConfigModel(ConfigBase):
     config_name: str = "oas"
     running_task: str = ''
@@ -413,6 +498,8 @@ class ConfigModel(ConfigBase):
         # pydantic v2 输出的是 $defs / 裸 $ref，前端 ModelParse.js 只认 v1 的
         # definitions / allOf，这里先归一化，否则设置页会整组渲染失败
         schema2 = to_gui_schema(task_gui.schema())
+        # 桌面版：给 account_id 注入当前检测到的账号，配置页直接下拉选择
+        inject_desktop_account_options_v1(schema2)
         # https://github.com/pydantic/pydantic/discussions/5687
         if 'definitions' in schema2:
             if 'Scheduler' in schema2['definitions']:
@@ -558,6 +645,10 @@ class ConfigModel(ConfigBase):
                     if group_name in key:
                         groups_value[key] = groups[group_name]
             result[key] = merge_value(groups_value[key], value, schema["$defs"])
+
+        # 桌面版：给 account_id 注入当前检测到的账号，配置页直接下拉选择（不用手抄 ID）
+        if 'desktop' in result:
+            inject_desktop_account_options(result['desktop'])
 
         return result
 

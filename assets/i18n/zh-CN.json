@@ -299,5 +299,14 @@
   "desktop_exe_path_help": "游戏启动程序完整路径（如 D:/Onmyoji/Onmyoji.exe）。填写后游戏未启动会自动拉起，留空只连已启动窗口。",
   "restore_window": "自动恢复最小化窗口",
   "desktop_restore_window_help": "窗口被最小化时，PrintWindow 只能抓到一张占位图，必须恢复窗口才能正常截图。关闭后请保证窗口不要最小化；仅被其它窗口遮挡是没问题的。",
-  "emulator_control_help": "脚本操作的目标。桌面版（可不配置模拟器相关参数）/模拟器。"
+  "emulator_control_help": "脚本操作的目标。桌面版（可不配置模拟器相关参数）/模拟器。",
+  "Account Id": "绑定账号",
+  "account_id": "绑定账号",
+  "desktop_account_id_help": "多开时用它精确匹配要操作的窗口，选好后游戏重启也不用改。留空则只按窗口标题匹配。",
+  "resize_window": "自动调整窗口大小",
+  "desktop_resize_window_help": "开启后自动把游戏窗口拉到下面的尺寸。客户区小于 1280x720 时截图会被放大、画面变糊，容易识别失败。",
+  "window_width": "窗口宽度",
+  "desktop_window_width_help": "目标窗口宽度（客户区像素），建议 1280",
+  "window_height": "窗口高度",
+  "desktop_window_height_help": "目标窗口高度（客户区像素），建议 720"
 }
