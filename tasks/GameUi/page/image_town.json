@@ -32,7 +32,7 @@
     "roiFront": "617,135,51,75",
     "roiBack": "232,121,873,100",
     "method": "Template matching",
-    "threshold": 0.7,
+    "threshold": 0.6,
     "description": "description"
   },
   {
@@ -50,7 +50,7 @@
     "roiFront": "335,159,55,72",
     "roiBack": "170,145,567,100",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.7,
     "description": "协同对弈"
   },
   {
@@ -110,7 +110,7 @@
   {
     "itemName": "town_goto_hyakkiyakou",
     "imageName": "page_town_goto_hyakkiyakou.png",
-    "roiFront": "880,165,53,69",
+    "roiFront": "880,160,43,74",
     "roiBack": "827,149,148,100",
     "method": "Template matching",
     "threshold": 0.8,

@@ -110,7 +110,7 @@
   {
     "itemName": "check_soul_zones",
     "imageName": "page_check_soul_zones.png",
-    "roiFront": "1188,635,48,46",
+    "roiFront": "1165,631,48,46",
     "roiBack": "1158,616,103,93",
     "method": "Template matching",
     "threshold": 0.8,
@@ -137,8 +137,8 @@
   {
     "itemName": "check_goryou",
     "imageName": "page_check_goryou.png",
-    "roiFront": "880,8,30,39",
-    "roiBack": "880,8,30,39",
+    "roiFront": "1192,629,32,47",
+    "roiBack": "1192,629,32,47",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "御灵页面标志"
@@ -281,7 +281,7 @@
   {
     "itemName": "check_incense_realm",
     "imageName": "page_check_incense_realm.png",
-    "roiFront": "347,163,29,106",
+    "roiFront": "346,151,29,106",
     "roiBack": "296,117,165,256",
     "method": "Template matching",
     "threshold": 0.8,
@@ -290,7 +290,7 @@
   {
     "itemName": "check_seasonrift_forest",
     "imageName": "page_check_seasonrift_forest.png",
-    "roiFront": "348,158,30,106",
+    "roiFront": "348,148,30,106",
     "roiBack": "296,117,165,256",
     "method": "Template matching",
     "threshold": 0.8,
@@ -299,7 +299,7 @@
   {
     "itemName": "check_pure_buddha_realm",
     "imageName": "page_check_pure_buddha_realm.png",
-    "roiFront": "348,158,30,106",
+    "roiFront": "345,138,30,106",
     "roiBack": "296,117,165,256",
     "method": "Template matching",
     "threshold": 0.8,

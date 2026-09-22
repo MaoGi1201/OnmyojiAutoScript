@@ -29,8 +29,8 @@
   {
     "itemName": "chess_exit_cancel",
     "imageName": "page_chess_exit_cancel.png",
-    "roiFront": "478,409,88,45",
-    "roiBack": "478,409,88,45",
+    "roiFront": "464,408,118,46",
+    "roiBack": "464,408,118,46",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "百鬼棋局退出确认弹窗"
@@ -74,8 +74,8 @@
   {
     "itemName": "chess_rank_goto_lobby",
     "imageName": "page_chess_rank_goto_lobby.png",
-    "roiFront": "66,646,133,42",
-    "roiBack": "66,646,133,42",
+    "roiFront": "29,635,211,67",
+    "roiBack": "29,635,211,67",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "百鬼棋局排名页返回大厅"
