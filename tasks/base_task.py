@@ -585,7 +585,12 @@ class BaseTask(GlobalGameAssets, CostumeBase):
                 swipe_down = True
             elif target.is_ocr:
                 result = target.ocr_appear(self.device.image, name=name)
-                swipe_down = result is not None and isinstance(result, int) and result > 0
+                if result is False:
+                    # OCR 明确表示无法判断方向（页面没有文本 / 配置与列表对不上），
+                    # 再滑只是空转，还会累积 SWIPE 点击记录，直接结束
+                    logger.warning(f'[{target.name}] cannot decide swipe direction, stop scrolling')
+                    break
+                swipe_down = isinstance(result, int) and result > 0
                 swipe_distance_ratio = 1
             # 结果是坐标证明找到了, 非坐标都是没找到
             if result is not None and isinstance(result, tuple):
@@ -595,6 +600,10 @@ class BaseTask(GlobalGameAssets, CostumeBase):
                 x1, y1, x2, y2 = target.swipe_pos(number=swipe_distance_ratio, after=swipe_down)
             else:
                 x1, y1, x2, y2 = target.swipe_pos(after=swipe_down)
+            # 翻列表是"滚动"不是"连点同一个按钮"，不应该被卡死检测误判。
+            # 否则翻满 10 次就会抛 GameTooManyClickError（恢复代价是整个任务重启）。
+            # 本方法自身有 max_swipe 兜底，清记录不会造成死循环。
+            self.device.click_record_clear()
             self.device.swipe(p1=(x1, y1), p2=(x2, y2))
             sleep(random.uniform(0.8, 1.3))  # 等待滑动完成, 待优化
         if appear:
