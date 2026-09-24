@@ -308,8 +308,8 @@
   {
     "itemName": "i_no_default",
     "imageName": "gi_i_no_default.png",
-    "roiFront": "509,340,36,40",
-    "roiBack": "509,340,36,40",
+    "roiFront": "480,341,36,40",
+    "roiBack": "480,341,36,40",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "不勾选 默认邀请"
@@ -317,8 +317,8 @@
   {
     "itemName": "i_default",
     "imageName": "gi_i_default.png",
-    "roiFront": "506,340,41,39",
-    "roiBack": "506,340,41,39",
+    "roiFront": "479,341,39,36",
+    "roiBack": "479,341,39,36",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "勾选 默认邀请"
