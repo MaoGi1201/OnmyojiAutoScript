@@ -23,7 +23,7 @@
     "roiBack": "387,118,110,42",
     "mode": "Single",
     "method": "Default",
-    "keyword": "入手顺序",
+    "keyword": "入手顺",
     "description": "入手顺序"
   },
   {
@@ -37,11 +37,11 @@
   },
   {
     "itemName": "st_sort_level_2",
-    "roiFront": "400,290,128,42",
-    "roiBack": "400,290,128,42",
+    "roiFront": "425,294,86,36",
+    "roiBack": "425,294,86,36",
     "mode": "Single",
     "method": "Default",
-    "keyword": "等级/星级",
+    "keyword": "/",
     "description": "等级/星 下边的"
   },
   {
@@ -50,7 +50,7 @@
     "roiBack": "414,118,64,43",
     "mode": "Single",
     "method": "Default",
-    "keyword": "类型",
+    "keyword": "種類",
     "description": "类型"
   },
   {
