@@ -4,6 +4,9 @@
 from datetime import timedelta, time, datetime
 from time import sleep
 
+import cv2
+import numpy as np
+
 from tasks.GameUi.default_pages import page_battle_prepare, page_battle
 from tasks.GameUi.matcher import any_of
 from typing import List, Callable, Optional
@@ -23,6 +26,22 @@ from tasks.Secret.script_task import ScriptTask as SecretScriptTask
 from tasks.WantedQuests.assets import WantedQuestsAssets
 from tasks.WantedQuests.config import CooperationType, CooperationSelectMask, WQInfo, WQType, WantedQuestsConfig
 from tasks.WantedQuests.explore import WQExplore, ExploreWantedBoss
+
+
+WQ_TYPE_COLOR_REFERENCE: tuple[tuple[WQType, int], ...] = (
+    (WQType.CHALLENGE, 8),    # 红 —— 式神欠片
+    (WQType.EXPLORE, 102),    # 绿 —— 探索
+    (WQType.SECRET, 212),     # 蓝 —— 異聞
+    (WQType.YOKAI, 320),      # 紫 —— 妖気
+)
+# 判定阈值：饱和度低于此值认为不是类型标签（空行是羊皮纸底色，饱和度很低）
+WQ_TYPE_COLOR_MIN_SATURATION = 70
+# 判定阈值：非白像素占比低于此值认为不是类型标签（标签会填满整个 ROI）
+WQ_TYPE_COLOR_MIN_COVERAGE = 0.4
+# 判定阈值：亮度低于此值认为不是类型标签（标签 V 在 130 以上；UI 暗部只有 40 左右）
+WQ_TYPE_COLOR_MIN_VALUE = 80
+# 色相离所有参考值都超过这个度数就不判定（避免把背景误判成某个类型）
+WQ_TYPE_COLOR_MAX_DISTANCE = 60
 
 
 class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
@@ -258,6 +277,12 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
             logger.info('Current wanted quests can not be executed')
             self.ui_click(self.I_TRACE_TRUE, self.I_TRACE_FALSE)
             return False
+        if wq_info.type not in wq_call_dict:
+            # 类型认出来了但本项目还没实现它的执行流程（如 妖气）。
+            # 直接跳过，避免 wq_call_dict[...] 抛 KeyError 把整个任务打崩。
+            logger.warning(f'{wq_info.type.value} has no executor yet, skip this quest')
+            self.ui_click(self.I_TRACE_TRUE, self.I_TRACE_FALSE)
+            return False
         try:
             logger.info(f'Choose wq: {wq_info}')
             wq_call_dict[wq_info.type](wq_info.goto_btn, wq_info.do_num)
@@ -302,6 +327,45 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         wq_info_list.sort(key=lambda x: type_ordered_list.index(x.type))
         return wq_info_list
 
+    def wq_type_by_color(self, roi: tuple) -> Optional[WQType]:
+        """
+        按类型标签的**背景色**判断悬赏类型（OCR 读不出来时的兜底）。
+        :param roi: 类型标签的 ROI（用 O_WQ_TYPE_N 自己的 roi 即可，无需加宽）
+        :return: 判断出的类型；不是类型标签（空行）或无法判断时返回 None
+        """
+        x, y, w, h = roi
+        patch = self.device.image[y:y + h, x:x + w]
+        if patch is None or patch.size == 0:
+            return None
+        # 取「非白像素」的中位色作为背景色，避开标签上的白色文字
+        flat = patch.reshape(-1, 3).astype(int)
+        nonwhite = flat[flat.sum(axis=1) < 600]
+        # 类型标签会填满整个 ROI（实测覆盖率 0.78~0.88）；
+        # 空行/背景只有零星杂色（实测 0.02~0.13），用覆盖率先排除
+        if len(nonwhite) < 50 or len(nonwhite) / len(flat) < WQ_TYPE_COLOR_MIN_COVERAGE:
+            return None
+        rgb = np.median(nonwhite, axis=0).astype(np.uint8)
+        # ⚠️ device.image 是 **RGB** 格式（见 desktop_window.py 的 BGRA2RGB），
+        # 所以必须用 RGB2HSV —— 用 BGR2HSV 会把 R/B 搞反，色相全错
+        # （实测过：式神欠片的红会被算成蓝的 H≈230，判成秘闻）
+        hsv = cv2.cvtColor(rgb.reshape(1, 1, 3), cv2.COLOR_RGB2HSV)[0, 0]
+        hue, saturation, value = int(hsv[0]) * 2, int(hsv[1]), int(hsv[2])
+        if saturation < WQ_TYPE_COLOR_MIN_SATURATION or value < WQ_TYPE_COLOR_MIN_VALUE:
+            # 饱和度/亮度太低 —— 空行是羊皮纸底色、UI 暗部是深棕，都不是类型标签
+            return None
+        # 按色相最近邻分类（色相是环形的，要算最短弧距）
+        best_type, best_distance = None, 999
+        for wq_type, reference in WQ_TYPE_COLOR_REFERENCE:
+            distance = abs(hue - reference)
+            distance = min(distance, 360 - distance)
+            if distance < best_distance:
+                best_type, best_distance = wq_type, distance
+        if best_type is None or best_distance > WQ_TYPE_COLOR_MAX_DISTANCE:
+            logger.warning(f'WQ type color not matched: hue={hue} sat={saturation}')
+            return None
+        logger.info(f'WQ type by color: hue={hue} sat={saturation} -> {best_type.value}')
+        return best_type
+
     def build_wq_info(self, type_rule: RuleOcr, info_rule: RuleOcr, goto_btn_rule: RuleImage, num_want: int) -> Optional[WQInfo]:
         """
         构建单条悬赏信息
@@ -315,9 +379,13 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         # 适配老逻辑, 将式神碎片改为挑战
         wq_type_txt = '挑战' if wq_type_txt == '式神' else wq_type_txt
         if wq_type_txt == '' or not WQType.contains(wq_type_txt):
-            logger.warning(f'Unknown wq type: {wq_type_txt}')
-            return None
-        wq_type = WQType(wq_type_txt)
+            # 只在 OCR 失败时启用，能读出来的行行为完全不变。
+            wq_type = self.wq_type_by_color(type_rule.roi)
+            if wq_type is None:
+                logger.warning(f'Unknown wq type: {wq_type_txt}')
+                return None
+        else:
+            wq_type = WQType(wq_type_txt)
         type_ordered_list = self.get_config()._wq_type_ordered_list
         if wq_type not in type_ordered_list:
             logger.warning(f'{wq_type.value} is not in the order list')
