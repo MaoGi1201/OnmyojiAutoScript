@@ -2,7 +2,7 @@
   {
     "itemName": "find_ts",
     "imageName": "st_find_ts.png",
-    "roiFront": "266,648,90,63",
+    "roiFront": "264,649,90,63",
     "roiBack": "175,603,289,117",
     "method": "Template matching",
     "threshold": 0.8,
