@@ -38,7 +38,7 @@
   {
     "itemName": "buy_success",
     "imageName": "buy_buy_success.png",
-    "roiFront": "512,53,261,44",
+    "roiFront": "520,115,261,44",
     "roiBack": "449,0,405,167",
     "method": "Template matching",
     "threshold": 0.8,
