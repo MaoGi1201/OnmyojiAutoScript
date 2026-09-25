@@ -11,6 +11,7 @@ _ = get_distribution
 from module.base.utils import get_color
 from module.base.decorator import cached_property
 from module.device.env import IS_WINDOWS, is_desktop_mode, enum_value
+from module.device.power import keep_display_awake
 from module.base.timer import Timer
 from module.config.utils import get_server_next_update
 from module.device.app_control import AppControl
@@ -78,6 +79,12 @@ class Device(Platform, Screenshot, Control, AppControl):
         # Auto-fill emulator info
         if IS_WINDOWS and not desktop_mode and self.config.script.device.emulatorinfo_type == 'auto':
             _ = self.emulator_instance
+
+        # 息屏/休眠后客户端不再渲染，PrintWindow 只能拿到黑图或旧帧，
+        # 识别会全部失败 → 任务判成卡住 → 反复重启。所以桌面模式下要阻止息屏。
+        # SetThreadExecutionState 是线程级的，这里在脚本进程主线程调用，能一直生效。
+        if desktop_mode:
+            keep_display_awake(bool(getattr(self.config.script.desktop, 'keep_display_awake', True)))
 
         self.screenshot_interval_set()
         self._image_batch_cache_frame_id: str | None = None

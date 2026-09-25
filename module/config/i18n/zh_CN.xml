@@ -363,6 +363,11 @@ PID 每次游戏重启都会变，重启后需重新填写，否则会报"找不
         <source>desktop_window_height_help</source>
         <translation>目标窗口高度（客户区像素），建议 720</translation>
     </message>
+	<message><source>Keep Display Awake</source><translation>保持屏幕常亮</translation></message>
+	<message>
+        <source>desktop_keep_display_awake_help</source>
+        <translation>息屏后游戏客户端会停止渲染，截图只剩黑图导致识别全部失败。开启后脚本运行期间显示器不会自动关闭、系统不会休眠。</translation>
+    </message>
 	<message>
         <source>Adb Restart</source>
         <translation>在检测不到设备的时候尝试重启adb</translation>
@@ -716,7 +721,6 @@ Refresh：直接刷新，如果刷新操作进入CD，将标记为失败并退�
 	<message><source>Random Soul</source><translation>随机御魂</translation></message>
 	<message><source>Challenge Pass</source><translation>挑战券</translation></message>
 	<message><source>challenge_pass_help</source><translation>可选[0~10]</translation></message>
-	<message><source>Charisma</source><translation>[杂货铺]魅力值购买</translation></message>
 	<message><source>Shrine</source><translation>神龛</translation></message>
 	<message><source>White Daruma Five</source><translation>五星奉为达摩</translation></message>
 	<message><source>White Daruma Four</source><translation>四星奉为达摩</translation></message>

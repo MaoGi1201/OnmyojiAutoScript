@@ -112,6 +112,8 @@ class Desktop(BaseModel):
     resize_window: bool = Field(default=True, description='desktop_resize_window_help')
     window_width: int = Field(default=1280, ge=320, le=7680, description='desktop_window_width_help')
     window_height: int = Field(default=720, ge=240, le=4320, description='desktop_window_height_help')
+    # 桌面版时必须让显示器保持点亮。见 module/device/power.py
+    keep_display_awake: bool = Field(default=True, description='desktop_keep_display_awake_help')
 
 
 if __name__ == '__main__':
