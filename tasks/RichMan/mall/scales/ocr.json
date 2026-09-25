@@ -1,8 +1,8 @@
 [
   {
     "itemName": "sca_number_orochi",
-    "roiFront": "43,323,28,17",
-    "roiBack": "43,323,28,17",
+    "roiFront": "38,299,37,24",
+    "roiBack": "38,299,37,24",
     "mode": "Digit",
     "method": "Default",
     "keyword": "",
@@ -10,8 +10,8 @@
   },
   {
     "itemName": "sca_number_demon",
-    "roiFront": "625,320,30,22",
-    "roiBack": "625,320,30,22",
+    "roiFront": "625,301,30,22",
+    "roiBack": "625,301,30,22",
     "mode": "Quantity",
     "method": "Default",
     "keyword": "",
@@ -19,8 +19,8 @@
   },
   {
     "itemName": "sca_number_sea",
-    "roiFront": "920,320,36,22",
-    "roiBack": "920,320,36,22",
+    "roiFront": "920,300,36,20",
+    "roiBack": "920,300,36,20",
     "mode": "Quantity",
     "method": "Default",
     "keyword": "",
@@ -37,8 +37,8 @@
   },
   {
     "itemName": "sca_res_orochi",
-    "roiFront": "547,11,127,37",
-    "roiBack": "547,11,127,37",
+    "roiFront": "505,9,127,37",
+    "roiBack": "505,9,127,37",
     "mode": "DigitCounter",
     "method": "Default",
     "keyword": "",
@@ -46,8 +46,8 @@
   },
   {
     "itemName": "sca_res_demon",
-    "roiFront": "948,10,95,35",
-    "roiBack": "948,10,95,35",
+    "roiFront": "895,9,114,34",
+    "roiBack": "895,9,114,34",
     "mode": "Digit",
     "method": "Default",
     "keyword": "",
@@ -55,8 +55,8 @@
   },
   {
     "itemName": "sca_res_sea",
-    "roiFront": "1134,11,100,38",
-    "roiBack": "1134,11,100,38",
+    "roiFront": "1085,12,111,37",
+    "roiBack": "1085,12,111,37",
     "mode": "Digit",
     "method": "Default",
     "keyword": "",

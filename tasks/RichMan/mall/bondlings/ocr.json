@@ -1,8 +1,8 @@
 [
   {
     "itemName": "bl_res_souls",
-    "roiFront": "90,281,31,34",
-    "roiBack": "90,281,31,34",
+    "roiFront": "88,297,37,25",
+    "roiBack": "88,297,37,25",
     "mode": "Digit",
     "method": "Default",
     "keyword": "",
@@ -10,8 +10,8 @@
   },
   {
     "itemName": "bl_res_stone",
-    "roiFront": "357,284,29,34",
-    "roiBack": "357,284,29,34",
+    "roiFront": "354,299,32,26",
+    "roiBack": "354,299,32,26",
     "mode": "Digit",
     "method": "Default",
     "keyword": "",
@@ -19,8 +19,8 @@
   },
   {
     "itemName": "bl_res_high",
-    "roiFront": "642,284,29,31",
-    "roiBack": "642,284,29,31",
+    "roiFront": "640,297,33,30",
+    "roiBack": "640,297,33,30",
     "mode": "Digit",
     "method": "Default",
     "keyword": "",
@@ -28,8 +28,8 @@
   },
   {
     "itemName": "bl_res_medium",
-    "roiFront": "918,285,28,27",
-    "roiBack": "918,285,28,27",
+    "roiFront": "916,301,34,24",
+    "roiBack": "916,301,34,24",
     "mode": "Digit",
     "method": "Default",
     "keyword": "",
@@ -37,8 +37,8 @@
   },
   {
     "itemName": "bl_check_money",
-    "roiFront": "1128,12,118,34",
-    "roiBack": "1128,12,118,34",
+    "roiFront": "1074,13,126,33",
+    "roiBack": "1074,13,126,33",
     "mode": "DigitCounter",
     "method": "Default",
     "keyword": "",

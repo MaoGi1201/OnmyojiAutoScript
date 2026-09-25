@@ -1,8 +1,8 @@
 [
   {
     "itemName": "con_number",
-    "roiFront": "813,140,34,38",
-    "roiBack": "813,140,34,38",
+    "roiFront": "817,140,34,38",
+    "roiBack": "817,140,34,38",
     "mode": "Digit",
     "method": "Default",
     "keyword": "",
