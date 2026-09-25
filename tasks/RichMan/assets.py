@@ -51,35 +51,26 @@ class RichManAssets:
 
 	# Image Rule Assets
 	# 兑换随机御魂 
-	I_BL_BUY_SOULS = RuleImage(roi_front=(197,476,90,38), roi_back=(197,476,90,38), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/bondlings/bondlings_bl_buy_souls.png")
+	I_BL_BUY_SOULS = RuleImage(roi_front=(195,474,94,37), roi_back=(195,474,94,37), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/bondlings/bondlings_bl_buy_souls.png")
 	# 兑换契灵石头 
-	I_BL_BUY_STONE = RuleImage(roi_front=(493,472,89,42), roi_back=(493,472,89,42), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/bondlings/bondlings_bl_buy_stone.png")
+	I_BL_BUY_STONE = RuleImage(roi_front=(494,475,91,38), roi_back=(494,475,91,38), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/bondlings/bondlings_bl_buy_stone.png")
 	# 兑换高级盘 
-	I_BL_BUY_HIGH = RuleImage(roi_front=(779,473,89,42), roi_back=(779,473,89,42), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/bondlings/bondlings_bl_buy_high.png")
+	I_BL_BUY_HIGH = RuleImage(roi_front=(779,473,92,41), roi_back=(779,473,92,41), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/bondlings/bondlings_bl_buy_high.png")
 	# 兑换中级盘 
-	I_BL_BUY_MEDIUM = RuleImage(roi_front=(1079,476,93,40), roi_back=(1079,476,93,40), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/bondlings/bondlings_bl_buy_medium.png")
+	I_BL_BUY_MEDIUM = RuleImage(roi_front=(1079,475,90,37), roi_back=(1079,475,90,37), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/bondlings/bondlings_bl_buy_medium.png")
 
 
 	# Ocr Rule Assets
 	# 御魂剩余 
-	O_BL_RES_SOULS = RuleOcr(roi=(90,281,31,34), area=(90,281,31,34), mode="Digit", method="Default", keyword="", name="bl_res_souls")
+	O_BL_RES_SOULS = RuleOcr(roi=(88,297,37,25), area=(88,297,37,25), mode="Digit", method="Default", keyword="", name="bl_res_souls")
 	# 石头剩余 
-	O_BL_RES_STONE = RuleOcr(roi=(357,284,29,34), area=(357,284,29,34), mode="Digit", method="Default", keyword="", name="bl_res_stone")
+	O_BL_RES_STONE = RuleOcr(roi=(354,299,32,26), area=(354,299,32,26), mode="Digit", method="Default", keyword="", name="bl_res_stone")
 	# 高级盘剩余 
-	O_BL_RES_HIGH = RuleOcr(roi=(642,284,29,31), area=(642,284,29,31), mode="Digit", method="Default", keyword="", name="bl_res_high")
+	O_BL_RES_HIGH = RuleOcr(roi=(640,297,33,30), area=(640,297,33,30), mode="Digit", method="Default", keyword="", name="bl_res_high")
 	# 中级盘剩余 
-	O_BL_RES_MEDIUM = RuleOcr(roi=(918,285,28,27), area=(918,285,28,27), mode="Digit", method="Default", keyword="", name="bl_res_medium")
+	O_BL_RES_MEDIUM = RuleOcr(roi=(916,301,34,24), area=(916,301,34,24), mode="Digit", method="Default", keyword="", name="bl_res_medium")
 	# 检查契灵的钱是否够 
-	O_BL_CHECK_MONEY = RuleOcr(roi=(1128,12,118,34), area=(1128,12,118,34), mode="DigitCounter", method="Default", keyword="", name="bl_check_money")
-
-
-	# Image Rule Assets
-	# 蓝票 
-	I_CH_BLUE = RuleImage(roi_front=(646,142,91,105), roi_back=(144,106,879,440), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/charisma/charisma_ch_blue.png")
-	# description 
-	I_CH_BLACK = RuleImage(roi_front=(869,396,94,92), roi_back=(139,123,880,428), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/charisma/charisma_ch_black.png")
-	# 蓝票购买确认 
-	I_CH_CHECK_BLUE = RuleImage(roi_front=(615,255,45,71), roi_back=(489,173,289,239), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/charisma/charisma_ch_check_blue.png")
+	O_BL_CHECK_MONEY = RuleOcr(roi=(1074,13,126,33), area=(1074,13,126,33), mode="DigitCounter", method="Default", keyword="", name="bl_check_money")
 
 
 	# Image Rule Assets
@@ -93,7 +84,7 @@ class RichManAssets:
 
 	# Ocr Rule Assets
 	# 寄售券可以购买的数量 
-	O_CON_NUMBER = RuleOcr(roi=(813,140,34,38), area=(813,140,34,38), mode="Digit", method="Default", keyword="", name="con_number")
+	O_CON_NUMBER = RuleOcr(roi=(817,140,34,38), area=(817,140,34,38), mode="Digit", method="Default", keyword="", name="con_number")
 
 
 	# Image Rule Assets
@@ -166,9 +157,9 @@ class RichManAssets:
 	# 契灵商店 
 	I_MALL_BONDLINGS_SURE = RuleImage(roi_front=(1194,421,69,74), roi_back=(1194,421,69,74), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/navbar/navbar_mall_bondlings_sure.png")
 	# 已选中契灵商店 
-	I_MALL_BONDLINGS_ON = RuleImage(roi_front=(903,12,27,32), roi_back=(309,0,952,62), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/navbar/navbar_mall_bondlings_on.png")
+	I_MALL_BONDLINGS_ON = RuleImage(roi_front=(1007,419,79,28), roi_back=(221,401,952,62), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/navbar/navbar_mall_bondlings_on.png")
 	# 契灵商店 
-	I_MALL_BONDLINGS_CHECK = RuleImage(roi_front=(355,186,34,104), roi_back=(355,186,34,104), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/navbar/navbar_mall_bondlings_check.png")
+	I_MALL_BONDLINGS_CHECK = RuleImage(roi_front=(355,178,33,127), roi_back=(355,178,33,127), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/navbar/navbar_mall_bondlings_check.png")
 	# 杂货铺 
 	I_MALL_SUNDRY = RuleImage(roi_front=(880,646,53,54), roi_back=(834,621,116,90), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/navbar/navbar_mall_sundry.png")
 	# 杂货铺 
@@ -184,14 +175,12 @@ class RichManAssets:
 	I_SIDE_CHECK_FRIENDS = RuleImage(roi_front=(924,8,39,43), roi_back=(602,0,543,67), threshold=0.7, method="Template matching", file="./tasks/RichMan/mall/navbar/navbar_side_check_friends.png")
 	# 勋章 
 	I_SIDE_CHECK_MEDAL = RuleImage(roi_front=(665,6,40,44), roi_back=(453,1,476,58), threshold=0.7, method="Template matching", file="./tasks/RichMan/mall/navbar/navbar_side_check_medal.png")
-	# 魅力值 
-	I_SIDE_CHECK_CHARISMA = RuleImage(roi_front=(921,4,48,46), roi_back=(741,0,435,59), threshold=0.7, method="Template matching", file="./tasks/RichMan/mall/navbar/navbar_side_check_charisma.png")
 
 
 	# List Rule Assets
 	# 杂货铺侧边导航 
-	L_RM_NAVBAR = RuleList(folder="./tasks/RichMan/mall/navbar", direction="vertical", mode="image", roi_back=(1178,88,60,531), size=(45, 76), 
-					 array=["special", "duel", "friendship", "medal", "charm", "honor"])
+	L_RM_NAVBAR = RuleList(folder="./tasks/RichMan/mall/navbar", direction="vertical", mode="image", roi_back=(1178,88,60,531), size=(46, 76), 
+					 array=["special", "duel", "friendship", "medal", "honor"])
 
 
 	# Ocr Rule Assets
@@ -265,19 +254,19 @@ class RichManAssets:
 
 	# Ocr Rule Assets
 	# 蛇皮剩余可买的 
-	O_SCA_NUMBER_OROCHI = RuleOcr(roi=(43,323,28,17), area=(43,323,28,17), mode="Digit", method="Default", keyword="", name="sca_number_orochi")
+	O_SCA_NUMBER_OROCHI = RuleOcr(roi=(38,299,37,24), area=(38,299,37,24), mode="Digit", method="Default", keyword="", name="sca_number_orochi")
 	# 首领御魂剩余可买的 
-	O_SCA_NUMBER_DEMON = RuleOcr(roi=(625,320,30,22), area=(625,320,30,22), mode="Quantity", method="Default", keyword="", name="sca_number_demon")
+	O_SCA_NUMBER_DEMON = RuleOcr(roi=(625,301,30,22), area=(625,301,30,22), mode="Quantity", method="Default", keyword="", name="sca_number_demon")
 	# 永生之海 
-	O_SCA_NUMBER_SEA = RuleOcr(roi=(920,320,36,22), area=(920,320,36,22), mode="Quantity", method="Default", keyword="", name="sca_number_sea")
+	O_SCA_NUMBER_SEA = RuleOcr(roi=(920,300,36,20), area=(920,300,36,20), mode="Quantity", method="Default", keyword="", name="sca_number_sea")
 	# 多少号位 
 	O_SCA_DEMON_POSTION = RuleOcr(roi=(960,244,88,41), area=(960,244,88,41), mode="Single", method="Default", keyword="", name="sca_demon_postion")
 	# 朴素的御魂 
-	O_SCA_RES_OROCHI = RuleOcr(roi=(547,11,127,37), area=(547,11,127,37), mode="DigitCounter", method="Default", keyword="", name="sca_res_orochi")
+	O_SCA_RES_OROCHI = RuleOcr(roi=(505,9,127,37), area=(505,9,127,37), mode="DigitCounter", method="Default", keyword="", name="sca_res_orochi")
 	# 首领御魂数量 
-	O_SCA_RES_DEMON = RuleOcr(roi=(948,10,95,35), area=(948,10,95,35), mode="Digit", method="Default", keyword="", name="sca_res_demon")
+	O_SCA_RES_DEMON = RuleOcr(roi=(895,9,114,34), area=(895,9,114,34), mode="Digit", method="Default", keyword="", name="sca_res_demon")
 	# 永生之海 
-	O_SCA_RES_SEA = RuleOcr(roi=(1134,11,100,38), area=(1134,11,100,38), mode="Digit", method="Default", keyword="", name="sca_res_sea")
+	O_SCA_RES_SEA = RuleOcr(roi=(1085,12,111,37), area=(1085,12,111,37), mode="Digit", method="Default", keyword="", name="sca_res_sea")
 
 
 	# Image Rule Assets
@@ -305,11 +294,11 @@ class RichManAssets:
 	# 下期预览 
 	I_S_NEXT_PERIOD = RuleImage(roi_front=(1083,574,90,86), roi_back=(1083,574,90,86), threshold=0.8, method="Template matching", file="./tasks/RichMan/shrine/shrine_s_next_period.png")
 	# description 
-	I_S_WHITE_FIVE = RuleImage(roi_front=(769,143,77,85), roi_back=(769,143,77,85), threshold=0.85, method="Template matching", file="./tasks/RichMan/shrine/shrine_s_white_five.png")
+	I_S_WHITE_FIVE = RuleImage(roi_front=(769,143,77,85), roi_back=(189,111,862,524), threshold=0.85, method="Template matching", file="./tasks/RichMan/shrine/shrine_s_white_five.png")
 	# description 
-	I_S_WHITE_FOUR = RuleImage(roi_front=(951,144,73,82), roi_back=(951,144,73,82), threshold=0.85, method="Template matching", file="./tasks/RichMan/shrine/shrine_s_white_four.png")
+	I_S_WHITE_FOUR = RuleImage(roi_front=(951,144,73,82), roi_back=(189,111,862,524), threshold=0.85, method="Template matching", file="./tasks/RichMan/shrine/shrine_s_white_four.png")
 	# 黑蛋 
-	I_S_BLACK = RuleImage(roi_front=(588,143,78,83), roi_back=(588,143,78,83), threshold=0.9, method="Template matching", file="./tasks/RichMan/shrine/shrine_s_black.png")
+	I_S_BLACK = RuleImage(roi_front=(588,143,78,83), roi_back=(189,111,862,524), threshold=0.9, method="Template matching", file="./tasks/RichMan/shrine/shrine_s_black.png")
 	# description 
 	I_S_BUY_BLACK = RuleImage(roi_front=(777,508,173,60), roi_back=(777,508,173,60), threshold=0.8, method="Template matching", file="./tasks/RichMan/shrine/shrine_s_buy_black.png")
 	# description 
@@ -319,9 +308,9 @@ class RichManAssets:
 	# description 
 	I_S_CONFIRM_WHITE_FIVE = RuleImage(roi_front=(554,522,174,61), roi_back=(520,416,220,193), threshold=0.8, method="Template matching", file="./tasks/RichMan/shrine/shrine_s_confirm_white_five.png")
 	# description 
-	I_S_CONFIRM_WHITE_FOUR = RuleImage(roi_front=(551,564,176,62), roi_back=(509,404,252,231), threshold=0.8, method="Template matching", file="./tasks/RichMan/shrine/shrine_s_confirm_white_four.png")
+	I_S_CONFIRM_WHITE_FOUR = RuleImage(roi_front=(551,564,176,62), roi_back=(521,424,248,216), threshold=0.8, method="Template matching", file="./tasks/RichMan/shrine/shrine_s_confirm_white_four.png")
 	# description 
-	I_S_CONFIRM_BLACK = RuleImage(roi_front=(547,496,180,62), roi_back=(532,426,214,184), threshold=0.8, method="Template matching", file="./tasks/RichMan/shrine/shrine_s_confirm_black.png")
+	I_S_CONFIRM_BLACK = RuleImage(roi_front=(551,523,180,62), roi_back=(532,426,214,184), threshold=0.8, method="Template matching", file="./tasks/RichMan/shrine/shrine_s_confirm_black.png")
 	# description 
 	I_S_BUY_UP = RuleImage(roi_front=(757,455,56,54), roi_back=(757,455,56,54), threshold=0.8, method="Template matching", file="./tasks/RichMan/shrine/shrine_s_buy_up.png")
 	# description 

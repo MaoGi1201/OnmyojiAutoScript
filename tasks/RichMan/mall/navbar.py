@@ -106,15 +106,6 @@ class MallNavbar(GameUi, RichManAssets):
         pos = self.list_find(self.L_RM_NAVBAR, name='medal', max_swipe=3)
         return self.click_and_check(pos, 'RM_NAVBAR_MEDAL', self.I_SIDE_CHECK_MEDAL)
 
-    def _enter_charisma(self):
-        """
-        魅力
-        :return:
-        """
-        self._enter_sundry()
-        pos = self.list_find(self.L_RM_NAVBAR, name='charm', max_swipe=3)
-        return self.click_and_check(pos, 'RM_NAVBAR_CHARM', self.I_SIDE_CHECK_CHARISMA)
-
     def back_mall(self):
         """
         返回商城

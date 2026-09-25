@@ -72,13 +72,6 @@ class MedalRoom(BaseModel):
     broken_amulet: int = Field(title='Broken Amulet', default=0)
 
 
-class Charisma(BaseModel):
-    # 杂货铺 魅力购买
-    enable: bool = Field(title='Enable', default=False)
-    black_daruma_scrap: bool = Field(title='Black Daruma Scrap', default=False)
-    mystery_amulet: bool = Field(title='Mystery Amulet', default=False)
-
-
 class Shrine(BaseModel):
     # 神社 神龛
     enable: bool = Field(title='Enable', default=False)
@@ -111,7 +104,6 @@ class RichMan(ConfigBase):
     honor_room: HonorRoom = Field(default_factory=HonorRoom)
     friendship_points: FriendshipPoints = Field(default_factory=FriendshipPoints)
     medal_room: MedalRoom = Field(default_factory=MedalRoom)
-    charisma: Charisma = Field(default_factory=Charisma)
 
     thousand_things: ThousandThings = Field(default_factory=ThousandThings)
     consignment: Consignment = Field(default_factory=Consignment)

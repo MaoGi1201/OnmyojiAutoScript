@@ -1530,11 +1530,6 @@
       "red_daruma": 0,
       "broken_amulet": 0
     },
-    "charisma": {
-      "enable": false,
-      "black_daruma_scrap": false,
-      "mystery_amulet": false
-    },
     "thousand_things": {
       "enable": false,
       "mystery_amulet": false,

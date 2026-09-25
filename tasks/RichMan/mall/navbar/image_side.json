@@ -34,14 +34,5 @@
     "method": "Template matching",
     "threshold": 0.7,
     "description": "勋章"
-  },
-  {
-    "itemName": "side_check_charisma",
-    "imageName": "navbar_side_check_charisma.png",
-    "roiFront": "921,4,48,46",
-    "roiBack": "741,0,435,59",
-    "method": "Template matching",
-    "threshold": 0.7,
-    "description": "魅力值"
   }
 ]

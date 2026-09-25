@@ -4,7 +4,6 @@
 from module.logger import logger
 
 from tasks.RichMan.mall.medal import Medal
-from tasks.RichMan.mall.charisma import Charisma
 from tasks.RichMan.mall.consignment import Consignment
 from tasks.RichMan.mall.scales import Scales
 from tasks.RichMan.mall.honor import Honor
@@ -12,7 +11,7 @@ from tasks.RichMan.mall.bondlings import Bondlings
 from tasks.GameUi.page import page_main, page_mall
 
 
-class Mall(Medal, Charisma, Honor, Consignment, Scales, Bondlings):
+class Mall(Medal, Honor, Consignment, Scales, Bondlings):
 
     def execute_mall(self):
         logger.hr('Mall', 1)
@@ -36,8 +35,6 @@ class Mall(Medal, Charisma, Honor, Consignment, Scales, Bondlings):
         self.execute_friendship()
         self.device.click_record_clear()
         self.execute_medal()
-        self.device.click_record_clear()
-        self.execute_charisma()
         self.device.click_record_clear()
 
         # 退出
