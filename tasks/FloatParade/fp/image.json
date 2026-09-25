@@ -133,5 +133,41 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "花车放置界面标志"
+  },
+  {
+    "itemName": "fp_pr_confirm_check",
+    "imageName": "fp_fp_pr_confirm_check.png",
+    "roiFront": "480,355,37,34",
+    "roiBack": "440,330,120,90",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "放置奖励确认框-本周不再提示勾选框"
+  },
+  {
+    "itemName": "fp_pr_confirm",
+    "imageName": "fp_fp_pr_confirm.png",
+    "roiFront": "670,399,172,60",
+    "roiBack": "620,370,280,120",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "放置奖励确认框-确认按钮"
+  },
+  {
+    "itemName": "fp_pr_confirm_checked",
+    "imageName": "fp_fp_pr_confirm_checked.png",
+    "roiFront": "478,351,40,34",
+    "roiBack": "450,330,100,80",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "放置奖励确认框-本周不再提示（已勾选）"
+  },
+  {
+    "itemName": "fp_pr_cancel",
+    "imageName": "fp_fp_pr_cancel.png",
+    "roiFront": "432,399,175,62",
+    "roiBack": "390,370,260,120",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "放置奖励确认框-取消按钮（用它判断弹框是否出现）"
   }
 ]

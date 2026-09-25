@@ -41,5 +41,13 @@ class FloatParadeAssets:
 	I_FP_PR_CANNOT_GET = RuleImage(roi_front=(795,514,135,44), roi_back=(769,494,192,92), threshold=0.8, method="Template matching", file="./tasks/FloatParade/fp/fp_fp_pr_cannot_get.png")
 	# 花车放置界面标志 
 	I_FP_PR_CHECK = RuleImage(roi_front=(194,91,167,46), roi_back=(161,65,229,102), threshold=0.8, method="Template matching", file="./tasks/FloatParade/fp/fp_fp_pr_check.png")
+	# 放置奖励确认框-本周不再提示勾选框 
+	I_FP_PR_CONFIRM_CHECK = RuleImage(roi_front=(480,355,37,34), roi_back=(440,330,120,90), threshold=0.8, method="Template matching", file="./tasks/FloatParade/fp/fp_fp_pr_confirm_check.png")
+	# 放置奖励确认框-确认按钮 
+	I_FP_PR_CONFIRM = RuleImage(roi_front=(670,399,172,60), roi_back=(620,370,280,120), threshold=0.8, method="Template matching", file="./tasks/FloatParade/fp/fp_fp_pr_confirm.png")
+	# 放置奖励确认框-本周不再提示（已勾选） 
+	I_FP_PR_CONFIRM_CHECKED = RuleImage(roi_front=(478,351,40,34), roi_back=(450,330,100,80), threshold=0.8, method="Template matching", file="./tasks/FloatParade/fp/fp_fp_pr_confirm_checked.png")
+	# 放置奖励确认框-取消按钮（用它判断弹框是否出现） 
+	I_FP_PR_CANCEL = RuleImage(roi_front=(432,399,175,62), roi_back=(390,370,260,120), threshold=0.8, method="Template matching", file="./tasks/FloatParade/fp/fp_fp_pr_cancel.png")
 
 

@@ -108,8 +108,44 @@ class ScriptTask(GameUi, FloatParadeAssets, TalismanPassAssets):
             logger.warn('Not have placement reward, exit')
         else:
             logger.info('Get placement reward')
+            # 每周第一次点「受取」会先弹一个确认框（放置报酬按 1 小时为单位结算，
+            self.screenshot()
+            self.appear_then_click(self.I_FP_PR_CAN_GET, interval=1)
+            self.handle_placement_confirm()
             self.ui_get_reward(self.I_FP_PR_CAN_GET)
         self.goto_page(page_fp_main)
+
+    def handle_placement_confirm(self, timeout: float = 3) -> bool:
+        """
+        处理「受取」后每周首次出现的确认框。
+
+        :param timeout: 等待弹框出现的最长时间（秒）；没弹框时只浪费这么久
+        :return: 是否出现过确认框
+        """
+        _timer = Timer(timeout)
+        _timer.start()
+        while not _timer.reached():
+            self.screenshot()
+            # 出现「取消」按钮就说明弹框了
+            if not self.appear(self.I_FP_PR_CANCEL):
+                continue
+            logger.info('Placement reward confirm dialog appeared')
+
+            # 点未勾选框，然后等它变成已勾选
+            check_timer = Timer(3)
+            check_timer.start()
+            while not check_timer.reached():
+                self.screenshot()
+                if self.appear(self.I_FP_PR_CONFIRM_CHECKED):
+                    logger.info('Checked "do not show this again this week"')
+                    break
+                if self.appear_then_click(self.I_FP_PR_CONFIRM_CHECK, interval=0.6):
+                    continue
+
+            # 点确认按钮
+            self.appear_then_click(self.I_FP_PR_CONFIRM, interval=0.6)
+            return True
+        return False
 
 
 if __name__ == '__main__':
