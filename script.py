@@ -27,6 +27,7 @@ from module.config.config import Config
 from module.config.anti_ban import AntiBanGuard
 from module.device.device import Device
 from module.device.env import IS_WINDOWS, is_desktop_mode
+from module.device import account_lock
 from module.base.utils import load_module
 from module.base.decorator import del_cached_property
 from module.logger import logger
@@ -39,6 +40,9 @@ from tasks.Restart.server_update import delay_pending_tasks_for_server_update, i
 from module.server.log_service import build_error_log_dir_name
 
 _log_switch_lock = threading.Lock()#线程锁
+
+# 设备（账号）被别的进程占用时，本次任务结束并在这个时间后重试
+DEVICE_BUSY_RETRY_MINUTES = 10
 
 
 class Script:
@@ -506,12 +510,34 @@ class Script:
 
             # Run
             logger.info(f'Scheduler: Start task `{task}`')
+
+            # 同一个账号不能被两个东西同时驱动（另一个配置、或标注工具）。
+            # 否则两边的截图会互相顶掉对方在图像服务里的帧（Unknown frame id）、
+            # 点击互相打断，最后变成一堆看不懂的代码错误。
+            # 拿不到设备锁就明确记一条日志，结束本次任务并稍后重试。
+            acquired, holder = account_lock.acquire(self.config, f'脚本 {self.config_name}')
+            if not acquired:
+                logger.warning(
+                    f'{account_lock.device_label(self.config)} 正在运行中'
+                    f'（占用者：{holder}），本次 {task} 任务结束，'
+                    f'{DEVICE_BUSY_RETRY_MINUTES} 分钟后重试'
+                )
+                self.config.task_delay(
+                    task=task, success=True,
+                    target=datetime.now() + timedelta(minutes=DEVICE_BUSY_RETRY_MINUTES)
+                )
+                del_cached_property(self, 'config')
+                continue
+
             self.device.stuck_record_clear()
             self.device.click_record_clear()
             logger.hr(task, level=0)
             self.config.model.running_task = task
             _task_start = datetime.now()
-            success = self.run(inflection.camelize(task))
+            try:
+                success = self.run(inflection.camelize(task))
+            finally:
+                account_lock.release(self.config)
             self.config.model.running_task = ''
             logger.info(f'Scheduler: End task `{task}`')
             self.is_first_task = False

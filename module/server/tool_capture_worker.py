@@ -7,6 +7,7 @@ import cv2
 
 from module.config.config import Config
 from module.device.device import Device
+from module.device import account_lock
 from module.logger import logger
 
 EMULATOR_CAPTURE_MAX_RETRIES = 3
@@ -160,6 +161,7 @@ def run_annotator_capture_worker(
     final_state = "stopped"
     final_error = ""
     final_error_at = 0.0
+    config = None  # finally 里要按它释放设备锁，先占位避免未绑定
 
     _put_state(
         state_queue,
@@ -181,6 +183,14 @@ def run_annotator_capture_worker(
 
             if device is None:
                 try:
+                    # 同一个账号不能被两个东西同时驱动：标注工具连着某个账号时，
+                    # 脚本也在跑同一个账号的话，两边的截图会互相顶掉对方在图像服务
+                    # 里的帧（Unknown frame id）、点击也会互相打断。
+                    acquired, holder = account_lock.acquire(config, '标注工具')
+                    if not acquired:
+                        raise account_lock.DeviceBusyError(
+                            account_lock.device_label(config), holder
+                        )
                     device = _build_device(session_id, config_name, config, interval, source)
                     _put_state(
                         state_queue,
@@ -193,6 +203,29 @@ def run_annotator_capture_worker(
                             "last_error_at": final_error_at,
                         },
                     )
+                except account_lock.DeviceBusyError as error:
+                    # 账号被别的进程占用是预期内的状态，重试没有意义：
+                    # 直接把原因报清楚然后停下来，不要变成一串看不懂的代码错误
+                    message = str(error)
+                    final_error = message
+                    final_error_at = time.time()
+                    logger.warning(
+                        f"[annotator] capture aborted, session={session_id}, source={source}, "
+                        f"config={config_name}, {message}"
+                    )
+                    _put_state(
+                        state_queue,
+                        {
+                            "state": "error",
+                            "source": source,
+                            "error": message,
+                            "retry_count": retry_count,
+                            "max_retries": max_retries,
+                            "last_error_at": final_error_at,
+                        },
+                    )
+                    final_state = "error"
+                    break
                 except Exception as error:
                     message = _format_error_message(error)
                     retry_count += 1
@@ -308,6 +341,8 @@ def run_annotator_capture_worker(
         )
     finally:
         _release_device(device)
+        if config is not None:
+            account_lock.release(config)
         _handle_commands(command_queue, response_queue, latest_frame)
         if final_state == "error":
             _put_state(
