@@ -47,7 +47,7 @@ class ScriptTask(GameUi, GeneralBattle, GeneralRoom, GeneralInvite, SwitchSoul, 
         count = 0
         while count < 2:
             self.goto_page(page_team)
-            self.check_zones('经验妖怪')
+            self.check_zones('经值妖怪')
             # 开始
             if not self.create_room():
                 self.experience_exit(con)

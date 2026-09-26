@@ -138,8 +138,8 @@ class GeneralRoom(BaseTask, GeneralRoomAssets):
         pos = self.list_find(self.L_TEAM_LIST, name)
         if not pos:
             return False
-        if name == '愤怒的石距' or name == '喷怒的石距':
-            name = '价悠的石距'
+        if name in ('石距', '石距の怒'):
+            name = '石距の怒'
         self.O_GR_ZONES_NAME.keyword = name
         click_timer = Timer(1.1)
         click_timer.start()
@@ -151,11 +151,11 @@ class GeneralRoom(BaseTask, GeneralRoomAssets):
             # https://github.com/runhey/OnmyojiAutoScript/issues/488
             # 只能说朴实无华
             text_ocr = self.O_GR_ZONES_NAME.ocr(self.device.image)
-            if name == '石距' and name in text_ocr:
+            if name == '石距の怒' and '石距' in text_ocr:
                 break
-            if name == '金币妖怪' and "金币" in text_ocr:
+            if name == '钱货妖怪' and '钱货' in text_ocr:
                 break
-            if name == '经验妖怪' and '经验' in text_ocr:
+            if name == '经值妖怪' and '经值' in text_ocr:
                 break
             if click_timer.reached():
                 click_timer.reset()
