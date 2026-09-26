@@ -100,6 +100,8 @@ class BaseTask(GlobalGameAssets, CostumeBase):
             self._network_wait_start = None
             raise GameStuckError('Network abnormal timeout')
         sleep(NETWORK_WAIT_INTERVAL)
+        # ⚠️ 睡完必须重新截图！
+        self.device.screenshot()
 
     def _burst(self) -> bool:
         """

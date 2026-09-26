@@ -284,6 +284,23 @@ class ImageClient:
             return None
         return pickle.dumps(image, protocol=4)
 
+    def _call_with_frame_fallback(self, method: str, data: Any, image: np.ndarray | None,
+                                  frame_id: str | None, *rest: Any) -> Any:
+        """
+        带「帧已过期」兜底的调用。
+        服务端的帧缓存 TTL 很短（`frame_cache_expire_seconds`，默认 3 秒）。一旦客户端
+        拿着已经被淘汰的 `frame_id` 去匹配，服务端会抛 `KeyError: Unknown frame id`，
+        这里「把图片重新传上去」再试一次 —— 代价是多传一张图，总好过整个任务崩掉。
+        """
+        call = getattr(self.client, method)
+        try:
+            return call(data, frame_id, self._encode_image_payload(image, frame_id), *rest)
+        except Exception as error:
+            if frame_id is None or 'Unknown frame id' not in str(error):
+                raise
+            logger.warning(f'Frame {frame_id} is gone on server, retry with uploaded image')
+            return call(data, None, self._encode_image_payload(image, None), *rest)
+
     def match_rule(
         self,
         rule_data: dict[str, Any],
@@ -300,8 +317,7 @@ class ImageClient:
             frame_id: 已在服务端注册过的截图引用，优先级高于 `image`。
             threshold: 可选的临时阈值覆盖值；为空时沿用规则自身阈值。
         """
-        payload = self._encode_image_payload(image=image, frame_id=frame_id)
-        return self.client.match_rule(rule_data, frame_id, payload, threshold)
+        return self._call_with_frame_fallback('match_rule', rule_data, image, frame_id, threshold)
 
     def match_rule_with_brightness_window(
         self,
@@ -315,8 +331,8 @@ class ImageClient:
 
         该接口仅适用于普通模板匹配，会在命中后额外校验源区域和模板区域的平均亮度范围。
         """
-        payload = self._encode_image_payload(image=image, frame_id=frame_id)
-        return self.client.match_rule_with_brightness_window(rule_data, frame_id, payload, threshold)
+        return self._call_with_frame_fallback(
+            'match_rule_with_brightness_window', rule_data, image, frame_id, threshold)
 
     def match_many(
         self,
@@ -330,8 +346,7 @@ class ImageClient:
 
         适用于 `RuleGif`、`ImageGrid` 这类需要在同帧内判断多个候选模板的场景。
         """
-        payload = self._encode_image_payload(image=image, frame_id=frame_id)
-        return self.client.match_many(rules_data, frame_id, payload, threshold)
+        return self._call_with_frame_fallback('match_many', rules_data, image, frame_id, threshold)
 
     def match_all(
         self,
