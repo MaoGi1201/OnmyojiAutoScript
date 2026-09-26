@@ -17,15 +17,20 @@ from module.atom.swipe import RuleSwipe
 from module.base.timer import Timer
 from module.config.config import Config
 from module.device.device import Device
-from module.exception import ScriptError
+from module.exception import ScriptError, GameStuckError
 from module.image.rpc import get_image_client
 from module.logger import logger
 from module.ocr.base_ocr import OcrMode
+from module.device.env import enum_value
 from tasks.Component.Costume.costume_base import CostumeBase
 from tasks.Component.config_base import Time
 from tasks.GlobalGame.assets import GlobalGameAssets
-from tasks.GlobalGame.config_emergency import FriendInvitation
+from tasks.GlobalGame.config_emergency import FriendInvitation, WhenNetworkAbnormal
 from typing import Union
+
+# 「通信中」弹窗的处理节奏：每轮等 10 秒，累计 60 秒还没连回来就判定为断线
+NETWORK_WAIT_INTERVAL = 10
+NETWORK_WAIT_TIMEOUT = 60
 
 
 class BaseTask(GlobalGameAssets, CostumeBase):
@@ -60,6 +65,41 @@ class BaseTask(GlobalGameAssets, CostumeBase):
 
         # 战斗次数相关
         self.current_count = 0  # 战斗次数
+
+        # 「通信中」弹窗首次出现的时间；连回来就清空
+        self._network_wait_start: datetime | None = None
+
+    def _handle_network_issue(self) -> None:
+        """
+        拦截「通信中」（网络卡顿）和「已断开游戏服务器」（断线）两个弹窗。
+        """
+        if self.appear(self.I_NETWORK_ERROR):
+            logger.warning('Network error: game server disconnected, need reconnect')
+            self._network_wait_start = None
+            raise GameStuckError('Network error')
+
+        if not self.appear(self.I_NETWORK_ABNORMAL):
+            self._network_wait_start = None
+            return
+
+        mode = enum_value(self.config.global_game.emergency.when_network_abnormal)
+        if mode != WhenNetworkAbnormal.WAIT_10S.value:
+            logger.warning('Network abnormal: still communicating, restart')
+            self._network_wait_start = None
+            raise GameStuckError('Network abnormal')
+
+        # 等一会儿让游戏自己连回来，这期间不点任何东西
+        now = datetime.now()
+        if self._network_wait_start is None:
+            self._network_wait_start = now
+            logger.warning(f'Network abnormal: communicating, wait {NETWORK_WAIT_INTERVAL}s')
+        elif (now - self._network_wait_start).total_seconds() >= NETWORK_WAIT_TIMEOUT:
+            logger.warning(
+                f'Network abnormal: still communicating after {NETWORK_WAIT_TIMEOUT}s, restart'
+            )
+            self._network_wait_start = None
+            raise GameStuckError('Network abnormal timeout')
+        sleep(NETWORK_WAIT_INTERVAL)
 
     def _burst(self) -> bool:
         """
@@ -127,15 +167,10 @@ class BaseTask(GlobalGameAssets, CostumeBase):
         # 判断勾协
         self._burst()
 
-        # # 判断网络异常
-        # if self.appear(self.I_NETWORK_ABNORMAL):
-        #     logger.warning(f"Network abnormal")
-        #     raise GameStuckError
-        #
-        # # 判断网络错误
-        # if self.appear(self.I_NETWORK_ERROR):
-        #     logger.warning(f"Network error")
-        #     raise GameStuckError
+        # 判断网络异常 / 网络错误
+        # 这两个弹窗不响应点击，必须在截图后立刻拦下来（原来是注释掉的，
+        # 结果「通信中」被当成"页面点不动"，一路点到 GameTooManyClickError）
+        self._handle_network_issue()
 
         return self.device.image
 
