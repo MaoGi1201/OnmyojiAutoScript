@@ -94,8 +94,8 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
                 if find_btn_clicked and self.click(self.C_DM_BOSS_CLICK, interval=5):
                     find_btn_clicked = False
                     continue
+                self.device.click_record_clear()
                 if self.best_demon_enable:
-                    self.device.click_record_clear()
                     if self.appear(self.I_DE_BOSS_BEST) and (not find_btn_clicked):
                         self.device.click_record_remove(self.I_DE_BOSS_BEST)
                         if self.click(self.I_DE_BOSS_BEST, interval=4):
