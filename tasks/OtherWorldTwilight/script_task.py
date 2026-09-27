@@ -110,6 +110,11 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralRoom, GameUi, SwitchSoul, 
         self.goto_page(pages.page_main)
         # 进入战斗流程
         self.device.stuck_record_add('BATTLE_STATUS_S')
+        # 队员干等队长邀请时既不在房间也不在战斗，只能靠卡死计时器兜底（300 秒），
+        # 队长已经收工的话就是白等，还会被判成卡死 → Restart。这里用自己的等待时间提前收工。
+        wait_second = int(self.conf.invite_config.wait_time_v.total_seconds())
+        wait_second = min(max(wait_second, 60), 280)
+        idle_timer = Timer(wait_second).start()
         while True:
             self.screenshot()
             if self.current_count >= self.conf.other_world_twilight_config.limit_count:
@@ -119,17 +124,29 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralRoom, GameUi, SwitchSoul, 
                 logger.info('Time limit out')
                 break
             if self.check_then_accept():
+                idle_timer.reset()
                 continue
             if self.is_in_room(False):
+                idle_timer.reset()
                 self.device.stuck_record_clear()
                 if self.wait_battle(wait_time=self.conf.invite_config.wait_time):
                     self.run_general_battle(config=self.conf.general_battle_config, exit_matcher=self.team_exit_matcher)
+                    idle_timer.reset()
                 else:
                     break
             # 队长秒开的时候，检测是否进入到战斗中
             if self.is_in_battle(False):
+                idle_timer.reset()
                 self.run_general_battle(config=self.conf.general_battle_config, exit_matcher=self.team_exit_matcher)
+                idle_timer.reset()
 
+            if idle_timer.reached():
+                logger.warning(f'Wait invite timeout({wait_second}s), leader may be gone, exit member mode')
+                break
+
+        # 兜底：页面既不是庭院/本任务页面，也不在房间/战斗中时不要死等，
+        # 否则会一直空转到 60 秒的卡死计时器把任务判死
+        timeout_timer = Timer(30).start()
         # 有一种情况是本来要退出的，但是队长邀请了进入的战斗的加载界面
         while True:
             if self.appear(self.I_CHECK_MAIN) or self.appear(self.I_OWT_FIRE):
@@ -140,6 +157,9 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralRoom, GameUi, SwitchSoul, 
             # 如果还在战斗中，就退出战斗
             if self.exit_battle():
                 pass
+            if timeout_timer.reached():
+                logger.warning('Exit other world twilight: wait timeout, stop waiting')
+                break
         return True
 
     def run_alone(self):

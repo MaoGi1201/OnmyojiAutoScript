@@ -4,6 +4,7 @@
 from datetime import datetime, timedelta
 
 from module.exception import TaskEnd
+from module.base.timer import Timer
 from module.logger import logger
 from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
 from tasks.EternitySea.config import EternitySea
@@ -153,6 +154,11 @@ class ScriptTask(GameUi, GeneralBattle, GeneralRoom, GeneralInvite, SwitchSoul, 
         logger.info('Start run member')
         # 进入战斗流程
         self.device.stuck_record_add('BATTLE_STATUS_S')
+        # 队员干等队长邀请时既不在房间也不在战斗，只能靠卡死计时器兜底（300 秒），
+        # 队长已经收工的话就是白等，还会被判成卡死 → Restart。这里用自己的等待时间提前收工。
+        wait_second = int(self._task_config.invite_config.wait_time_v.total_seconds())
+        wait_second = min(max(wait_second, 60), 280)
+        idle_timer = Timer(wait_second).start()
         while 1:
             self.screenshot()
             if self.current_count >= self._task_config.eternity_sea_config.limit_count:
@@ -162,22 +168,31 @@ class ScriptTask(GameUi, GeneralBattle, GeneralRoom, GeneralInvite, SwitchSoul, 
                 logger.info("EternitySea time limit out")
                 break
             if self.check_then_accept():
+                idle_timer.reset()
                 continue
             if self.is_in_room(False):
+                idle_timer.reset()
                 self.device.stuck_record_clear()
                 if self.wait_battle(wait_time=self._task_config.invite_config.wait_time):
                     self.run_general_battle(
                         config=self._member_general_battle_config(),
                         exit_matcher=any_of(self.I_GI_EMOJI_1, self.I_CHECK_MAIN),
                     )
+                    idle_timer.reset()
                 else:
                     break
             # 队长秒开的时候，检测是否进入到战斗中
             if self.is_in_battle(False):
+                idle_timer.reset()
                 self.run_general_battle(
                     config=self._member_general_battle_config(),
                     exit_matcher=any_of(self.I_GI_EMOJI_1, self.I_CHECK_MAIN),
                 )
+                idle_timer.reset()
+
+            if idle_timer.reached():
+                logger.warning(f'Wait invite timeout({wait_second}s), leader may be gone, exit member mode')
+                break
         self.exit_room()
         self.exit_team()
         return True

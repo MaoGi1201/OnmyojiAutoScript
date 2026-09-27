@@ -259,9 +259,9 @@ class ScriptTask(GameUi, GeneralInvite, GeneralRoom, GeneralBattle, SwitchSoul, 
 
     def run_member(self):
         logger.hr('Start run member', 2)
-        # 开始等待队长拉人
-        wait_time = self.config.bondling_fairyland.invite_config.wait_time
-        wait_timer = Timer(wait_time.minute * 60)
+        # 开始等待队长拉人（原来的 minute*60 会丢掉配置里的秒）
+        wait_second = int(self.config.bondling_fairyland.invite_config.wait_time_v.total_seconds())
+        wait_timer = Timer(wait_second)
         wait_timer.start()
         success = True
 
@@ -306,6 +306,9 @@ class ScriptTask(GameUi, GeneralInvite, GeneralRoom, GeneralBattle, SwitchSoul, 
                 self.device.stuck_record_add('BATTLE_STATUS_S')
                 continue
 
+        # 兜底：页面既不是庭院/探索，也不在房间/战斗中时不要死等，
+        # 否则会一直空转到 60 秒的卡死计时器把任务判死
+        timeout_timer = Timer(30).start()
         while 1:
             # 有一种情况是本来要退出的，但是队长邀请了进入的战斗的加载界面
             if self.appear(self.I_CHECK_MAIN) or self.appear(self.I_CHECK_EXPLORATION) or self.appear(
@@ -318,6 +321,9 @@ class ScriptTask(GameUi, GeneralInvite, GeneralRoom, GeneralBattle, SwitchSoul, 
             if self.exit_battle():
                 pass
                 # 引用配置
+            if timeout_timer.reached():
+                logger.warning('Exit bondling fairyland: wait timeout, stop waiting')
+                break
         if UserStatus.MEMBER == self.config.bondling_fairyland.bondling_config.user_status:
             self.goto_page(page_main)
             self.set_next_run(task='BondlingFairyland', finish=True, success=True)

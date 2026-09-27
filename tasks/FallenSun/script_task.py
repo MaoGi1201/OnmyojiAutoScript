@@ -14,6 +14,7 @@ from tasks.GameUi.game_ui import GameUi
 from tasks.GameUi.page import any_of, page_main, page_reward, page_shikigami_records, page_soul_zones
 from tasks.FallenSun.assets import FallenSunAssets
 from tasks.FallenSun.config import FallenSun, UserStatus
+from module.base.timer import Timer
 from module.logger import logger
 from module.exception import TaskEnd
 
@@ -215,11 +216,17 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
 
         # 进入战斗流程
         self.device.stuck_record_add('BATTLE_STATUS_S')
+        # 队员干等队长邀请时既不在房间也不在战斗，只能靠卡死计时器兜底（300 秒），
+        # 队长已经收工的话就是白等，还会被判成卡死 → Restart。这里用自己的等待时间提前收工。
+        wait_second = int(self.config.fallen_sun.invite_config.wait_time_v.total_seconds())
+        wait_second = min(max(wait_second, 60), 280)
+        idle_timer = Timer(wait_second).start()
         while 1:
             self.screenshot()
 
             # 检查猫咪奖励
             if self.appear_then_click(self.I_PET_PRESENT, action=self.C_RANDOM_RIGHT, interval=1):
+                idle_timer.reset()
                 continue
 
             if self.current_count >= self.limit_count:
@@ -230,9 +237,11 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
                 break
 
             if self.check_then_accept():
+                idle_timer.reset()
                 continue
 
             if self.is_in_room():
+                idle_timer.reset()
                 self.device.stuck_record_clear()
                 if self.wait_battle(wait_time=self.config.fallen_sun.invite_config.wait_time):
                     self.run_general_battle(
@@ -240,16 +249,26 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
                         battle_key=self._fallen_sun_battle_key(),
                         exit_matcher=self.I_CHECK_TEAM,
                     )
+                    idle_timer.reset()
                 else:
                     break
             # 队长秒开的时候，检测是否进入到战斗中
             if self.is_in_battle(False):
+                idle_timer.reset()
                 self.run_general_battle(
                     config=self.config.fallen_sun.general_battle_config,
                     battle_key=self._fallen_sun_battle_key(),
                     exit_matcher=self.I_CHECK_TEAM,
                 )
+                idle_timer.reset()
 
+            if idle_timer.reached():
+                logger.warning(f'Wait invite timeout({wait_second}s), leader may be gone, exit member mode')
+                break
+
+        # 兜底：页面既不是庭院/探索，也不在房间/战斗中时不要死等，
+        # 否则会一直空转到 60 秒的卡死计时器把任务判死
+        timeout_timer = Timer(30).start()
         while 1:
             # 有一种情况是本来要退出的，但是队长邀请了进入的战斗的加载界面
             if self.appear(self.I_CHECK_MAIN) or self.appear(self.I_CHECK_EXPLORATION):
@@ -260,6 +279,9 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
             # 如果还在战斗中，就退出战斗
             if self.exit_battle():
                 pass
+            if timeout_timer.reached():
+                logger.warning('Exit fallen sun: wait timeout, stop waiting')
+                break
 
 
         self.goto_page(page_main)
