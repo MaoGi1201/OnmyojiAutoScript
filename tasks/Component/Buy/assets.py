@@ -14,7 +14,7 @@ class BuyAssets:
 	# description 
 	C_BUY_ONE = RuleClick(roi_front=(551,506,174,36), roi_back=(551,506,174,36), name="buy_one")
 	# description 
-	C_BUY_MORE = RuleClick(roi_front=(551,563,174,17), roi_back=(551,563,174,17), name="buy_more")
+	C_BUY_MORE = RuleClick(roi_front=(551,565,175,43), roi_back=(551,565,175,43), name="buy_more")
 	# 取消购买 
 	C_BUY_CANCEL = RuleClick(roi_front=(121,2,100,22), roi_back=(121,2,100,22), name="buy_cancel")
 
