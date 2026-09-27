@@ -33,7 +33,8 @@ from tasks.GameUi.page_definition import Page
 ExitMatcher = Union[Matcher | RecognizerLike | Page]
 BattleInspectionAction = Callable[["BattleContext"], None]
 PREPARE_CLICK_DELAY = 3.0
-QUICK_EXIT_WAIT_TIMEOUT = 5.0
+# 快速退出时等待退出按钮出现的时间窗口, 需要覆盖战斗界面加载所需的时间
+QUICK_EXIT_WAIT_TIMEOUT = 10.0
 
 
 @dataclass
