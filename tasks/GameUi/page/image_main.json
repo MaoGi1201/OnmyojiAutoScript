@@ -74,19 +74,19 @@
   {
     "itemName": "main_goto_mall",
     "imageName": "page_main_goto_mall.png",
-    "roiFront": "664,661,40,18",
-    "roiBack": "601,613,163,78",
+    "roiFront": "664,659,40,32",
+    "roiBack": "600,615,162,77",
     "method": "Template matching",
-    "threshold": 0.7,
+    "threshold": 0.5,
     "description": "庭院前往商店"
   },
   {
     "itemName": "main_goto_guild",
     "imageName": "page_main_goto_guild.png",
-    "roiFront": "495,590,50,22",
-    "roiBack": "495,590,120,100",
+    "roiFront": "494,591,49,32",
+    "roiBack": "494,591,121,101",
     "method": "Template matching",
-    "threshold": 0.7,
+    "threshold": 0.5,
     "description": "庭院前往阴阳寮"
   },
   {
