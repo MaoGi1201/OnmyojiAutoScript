@@ -1,6 +1,5 @@
 from module.atom.image import RuleImage
 from module.atom.click import RuleClick
-from module.atom.scatter import RuleScatter
 from module.atom.long_click import RuleLongClick
 from module.atom.swipe import RuleSwipe
 from module.atom.ocr import RuleOcr
@@ -32,7 +31,7 @@ class LBSAssets:
 	I_LBS_MAP_ENTRY = RuleImage(roi_front=(1104,543,101,111), roi_back=(980,440,300,280), threshold=0.8, method="Template matching", file="./tasks/LBS/res/lbs_map_entry.png")
 	# 活动界面右下角寻找队伍按钮（组队模式入口） 
 	I_LBS_FIND_TEAM = RuleImage(roi_front=(973,615,65,35), roi_back=(900,540,280,175), threshold=0.8, method="Template matching", file="./tasks/LBS/res/lbs_find_team.png")
-	# 排队横幅右上角X（在=排队中；超时点击取消排队）
+	# 排队横幅右上角X关闭按钮（超时取消排队用） 
 	I_LBS_MATCH_CANCEL = RuleImage(roi_front=(790,10,75,70), roi_back=(250,5,800,95), threshold=0.8, method="Template matching", file="./tasks/LBS/res/lbs_match_cancel.png")
 
 
