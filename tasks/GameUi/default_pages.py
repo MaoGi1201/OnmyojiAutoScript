@@ -164,6 +164,10 @@ page_main.connect(page_summon, GameUiAssets.I_MAIN_GOTO_SUMMON, key="page_main->
 
 # 町中主页。
 page_town = Page(GameUiAssets.I_CHECK_TOWN, category="global")
+# 从庭院进入町中时有概率弹出“场景扩展包下载”提示, 点击取消关闭
+page_town.add_enter_success_hooks(GameUiAssets.I_TOWN_SCENE_PACK_CANCEL)
+# 弹窗晚于页面出现时会挡住离开町中的点击, 跳转失败时兜底再关一次
+page_town.add_leave_failure_hooks(GameUiAssets.I_TOWN_SCENE_PACK_CANCEL)
 page_town.connect(page_main, GameUiAssets.I_TOWN_GOTO_MAIN, key="page_town->page_main")
 page_main.connect(page_town, GameUiAssets.I_MAIN_GOTO_TOWN, key="page_main->page_town")
 

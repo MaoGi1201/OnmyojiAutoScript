@@ -169,5 +169,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "百鬼棋局大厅标志"
+  },
+  {
+    "itemName": "town_scene_pack_cancel",
+    "imageName": "page_town_scene_pack_cancel.png",
+    "roiFront": "413,438,146,64",
+    "roiBack": "350,400,320,140",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "町中场景扩展包下载弹窗取消按钮"
   }
 ]
