@@ -34,6 +34,8 @@ ExitMatcher = Union[Matcher | RecognizerLike | Page]
 BattleInspectionAction = Callable[["BattleContext"], None]
 PREPARE_CLICK_DELAY = 3.0
 QUICK_EXIT_WAIT_TIMEOUT = 10.0
+# 退出战斗流程的最长等待：点掉退出确认后如果既没到结算页也没离开战斗页，最多等这么久
+EXIT_BATTLE_WAIT_TIMEOUT = 20.0
 
 
 @dataclass
@@ -863,11 +865,22 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
             self.screenshot()
         if not self.appear(self.I_EXIT):
             return False
+        # 点掉退出确认后页面不一定回到结算/奖励：房间被解散、队长跑路、队员到次数上限
+        # 自己退出时都会直接落到探索/庭院。原来只认结算页，落到别的页面就会一直空转，
+        # 直到 60 秒的卡死计时器把整个任务判死（并触发 Restart）。这里补两个出口。
+        timeout_timer = Timer(EXIT_BATTLE_WAIT_TIMEOUT).start()
         while True:
             self.screenshot()
             if self.appear_then_click(self.I_EXIT_ENSURE, interval=0.8):
                 continue
-            if GameUi.get_current_page(self) in (page_battle_result, page_reward):
+            page = GameUi.get_current_page(self)
+            if page in (page_battle_result, page_reward):
+                break
+            if page is not None and page not in (page_battle_prepare, page_battle):
+                logger.info(f'Exit battle: already left battle page, now at {page.name}')
+                break
+            if timeout_timer.reached():
+                logger.warning('Exit battle: wait timeout, stop waiting')
                 break
             if self.appear_then_click(self.I_EXIT, interval=6):
                 continue
