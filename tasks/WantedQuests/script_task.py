@@ -269,7 +269,8 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         wq_call_dict: dict[WQType, Callable] = {
             WQType.CHALLENGE: self.challenge,
             WQType.EXPLORE: self.explore,
-            WQType.SECRET: self.secret
+            WQType.SECRET: self.secret,
+            WQType.SOUL: self.soul
         }
         # 获取当前需要执行的悬赏策略
         wq_info = self.get_need_exec_wq(ordered_wq_infos)
@@ -408,6 +409,21 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         # 锁定阵容进入战斗
         wq_config = GeneralBattleConfig(lock_team_enable=True)
         self.run_general_battle(config=wq_config, exit_matcher=self.I_WQC_FIRE)
+
+    def soul(self, goto, num=1):
+        """
+        御魂悬赏。
+        悬赏界面已经帮我们选好了，直接点右下角的「挑戦」开打即可。
+        """
+        self.ui_click(goto, self.I_WQ_SOUL_FIRE)
+        for i in range(num):
+            self.screenshot()
+            if not self.appear(self.I_WQ_SOUL_FIRE):
+                logger.warning('Soul fire button not found, stop')
+                break
+            logger.info(f'Soul mission battle {i + 1}/{num}')
+            self.run_general_battle(self.battle_config, exit_matcher=self.I_WQ_SOUL_FIRE)
+        logger.info('Soul mission finished')
 
     def secret(self, goto, num=1):
         self.ui_click(goto, self.I_WQSE_FIRE)

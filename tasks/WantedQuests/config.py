@@ -20,6 +20,7 @@ class WQType(str, Enum):
     EXPLORE = '探索'
     SECRET = '秘闻'
     YOKAI = '妖气'
+    SOUL = '御魂'
 
     def __repr__(self):
         return self.value

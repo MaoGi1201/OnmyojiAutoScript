@@ -151,5 +151,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "探索界面,左侧任务列表右上角右下角标志"
+  },
+  {
+    "itemName": "soul_fire",
+    "imageName": "wq_soul_fire.png",
+    "roiFront": "1146,593,91,44",
+    "roiBack": "1118,559,141,120",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "御魂副本页的「挑战」按钮"
   }
 ]
