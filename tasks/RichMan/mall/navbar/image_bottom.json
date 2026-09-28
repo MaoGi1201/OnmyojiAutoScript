@@ -74,10 +74,10 @@
   {
     "itemName": "mall_sundry",
     "imageName": "navbar_mall_sundry.png",
-    "roiFront": "880,646,53,54",
-    "roiBack": "834,621,116,90",
+    "roiFront": "880,666,53,34",
+    "roiBack": "834,644,116,76",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.75,
     "description": "杂货铺"
   },
   {
