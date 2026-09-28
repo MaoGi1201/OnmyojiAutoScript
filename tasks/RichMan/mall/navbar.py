@@ -14,6 +14,8 @@ from tasks.GameUi.game_ui import GameUi
 from tasks.Component.Buy.buy import Buy
 from tasks.RichMan.assets import RichManAssets
 
+# 进入某个商店页面的最长等待
+NAVBAR_ENTER_TIMEOUT = 10
 
 
 class MallNavbar(GameUi, RichManAssets):
@@ -23,14 +25,14 @@ class MallNavbar(GameUi, RichManAssets):
         进入寄售屋
         :return:
         """
-        self.ui_click(self.I_MALL_CONSIGNMENT, self.I_MALL_CONSIGNMENT_CHECK)
+        self.ui_click(self.I_MALL_CONSIGNMENT, self.I_MALL_CONSIGNMENT_CHECK, timeout=NAVBAR_ENTER_TIMEOUT)
 
     def _enter_scales(self):
         """
         进入密卷屋 蛇皮
         :return:
         """
-        self.ui_click(self.I_MALL_SCCALES, self.I_MALL_SCCALES_CHECK)
+        self.ui_click(self.I_MALL_SCCALES, self.I_MALL_SCCALES_CHECK, timeout=NAVBAR_ENTER_TIMEOUT)
 
     def _enter_bondlings(self):
         """
@@ -38,21 +40,25 @@ class MallNavbar(GameUi, RichManAssets):
         :return:
         """
         self._enter_scales()
-        self.ui_click(self.I_MALL_BONDLINGS_SURE, self.I_MALL_BONDLINGS_ON)
+        self.ui_click(self.I_MALL_BONDLINGS_SURE, self.I_MALL_BONDLINGS_ON, timeout=NAVBAR_ENTER_TIMEOUT)
 
-    def _enter_sundry(self):
+    def _enter_sundry(self) -> bool:
         """
         进入杂货铺
-        :return:
+        :return: 是否成功进入
         """
-        self.ui_click(self.I_MALL_SUNDRY, self.I_MALL_SUNDRY_CHECK)
+        if not self.ui_click(self.I_MALL_SUNDRY, self.I_MALL_SUNDRY_CHECK, timeout=NAVBAR_ENTER_TIMEOUT):
+            logger.warning('Enter sundry mall failed')
+            return False
+        return True
 
     def _enter_special(self) -> bool:
         """
         进入特殊
         :return:
         """
-        self._enter_sundry()
+        if not self._enter_sundry():
+            return False
         pos = self.list_find(self.L_RM_NAVBAR, name='special', max_swipe=3)
         return self.click_and_check(pos, 'RM_NAVBAR_SPECIAL', self.I_SIDE_CHECK_SPECIAL)
 
@@ -83,7 +89,8 @@ class MallNavbar(GameUi, RichManAssets):
         进入荣誉 屋
         :return:
         """
-        self._enter_sundry()
+        if not self._enter_sundry():
+            return False
         img_names = ['honor', 'duel']
         pos = self.list_find(self.L_RM_NAVBAR, name=img_names, max_swipe=3)
         return self.click_and_check(pos, 'RM_NAVBAR_HONOR', self.I_SIDE_CHECK_HONOR)
@@ -93,7 +100,8 @@ class MallNavbar(GameUi, RichManAssets):
         友情点
         :return:
         """
-        self._enter_sundry()
+        if not self._enter_sundry():
+            return False
         pos = self.list_find(self.L_RM_NAVBAR, name='friendship', max_swipe=3)
         return self.click_and_check(pos, 'RM_NAVBAR_FRIENDSHIP', self.I_SIDE_CHECK_FRIENDS)
 
@@ -102,7 +110,8 @@ class MallNavbar(GameUi, RichManAssets):
         勋章
         :return:
         """
-        self._enter_sundry()
+        if not self._enter_sundry():
+            return False
         pos = self.list_find(self.L_RM_NAVBAR, name='medal', max_swipe=3)
         return self.click_and_check(pos, 'RM_NAVBAR_MEDAL', self.I_SIDE_CHECK_MEDAL)
 

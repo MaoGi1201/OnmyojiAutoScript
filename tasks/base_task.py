@@ -751,23 +751,38 @@ class BaseTask(GlobalGameAssets, CostumeBase):
 
         return True
 
-    def ui_click(self, click, stop, interval=1):
+    def ui_click(self, click, stop, interval=1, timeout: float = None) -> bool:
         """
         循环的一个操作，直到出现stop
         :param click:
         :param stop:
         :parm interval
-        :return:
+        :param timeout: 最长等待秒数。为空表示一直等到 stop 出现（老行为）。
+            页面没出现、按钮又点不动时，这种"只等页面判据"的循环会一直空转，
+            60 秒后被判 GameStuckError 把整个任务重启，所以需要的地方要传超时。
+        :return: stop 是否出现过
         """
+        timeout_timer = Timer(timeout).start() if timeout else None
         while 1:
             self.screenshot()
             if self.appear(stop):
-                break
+                return True
+            if timeout_timer is not None and timeout_timer.reached():
+                logger.warning(f'ui_click: wait {getattr(stop, "name", stop)} timeout({timeout}s)')
+                return False
             if isinstance(click, RuleImage) and self.appear_then_click(click, interval=interval):
+                if timeout_timer is not None:
+                    # 传了超时的调用自带总时长上界，不会无限连点同一个按钮，
+                    # 清掉点击记录，免得被"单按钮 10 次"的守卫判成卡死（同 list_find 的处理）
+                    self.device.click_record_clear()
                 continue
             if isinstance(click, RuleClick) and self.click(click, interval=interval):
+                if timeout_timer is not None:
+                    self.device.click_record_clear()
                 continue
             elif isinstance(click, RuleOcr) and self.ocr_appear_click(click, interval=interval):
+                if timeout_timer is not None:
+                    self.device.click_record_clear()
                 continue
 
     def ui_clicks(self, clicks: list[RuleImage | RuleOcr | RuleClick], stop: RuleImage, interval=1):
