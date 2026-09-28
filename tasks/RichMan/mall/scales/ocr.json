@@ -10,8 +10,8 @@
   },
   {
     "itemName": "sca_number_demon",
-    "roiFront": "625,301,30,22",
-    "roiBack": "625,301,30,22",
+    "roiFront": "622,299,32,24",
+    "roiBack": "622,299,32,24",
     "mode": "Quantity",
     "method": "Default",
     "keyword": "",
@@ -19,8 +19,8 @@
   },
   {
     "itemName": "sca_number_sea",
-    "roiFront": "920,300,33,20",
-    "roiBack": "920,300,33,20",
+    "roiFront": "920,299,32,24",
+    "roiBack": "920,299,32,24",
     "mode": "Quantity",
     "method": "Default",
     "keyword": "",
