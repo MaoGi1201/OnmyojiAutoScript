@@ -7,6 +7,7 @@ from time import sleep
 from module.exception import TaskEnd
 from module.logger import logger
 from module.base.timer import Timer
+from module.atom.image import RuleImage
 
 from tasks.GameUi.game_ui import GameUi
 from tasks.GameUi.page import (
@@ -19,6 +20,10 @@ from tasks.GameUi.page import (
 )
 from tasks.WeeklyTrifles.assets import WeeklyTriflesAssets
 from tasks.WeeklyTrifles.page import page_shikigami_share, page_touch_fish
+
+# 点分享后等"分享完成"的最长时间。桌面版不出二维码界面、也不弹奖励弹窗，
+# 只能靠勾玉图标消失判断完成，所以要有个上限，别把分享按钮点到撞点击守卫。
+SHARE_WAIT_TIMEOUT = 15
 
 
 class ScriptTask(GameUi, WeeklyTriflesAssets):
@@ -39,20 +44,28 @@ class ScriptTask(GameUi, WeeklyTriflesAssets):
         self.set_next_run(task='WeeklyTrifles', success=True, finish=True)
         raise TaskEnd('WeeklyTrifles')
 
-    def click_share(self, wechat) -> bool:
+    def click_share(self, wechat, jade: RuleImage = None) -> bool:
         """
         点击分享
-        :param wechat:
-        :return:
+        :param jade: 分享奖励的勾玉图标。
+        :return: 是否确认分享完成
         """
         # 点击分享
         # self.ui_click(wechat, self.I_WT_QR_CODE)
+        share_timer = Timer(SHARE_WAIT_TIMEOUT).start()
         while 1:
             self.screenshot()
+            # 先判二维码：二维码界面可能把勾玉挡住，不能先判勾玉
             if self.appear(self.I_WT_QR_CODE) or self.appear(self.I_WT_QR_CODE_1) or self.appear(self.I_WT_QR_CODE_2):
                 break
+            if jade is not None and not self.appear(jade):
+                logger.info('Share finished, jade is gone')
+                return True
             if self.appear_then_click(wechat, interval=2.5):
                 continue
+            if share_timer.reached():
+                logger.warning('Share button has no response, give up')
+                return False
         logger.info('Click share')
         get_timer = Timer(7)
         get_timer.start()
@@ -180,8 +193,8 @@ class ScriptTask(GameUi, WeeklyTriflesAssets):
             logger.warning('This week has been obtained')
             obtained = True
         if not obtained:
-            # 点击分享
-            self.click_share(self.I_WT_AB_TWITTER)
+            # 点击分享（勾玉消失即视为分享完成，桌面版不会弹奖励弹窗）
+            self.click_share(self.I_WT_AB_TWITTER, self.I_WT_AB_JADE)
         self.goto_page(page_main)
 
     def _share_secret(self):
@@ -218,9 +231,9 @@ class ScriptTask(GameUi, WeeklyTriflesAssets):
         if not self.appear(self.I_WT_SE_JADE):
             obtained = True
             logger.warning('This week has been obtained')
-        # 点击分享
+        # 点击分享（勾玉消失即视为分享完成，桌面版不会弹奖励弹窗）
         if not obtained:
-            self.click_share(self.I_WT_SE_TWITTER)
+            self.click_share(self.I_WT_SE_TWITTER, self.I_WT_SE_JADE)
         # 返回
         self.goto_page(page_main)
 
