@@ -38,6 +38,8 @@ WQ_TYPE_COLOR_REFERENCE: tuple[tuple[WQType, int], ...] = (
 WQ_TYPE_COLOR_MIN_SATURATION = 70
 # 判定阈值：非白像素占比低于此值认为不是类型标签（标签会填满整个 ROI）
 WQ_TYPE_COLOR_MIN_COVERAGE = 0.4
+# 秘闻剧情对话最多点多少次就放弃
+SECRET_CHAT_MAX_CLICKS = 60
 # 判定阈值：亮度低于此值认为不是类型标签（标签 V 在 130 以上；UI 暗部只有 40 左右）
 WQ_TYPE_COLOR_MIN_VALUE = 80
 # 色相离所有参考值都超过这个度数就不判定（避免把背景误判成某个类型）
@@ -434,21 +436,29 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
                 logger.warning('Current is special secret, exit and retry')
                 return 
             # 又臭又长的对话针的是服了这个网易
+            # 注意：秘闻的剧情对话画面**没有任何可识别页面、也没有红色返回键**
             click_count = 0
+            chat_total = 0
             while 1:
                 self.screenshot()
-                if self.get_current_page() in [page_battle_prepare, page_battle]:
+                current_page = self.get_current_page()
+                if current_page in [page_battle_prepare, page_battle]:
                     self.run_general_battle(self.battle_config, exit_matcher=any_of(self.I_UI_BACK_RED, self.I_WQSE_SPECIAL_FIRE))
                     break
                 if self.appear_then_click(self.I_WQSE_FIRE, interval=1):
                     continue
-                if self.appear(self.I_UI_BACK_RED, threshold=0.7) and not self.appear(self.I_WQSE_FIRE):
+                if current_page is None or (
+                        self.appear(self.I_UI_BACK_RED, threshold=0.7) and not self.appear(self.I_WQSE_FIRE)):
                     self.click(self.C_SECRET_CHAT, interval=0.8)
                     click_count += 1
+                    chat_total += 1
                     if click_count >= 6:
                         logger.warning('Secret mission chat too long, force to close')
                         click_count = 0
                         self.device.click_record_clear()
+                    if chat_total >= SECRET_CHAT_MAX_CLICKS:
+                        logger.warning('Secret mission chat too long, give up this quest')
+                        return
         logger.info('Secret mission finished')
 
     def invite_random(self, add_button: RuleImage):
