@@ -238,6 +238,12 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
         if not self.appear(self.I_DE_AWARD):
             self.ui_get_reward(self.I_DE_RED_DHARMA)
         self.wait_until_appear(self.I_DE_AWARD)
+        # 判断灯笼前先点一下左下角地标，让地图归位、灯笼标记刷新出来，等 2 秒再判断
+        if self.appear_then_click(self.I_DE_LOCATION):
+            logger.info('Click location before check lantern')
+        else:
+            logger.warning('Location icon not found before check lantern')
+        time.sleep(2)
         # 然后到四个灯笼
         match_click = {
             1: self.C_DE_1,
