@@ -285,18 +285,11 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
             if datetime.now() - self.start_time >= self.limit_time:
                 logger.info('EvoZone time limit out')
                 break
-            # 点击挑战
-            while 1:
-                self.screenshot()
-                if self.appear_then_click(self.I_EVOZONE_FIRE, interval=1):
-                    pass
-
-                if not self.appear(self.I_EVOZONE_FIRE):
-                    self.run_general_battle(
-                        config=self.config.evo_zone.general_battle_config,
-                        exit_matcher=self.I_EVOZONE_FIRE,
-                    )
-                    break
+            self.click_fire_until_battle(self.I_EVOZONE_FIRE)
+            self.run_general_battle(
+                config=self.config.evo_zone.general_battle_config,
+                exit_matcher=self.I_EVOZONE_FIRE,
+            )
 
     def run_wild(self):
         logger.error('Wild mode is not implemented')

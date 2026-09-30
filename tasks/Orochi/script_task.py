@@ -288,17 +288,11 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
             if datetime.now() - self.start_time >= self.limit_time:
                 logger.info('Orochi time limit out')
                 break
-            # 点击挑战
-            while True:
-                self.screenshot()
-                if self.appear_then_click(self.I_OROCHI_FIRE, interval=1):
-                    pass
-                if not self.appear(self.I_OROCHI_FIRE):
-                    self.run_general_battle(
-                        config=self.config.orochi.general_battle_config,
-                        battle_key=self._orochi_battle_key(),
-                        exit_matcher=self.I_OROCHI_FIRE)
-                    break
+            self.click_fire_until_battle(self.I_OROCHI_FIRE)
+            self.run_general_battle(
+                config=self.config.orochi.general_battle_config,
+                battle_key=self._orochi_battle_key(),
+                exit_matcher=self.I_OROCHI_FIRE)
 
     def run_wild(self):
         logger.info('Start run wild')

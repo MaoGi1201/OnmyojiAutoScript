@@ -105,14 +105,8 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AreaBossAssets):
         # 点击第几个鬼王
         logger.info(f'Script area boss {battle}')
         self.ui_click(battle, self.I_AB_CLOSE_RED)
-        # 点击挑战
         logger.info("Script fire ")
-        while 1:
-            self.screenshot()
-            if self.appear_then_click(self.I_FIRE, interval=1):
-                continue
-            if not self.appear(self.I_AB_CLOSE_RED):  # 如果这个红色的关闭不见了才可以进行继续
-                break
+        self.click_fire_until_battle(self.I_FIRE, stay_rule=self.I_AB_CLOSE_RED)
         if not self.run_general_battle(self.config.area_boss.general_battle):
             logger.info("地域鬼王第2只战斗失败")
         # 红色关闭
@@ -176,12 +170,8 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AreaBossAssets):
 
     def start_fight(self) -> bool:
         self.check_can_run()
-        while 1:
-            self.screenshot()
-            if self.appear_then_click(self.I_FIRE, interval=1):
-                continue
-            if not self.appear(self.I_AB_CLOSE_RED):  # 如果这个红色的关闭不见了才可以进行继续
-                break
+        # 点击挑战，并等到战斗页面真的出现（不要用"一帧看不到按钮"当作已进战斗）
+        self.click_fire_until_battle(self.I_FIRE, stay_rule=self.I_AB_CLOSE_RED)
 
         return self.run_general_battle(self.config.area_boss.general_battle)
     

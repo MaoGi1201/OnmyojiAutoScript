@@ -12,6 +12,7 @@ from tasks.GameUi.default_pages import random_click
 from typing import Callable, Union
 
 from module.atom.gif import RuleGif
+from module.atom.click import RuleClick
 from module.atom.image import RuleImage
 from module.atom.ocr import RuleOcr
 from module.base.timer import Timer
@@ -36,6 +37,14 @@ PREPARE_CLICK_DELAY = 3.0
 QUICK_EXIT_WAIT_TIMEOUT = 10.0
 # 退出战斗流程的最长等待：点掉退出确认后如果既没到结算页也没离开战斗页，最多等这么久
 EXIT_BATTLE_WAIT_TIMEOUT = 20.0
+# 点挑战后，挑战按钮要连续多少帧看不到才算"真的进了战斗"。
+CLICK_FIRE_GONE_FRAMES = 2
+# 点挑战后最多等多久离开原页面
+CLICK_FIRE_LEAVE_TIMEOUT = 20.0
+# 离开原页面后最多等多久战斗页面出现
+CLICK_FIRE_BATTLE_TIMEOUT = 10.0
+# 点完挑战先播剧情对话时，最多点屏幕推进多久
+CLICK_FIRE_CHAT_TIMEOUT = 60.0
 
 
 @dataclass
@@ -850,6 +859,63 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
         finally:
             self._battle_context = None
             self.device.screenshot_interval_set()
+
+    def click_fire_until_battle(self, fire: RuleImage, stay_rule: RuleImage = None,
+                                advance_click: RuleClick = None) -> bool:
+        """
+        点挑战按钮，并等到战斗页面真的出现再返回。
+        Args:
+            fire: 挑战按钮。
+            stay_rule: "还停在原页面"的标志（可选）。原页面本身可能被识别成
+                `page_battle_prepare`，只等战斗页面会立刻返回，带上它更稳。
+            advance_click: 推进剧情对话的点击位置（可选）。秘闻这类副本点完挑战会先播剧情，
+                那种画面认不出页面、也没有挑战按钮，只能点屏幕中间推进。
+
+        Returns:
+            bool: 是否等到了战斗页面（False 表示超时，调用方可以照常继续）
+        """
+        logger.info(f'Click fire until battle: {fire.name}')
+        gone_frames = 0
+        leave_timer = Timer(CLICK_FIRE_LEAVE_TIMEOUT).start()
+        while 1:
+            self.screenshot()
+            if self.appear(fire):
+                gone_frames = 0
+                self.appear_then_click(fire, interval=1)
+            else:
+                gone_frames += 1
+                if gone_frames >= CLICK_FIRE_GONE_FRAMES:
+                    break
+            if leave_timer.reached():
+                logger.warning(f'Click fire: {fire.name} still here after {CLICK_FIRE_LEAVE_TIMEOUT}s')
+                break
+
+        # 过场走完后再等战斗页面出现；期间按钮又冒出来说明没点进去，继续点；
+        # 剧情对话（认不出页面）就点 advance_click 推进，直到战斗页面出现
+        chat_waiting = False
+        chat_clicks = 0
+        wait_timeout = CLICK_FIRE_CHAT_TIMEOUT if advance_click is not None else CLICK_FIRE_BATTLE_TIMEOUT
+        battle_timer = Timer(wait_timeout).start()
+        while 1:
+            self.screenshot()
+            if self.appear(fire) or (stay_rule is not None and self.appear(stay_rule)):
+                self.appear_then_click(fire, interval=1)
+            elif GameUi.detect_page_in(self, page_battle_prepare, page_battle):
+                if chat_waiting:
+                    logger.info(f'Secret mission chat done in {chat_clicks} clicks')
+                logger.info('Battle page appeared')
+                return True
+            elif advance_click is not None:
+                if not chat_waiting:
+                    chat_waiting = True
+                    logger.info('Secret mission chat appeared, click to advance')
+                self.click(advance_click, interval=0.8)
+                chat_clicks += 1
+                # 这个循环自身有总时长上界，清掉点击记录免得撞"单按钮 10 次"守卫
+                self.device.click_record_clear()
+            if battle_timer.reached():
+                logger.warning(f'Battle page not appeared in {wait_timeout}s, continue anyway')
+                return False
 
     def exit_battle(self, skip_first: bool = False) -> bool:
         """

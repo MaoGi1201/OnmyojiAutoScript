@@ -317,19 +317,12 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
                 logger.info('FallenSun time limit out')
                 break
 
-            # 点击挑战
-            while 1:
-                self.screenshot()
-                if self.appear_then_click(self.I_FALLEN_SUN_FIRE, interval=1):
-                    pass
-
-                if not self.appear(self.I_FALLEN_SUN_FIRE):
-                    self.run_general_battle(
-                        config=self.config.fallen_sun.general_battle_config,
-                        battle_key=self._fallen_sun_battle_key(),
-                        exit_matcher=self.I_FALLEN_SUN_FIRE,
-                    )
-                    break
+            self.click_fire_until_battle(self.I_FALLEN_SUN_FIRE)
+            self.run_general_battle(
+                config=self.config.fallen_sun.general_battle_config,
+                battle_key=self._fallen_sun_battle_key(),
+                exit_matcher=self.I_FALLEN_SUN_FIRE,
+            )
 
         # 回去
         self.goto_page(page_main)

@@ -92,17 +92,11 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, SougenbiAssets):
             if ticket == 0:
                 break
 
-            # 点击挑战
-            while 1:
-                self.screenshot()
-                if self.appear_then_click(self.I_S_FIRE, interval=1):
-                    pass
-                if not self.appear(self.I_S_FIRE):
-                    self.run_general_battle(
-                        config=con.general_battle_config,
-                        exit_matcher=any_of(self.I_S_FIRE, self.I_S_CHECK_SOUGENBI),
-                    )
-                    break
+            self.click_fire_until_battle(self.I_S_FIRE)
+            self.run_general_battle(
+                config=con.general_battle_config,
+                exit_matcher=any_of(self.I_S_FIRE, self.I_S_CHECK_SOUGENBI),
+            )
         self.goto_page(page_main)
         if s_con.buff_enable:
             self.open_buff()

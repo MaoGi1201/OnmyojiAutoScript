@@ -214,17 +214,11 @@ class ScriptTask(GameUi, GeneralBattle, GeneralRoom, GeneralInvite, SwitchSoul, 
             if datetime.now() - self.start_time >= self._limit_time:
                 logger.info("EternitySea time limit out")
                 break
-            # 点击挑战
-            while 1:
-                self.screenshot()
-                if self.appear_then_click(self.I_ETERNITY_SEA_FIRE, interval=1):
-                    pass
-                if not self.appear(self.I_ETERNITY_SEA_FIRE):
-                    self.run_general_battle(
-                        config=self._task_config.general_battle_config,
-                        exit_matcher=self.I_ETERNITY_SEA_FIRE,
-                    )
-                    break
+            self.click_fire_until_battle(self.I_ETERNITY_SEA_FIRE)
+            self.run_general_battle(
+                config=self._task_config.general_battle_config,
+                exit_matcher=self.I_ETERNITY_SEA_FIRE,
+            )
         self.exit_room()
         return True
 
