@@ -20,7 +20,7 @@
   {
     "itemName": "soul_preset_5",
     "imageName": "sk5_soul_preset_5.png",
-    "roiFront": "335,73,90,51",
+    "roiFront": "361,75,93,42",
     "roiBack": "310,57,169,72",
     "method": "Template matching",
     "threshold": 0.8,
@@ -146,7 +146,7 @@
   {
     "itemName": "sou_team_present_5",
     "imageName": "sk5_sou_team_present_5.png",
-    "roiFront": "720,76,136,43",
+    "roiFront": "722,83,136,43",
     "roiBack": "706,68,175,63",
     "method": "Template matching",
     "threshold": 0.8,
@@ -165,7 +165,7 @@
     "itemName": "st_souls_5",
     "imageName": "sk5_st_souls_5.png",
     "roiFront": "1176,227,70,80",
-    "roiBack": "1181,234,58,69",
+    "roiBack": "1176,227,70,80",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "点击御魂"
@@ -174,7 +174,7 @@
     "itemName": "st_replace_5",
     "imageName": "sk5_st_replace_5.png",
     "roiFront": "860,168,100,100",
-    "roiBack": "872,186,78,63",
+    "roiBack": "860,168,100,100",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "更换"

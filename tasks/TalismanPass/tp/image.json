@@ -65,8 +65,8 @@
   {
     "itemName": "tp_level_3",
     "imageName": "tp_tp_level_3.png",
-    "roiFront": "967,433,109,61",
-    "roiBack": "967,433,109,61",
+    "roiFront": "957,434,122,58",
+    "roiBack": "957,434,122,58",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "选择三号奖励"

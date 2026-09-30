@@ -20,7 +20,7 @@
   {
     "itemName": "main_goto_summon_1",
     "imageName": "main1_main_goto_summon_1.png",
-    "roiFront": "818,206,32,37",
+    "roiFront": "815,207,32,37",
     "roiBack": "634,175,388,100",
     "method": "Template matching",
     "threshold": 0.8,
@@ -30,7 +30,7 @@
     "itemName": "main_goto_town_1",
     "imageName": "main1_main_goto_town_1.png",
     "roiFront": "567,340,36,60",
-    "roiBack": "474,325,240,86",
+    "roiBack": "394,325,320,92",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"

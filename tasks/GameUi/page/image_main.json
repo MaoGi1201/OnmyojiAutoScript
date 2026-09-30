@@ -74,7 +74,7 @@
   {
     "itemName": "main_goto_mall",
     "imageName": "page_main_goto_mall.png",
-    "roiFront": "664,661,40,18",
+    "roiFront": "667,648,40,18",
     "roiBack": "601,613,163,78",
     "method": "Template matching",
     "threshold": 0.7,
@@ -164,8 +164,8 @@
   {
     "itemName": "check_mall",
     "imageName": "page_check_mall.png",
-    "roiFront": "231,455,131,78",
-    "roiBack": "201,432,185,121",
+    "roiFront": "1037,56,91,51",
+    "roiBack": "1017,42,131,80",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "商店页面标志"
