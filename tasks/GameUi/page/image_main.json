@@ -2,10 +2,10 @@
   {
     "itemName": "check_main",
     "imageName": "page_check_main.png",
-    "roiFront": "807,108,76,45",
-    "roiBack": "49,98,1033,61",
+    "roiFront": "806,109,77,44",
+    "roiBack": "49,97,1031,61",
     "method": "Template matching",
-    "threshold": 0.95,
+    "threshold": 0.8,
     "description": "庭院标志"
   },
   {
