@@ -60,12 +60,16 @@ class GeneralBuff(BaseTask, GeneralBuffAssets):
         self.screenshot()
         result_list = buff.detect_and_ocr(self.device.image)
         area = None
+        # 关键词只取稳定的后缀部分（如 "货UP100%"）。
+        keyword = buff.keyword.replace(' ', '')
         for result in result_list:
-            if result.ocr_text == buff.keyword:
+            if keyword in result.ocr_text.replace(' ', ''):
                 area = (buff.roi[0] + result.box[0, 0], buff.roi[1] + result.box[0, 1],
-                        result.box[1, 0] - result.box[0,0], result.box[2, 1] - result.box[0,1])
+                        result.box[1, 0] - result.box[0, 0], result.box[2, 1] - result.box[0, 1])
                 break
         if area is None:
+            logger.warning(f'Buff [{buff.name}] not matched by {keyword!r}, ocr: '
+                           f'{[r.ocr_text for r in result_list]}')
             return None
         # 开始的x坐标就是文字的右边
         start_x = area[0] + area[2] + 10  # 10是文字和开关之间的间隔

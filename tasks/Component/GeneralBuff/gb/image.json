@@ -38,7 +38,7 @@
   {
     "itemName": "gold_100",
     "imageName": "gb_gold_100.png",
-    "roiFront": "379,268,43,39",
+    "roiFront": "378,340,43,39",
     "roiBack": "365,121,74,407",
     "method": "Template matching",
     "threshold": 0.8,

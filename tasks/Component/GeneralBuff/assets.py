@@ -20,7 +20,7 @@ class GeneralBuffAssets:
 	# description 
 	I_GOLD_50 = RuleImage(roi_front=(373,269,52,36), roi_back=(367,120,64,391), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBuff/gb/gb_gold_50.png")
 	# description 
-	I_GOLD_100 = RuleImage(roi_front=(379,268,43,39), roi_back=(365,121,74,407), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBuff/gb/gb_gold_100.png")
+	I_GOLD_100 = RuleImage(roi_front=(378,340,43,39), roi_back=(365,121,74,407), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBuff/gb/gb_gold_100.png")
 	# description 
 	I_EXP_50 = RuleImage(roi_front=(375,338,44,43), roi_back=(365,127,70,393), threshold=0.8, method="Template matching", file="./tasks/Component/GeneralBuff/gb/gb_exp_50.png")
 	# description 
@@ -35,13 +35,13 @@ class GeneralBuffAssets:
 
 	# Ocr Rule Assets
 	# Ocr-description 
-	O_GOLD_50 = RuleOcr(roi=(428,120,338,389), area=(0,0,100,100), mode="Full", method="Default", keyword="战斗胜利获得的金币增加50%", name="gold_50")
+	O_GOLD_50 = RuleOcr(roi=(428,120,338,389), area=(0,0,100,100), mode="Full", method="Default", keyword="货UP50%", name="gold_50")
 	# Ocr-description 
-	O_GOLD_100 = RuleOcr(roi=(425,118,342,397), area=(0,0,100,100), mode="Full", method="Default", keyword="战斗胜利获得的金币增加100%", name="gold_100")
+	O_GOLD_100 = RuleOcr(roi=(425,118,342,397), area=(0,0,100,100), mode="Full", method="Default", keyword="货UP100%", name="gold_100")
 	# Ocr-description 
-	O_EXP_50 = RuleOcr(roi=(426,119,335,394), area=(0,0,100,100), mode="Full", method="Default", keyword="战斗胜利获得的经验增加50%", name="exp_50")
+	O_EXP_50 = RuleOcr(roi=(426,119,335,394), area=(0,0,100,100), mode="Full", method="Default", keyword="值UP50%", name="exp_50")
 	# Ocr-description 
-	O_EXP_100 = RuleOcr(roi=(421,127,342,388), area=(0,0,100,100), mode="Full", method="Default", keyword="战斗胜利获得的经验增加100%", name="exp_100")
+	O_EXP_100 = RuleOcr(roi=(421,127,342,388), area=(0,0,100,100), mode="Full", method="Default", keyword="值UP100%", name="exp_100")
 	# 打开buff加成 
 	O_GB_BUFF_2 = RuleOcr(roi=(348,31,93,51), area=(363,36,29,43), mode="Single", method="Default", keyword="加成", name="gb_buff_2")
 
