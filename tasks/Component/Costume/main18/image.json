@@ -1,0 +1,137 @@
+[
+  {
+    "itemName": "check_main_18_night",
+    "imageName": "main18_check_main_18_night.png",
+    "roiFront": "1061,159,52,72",
+    "roiBack": "1011,123,150,130",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "庭院锚点（町中挂牌）（night）"
+  },
+  {
+    "itemName": "check_main_18_dusk",
+    "imageName": "main18_check_main_18_dusk.png",
+    "roiFront": "1058,164,58,47",
+    "roiBack": "1015,119,150,130",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "庭院锚点（町中挂牌）（dusk）"
+  },
+  {
+    "itemName": "check_main_18_day",
+    "imageName": "main18_check_main_18_day.png",
+    "roiFront": "1056,167,63,64",
+    "roiBack": "1007,125,150,130",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "庭院锚点（町中挂牌）（day）"
+  },
+  {
+    "itemName": "main_goto_exploration_18_night",
+    "imageName": "main18_main_goto_exploration_18_night.png",
+    "roiFront": "482,155,40,46",
+    "roiBack": "400,105,205,174",
+    "method": "Template matching",
+    "threshold": 0.6,
+    "description": "探索（night）"
+  },
+  {
+    "itemName": "main_goto_exploration_18_dusk",
+    "imageName": "main18_main_goto_exploration_18_dusk.png",
+    "roiFront": "486,155,32,46",
+    "roiBack": "442,106,141,166",
+    "method": "Template matching",
+    "threshold": 0.6,
+    "description": "探索（dusk）"
+  },
+  {
+    "itemName": "main_goto_exploration_18_day",
+    "imageName": "main18_main_goto_exploration_18_day.png",
+    "roiFront": "489,154,34,42",
+    "roiBack": "422,100,179,181",
+    "method": "Template matching",
+    "threshold": 0.6,
+    "description": "探索（day）"
+  },
+  {
+    "itemName": "main_goto_summon_18_night",
+    "imageName": "main18_main_goto_summon_18_night.png",
+    "roiFront": "815,214,27,43",
+    "roiBack": "739,151,169,163",
+    "method": "Template matching",
+    "threshold": 0.6,
+    "description": "召唤屋（night）"
+  },
+  {
+    "itemName": "main_goto_summon_18_dusk",
+    "imageName": "main18_main_goto_summon_18_dusk.png",
+    "roiFront": "808,215,36,50",
+    "roiBack": "752,174,159,148",
+    "method": "Template matching",
+    "threshold": 0.6,
+    "description": "召唤屋（dusk）"
+  },
+  {
+    "itemName": "main_goto_summon_18_day",
+    "imageName": "main18_main_goto_summon_18_day.png",
+    "roiFront": "806,214,39,44",
+    "roiBack": "748,155,148,149",
+    "method": "Template matching",
+    "threshold": 0.6,
+    "description": "召唤屋（day）"
+  },
+  {
+    "itemName": "main_goto_town_18_night",
+    "imageName": "main18_main_goto_town_18_night.png",
+    "roiFront": "575,343,27,61",
+    "roiBack": "525,315,190,140",
+    "method": "Template matching",
+    "threshold": 0.6,
+    "description": "町中（night）"
+  },
+  {
+    "itemName": "main_goto_town_18_dusk",
+    "imageName": "main18_main_goto_town_18_dusk.png",
+    "roiFront": "575,349,24,56",
+    "roiBack": "525,315,190,140",
+    "method": "Template matching",
+    "threshold": 0.6,
+    "description": "町中（dusk）"
+  },
+  {
+    "itemName": "main_goto_town_18_day",
+    "imageName": "main18_main_goto_town_18_day.png",
+    "roiFront": "575,343,26,56",
+    "roiBack": "525,315,190,140",
+    "method": "Template matching",
+    "threshold": 0.6,
+    "description": "町中（day）"
+  },
+  {
+    "itemName": "pet_house_18_night",
+    "imageName": "main18_pet_house_18_night.png",
+    "roiFront": "960,540,65,80",
+    "roiBack": "900,495,190,155",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "宠物屋（night）"
+  },
+  {
+    "itemName": "pet_house_18_dusk",
+    "imageName": "main18_pet_house_18_dusk.png",
+    "roiFront": "965,561,41,40",
+    "roiBack": "897,491,190,155",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "宠物屋（dusk）"
+  },
+  {
+    "itemName": "pet_house_18_day",
+    "imageName": "main18_pet_house_18_day.png",
+    "roiFront": "960,565,40,43",
+    "roiBack": "896,487,190,155",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "宠物屋（day）"
+  }
+]

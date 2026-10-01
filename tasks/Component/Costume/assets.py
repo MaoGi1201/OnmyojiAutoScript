@@ -140,6 +140,39 @@ class CostumeAssets:
 
 
 	# Image Rule Assets
+	# 庭院锚点（町中挂牌）（night） 
+	I_CHECK_MAIN_18_NIGHT = RuleImage(roi_front=(1061,159,52,72), roi_back=(1011,123,150,130), threshold=0.8, method="Template matching", file="./tasks/Component/Costume/main18/main18_check_main_18_night.png")
+	# 庭院锚点（町中挂牌）（dusk） 
+	I_CHECK_MAIN_18_DUSK = RuleImage(roi_front=(1058,164,58,47), roi_back=(1015,119,150,130), threshold=0.8, method="Template matching", file="./tasks/Component/Costume/main18/main18_check_main_18_dusk.png")
+	# 庭院锚点（町中挂牌）（day） 
+	I_CHECK_MAIN_18_DAY = RuleImage(roi_front=(1056,167,63,64), roi_back=(1007,125,150,130), threshold=0.8, method="Template matching", file="./tasks/Component/Costume/main18/main18_check_main_18_day.png")
+	# 探索（night） 
+	I_MAIN_GOTO_EXPLORATION_18_NIGHT = RuleImage(roi_front=(482,155,40,46), roi_back=(400,105,205,174), threshold=0.6, method="Template matching", file="./tasks/Component/Costume/main18/main18_main_goto_exploration_18_night.png")
+	# 探索（dusk） 
+	I_MAIN_GOTO_EXPLORATION_18_DUSK = RuleImage(roi_front=(486,155,32,46), roi_back=(442,106,141,166), threshold=0.6, method="Template matching", file="./tasks/Component/Costume/main18/main18_main_goto_exploration_18_dusk.png")
+	# 探索（day） 
+	I_MAIN_GOTO_EXPLORATION_18_DAY = RuleImage(roi_front=(489,154,34,42), roi_back=(422,100,179,181), threshold=0.6, method="Template matching", file="./tasks/Component/Costume/main18/main18_main_goto_exploration_18_day.png")
+	# 召唤屋（night） 
+	I_MAIN_GOTO_SUMMON_18_NIGHT = RuleImage(roi_front=(815,214,27,43), roi_back=(739,151,169,163), threshold=0.6, method="Template matching", file="./tasks/Component/Costume/main18/main18_main_goto_summon_18_night.png")
+	# 召唤屋（dusk） 
+	I_MAIN_GOTO_SUMMON_18_DUSK = RuleImage(roi_front=(808,215,36,50), roi_back=(752,174,159,148), threshold=0.6, method="Template matching", file="./tasks/Component/Costume/main18/main18_main_goto_summon_18_dusk.png")
+	# 召唤屋（day） 
+	I_MAIN_GOTO_SUMMON_18_DAY = RuleImage(roi_front=(806,214,39,44), roi_back=(748,155,148,149), threshold=0.6, method="Template matching", file="./tasks/Component/Costume/main18/main18_main_goto_summon_18_day.png")
+	# 町中（night） 
+	I_MAIN_GOTO_TOWN_18_NIGHT = RuleImage(roi_front=(575,343,27,61), roi_back=(525,315,190,140), threshold=0.6, method="Template matching", file="./tasks/Component/Costume/main18/main18_main_goto_town_18_night.png")
+	# 町中（dusk） 
+	I_MAIN_GOTO_TOWN_18_DUSK = RuleImage(roi_front=(575,349,24,56), roi_back=(525,315,190,140), threshold=0.6, method="Template matching", file="./tasks/Component/Costume/main18/main18_main_goto_town_18_dusk.png")
+	# 町中（day） 
+	I_MAIN_GOTO_TOWN_18_DAY = RuleImage(roi_front=(575,343,26,56), roi_back=(525,315,190,140), threshold=0.6, method="Template matching", file="./tasks/Component/Costume/main18/main18_main_goto_town_18_day.png")
+	# 宠物屋（night） 
+	I_PET_HOUSE_18_NIGHT = RuleImage(roi_front=(960,540,65,80), roi_back=(900,495,190,155), threshold=0.8, method="Template matching", file="./tasks/Component/Costume/main18/main18_pet_house_18_night.png")
+	# 宠物屋（dusk） 
+	I_PET_HOUSE_18_DUSK = RuleImage(roi_front=(965,561,41,40), roi_back=(897,491,190,155), threshold=0.8, method="Template matching", file="./tasks/Component/Costume/main18/main18_pet_house_18_dusk.png")
+	# 宠物屋（day） 
+	I_PET_HOUSE_18_DAY = RuleImage(roi_front=(960,565,40,43), roi_back=(896,487,190,155), threshold=0.8, method="Template matching", file="./tasks/Component/Costume/main18/main18_pet_house_18_day.png")
+
+
+	# Image Rule Assets
 	# description 
 	I_CHECK_MAIN_2 = RuleImage(roi_front=(1090,146,48,55), roi_back=(880,108,271,100), threshold=0.8, method="Template matching", file="./tasks/Component/Costume/main2/main2_check_main_2.png")
 	# description 

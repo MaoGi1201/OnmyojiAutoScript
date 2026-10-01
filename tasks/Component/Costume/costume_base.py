@@ -2,6 +2,8 @@
 # @author runhey
 # github https://github.com/runhey
 
+from typing import Optional
+
 from module.atom.image import RuleImage
 from module.logger import logger
 
@@ -19,8 +21,13 @@ from tasks.Component.CustomCourtyardAffair.assets import CustomCourtyardAffairAs
 
 # 庭院皮肤
 # 主界面皮肤（使用字典推导式动态生成）
-main_costume_model = {
-    getattr(MainType, f'COSTUME_MAIN_{i}'): {
+def _main_costume_assets(i: int) -> dict:
+    """第 i 套庭院皮肤的「基准名 → 资产名」映射。
+
+    值可以是 str（单模板），也可以是 list（**多状态候选**：动态庭院里同一个按钮在不同
+    时段/场景下配色不同，一张模板覆盖不了，运行时会按当前画面挑一张能命中的）。
+    """
+    return {
         'I_CHECK_MAIN': f'I_CHECK_MAIN_{i}',
         'I_MAIN_GOTO_EXPLORATION': f'I_MAIN_GOTO_EXPLORATION_{i}',
         'I_MAIN_GOTO_SUMMON': f'I_MAIN_GOTO_SUMMON_{i}',
@@ -33,7 +40,20 @@ main_costume_model = {
         'I_HARVEST_SOUL': f'I_HARVEST_SOUL_{i}',
         'I_HARVEST_GUILD_REWARD': f'I_HARVEST_GUILD_REWARD_{i}',
     }
+
+
+main_costume_model = {
+    getattr(MainType, f'COSTUME_MAIN_{i}'): _main_costume_assets(i)
     for i in range(1, 18)
+}
+# 动态庭院（画面随时段变）：每个按钮都从三个时段各裁一份模板当候选。
+# 顺序 = 优先级（night 那张最独特、不会误命中别的时段，放最前）。
+# 回退到第一张时点击位置依然是对的。
+main_costume_model[MainType.COSTUME_MAIN_18] = {
+    **_main_costume_assets(18),
+    **{key: [f'{key}_18_NIGHT', f'{key}_18_DUSK', f'{key}_18_DAY']
+       for key in ('I_CHECK_MAIN', 'I_MAIN_GOTO_EXPLORATION', 'I_MAIN_GOTO_SUMMON',
+                   'I_MAIN_GOTO_TOWN', 'I_PET_HOUSE')},
 }
 
 # 战斗主题（使用循环处理常规情况 + 特例处理）
@@ -112,12 +132,34 @@ class CostumeBase:
         asset_before_object.threshold = asset_after.threshold
         asset_before_object.file = asset_after.file
 
+    def _pick_multi_state_rule(self, names: list) -> Optional[RuleImage]:
+        """多状态候选里挑一张当前画面能命中的（动态庭院每个时段配色不同）。
+
+        顺序即优先级，命中第一张就返回；一张都命中不了（或还没有截图）就用第一张兜底。
+        """
+        rules = [r for r in (getattr(CostumeAssets(), n, None) for n in names) if r is not None]
+        if not rules:
+            return None
+        image = self.device.image
+        if image is not None:
+            for rule in rules:
+                if rule.match(image, frame_id=self.device.image_frame_id):
+                    return rule
+        return rules[0]
+
     def check_costume_main(self, main_type: MainType):
         if main_type == MainType.COSTUME_MAIN:
             return
         logger.info(f'Switch main costume to {main_type}')
         costume_assets = CostumeAssets()
         for key, value in main_costume_model[main_type].items():
+            if isinstance(value, (list, tuple)):
+                picked = self._pick_multi_state_rule(value)
+                if picked is None:
+                    continue
+                logger.info(f'{key} uses {picked.name} (multi-state)')
+                self.replace_img(key, picked)
+                continue
             assert_value: RuleImage = getattr(costume_assets, value, None)
             if assert_value is None:
                 continue

@@ -43,3 +43,75 @@
    **在测试之前你需要打开一次 OASX 修改你对应的庭院皮肤的选项**
 
 8. 完事啦？？？哪有那么简单，你没有发现打开 OASX 的时候发现你的选项还是 `costume_main_xxx` 这种吗。你还需要添加一个翻译，[点击这儿](https://runhey.github.io/OnmyojiAutoScript-website/docs/development/user-option#7翻译)
+
+
+---
+
+## 如何添加「动态庭院」（画面会随时段变化）
+
+有些庭院是动态的：**同一个按钮在不同时段/场景下配色和画面内容都不同**
+（例：`costume_main_18` 天穹之境有 夕 / 夜 / 昼 三种画面）。这种庭院一张模板只能命中一个时段，
+其他时段必然匹配失败，所以要**每个时段各裁一份**，运行时按当前画面挑一张能命中的。
+
+参考实现：`costume_main_18`（`./tasks/Component/Costume/main18/`）。
+
+**改动清单（照着做就行，一共 5 处）**
+
+| # | 位置 | 改什么 |
+|---|---|---|
+| 1 | `tasks/Component/Costume/mainNN/` | 新建文件夹：每个功能 × 每个时段各一张 png + `image.json` |
+| 2 | `tasks/Component/Costume/assets.py` | 手工加 5×N 条 `I_XXX_NN_时段` 规则（**别整文件重跑 assets_extract**，会重排） |
+| 3 | `tasks/Component/Costume/config.py` | `MainType` 里加 `COSTUME_MAIN_NN = 'costume_main_NN'  # 中文名` |
+| 4 | `tasks/Component/Costume/costume_base.py` | 补一行 `main_costume_model[MainType.COSTUME_MAIN_NN] = {...}`（见下面第 3 小节） |
+| 5 | `assets/i18n/zh-CN.json` | 加 `"costume_main_NN": "中文名"`（Web UI 下拉显示用；Qt 的 `zh_CN.xml` 里 1~18 都没有，属既有缺口） |
+
+改完**必须重启脚本进程**（`assets.py`/`config.py`/`costume_base.py` 都是进程启动时加载的），
+Web UI 刷新浏览器即可。可选：`I_WQ_DONE_NN` / `I_HARVEST_*_NN` 这些非强制的资源，
+如果该庭院的悬赏完成标记、收菜按钮位置也不一样再补（缺了会自动跳过、不影响其它功能）。
+
+### 1. 资产命名
+
+每个功能 × 每个时段各一张，命名 `<功能>_<编号>_<时段>`：
+
+```
+main18_check_main_18_night.png / _dusk.png / _day.png
+main18_main_goto_exploration_18_night.png / _dusk.png / _day.png
+main18_main_goto_summon_18_night.png / _dusk.png / _day.png
+main18_main_goto_town_18_night.png / _dusk.png / _day.png
+main18_pet_house_18_night.png / _dusk.png / _day.png
+```
+
+生成的常量名就是 `I_` + 大写，例如 `I_MAIN_GOTO_TOWN_18_NIGHT`。
+时段名随便起（`night/dusk/day`），只要前后一致即可。
+
+### 2. 三条硬规则
+
+1. **所有候选必须共用同一 `roiFront` / `roiBack`**
+   （实测三张图里元素位置一致，只有配色/内容不同）。
+   这样即使将来出现没收录的新时段、候选全不中而回退到第一张，**点击位置依然是对的**，
+   不会点到别的地方去。
+2. **阈值统一 0.8**（比普通庭院常用的 0.55~0.7 严）。
+   因为"选哪一套"靠的就是匹配分：跨时段误匹配分实测只有 0.15~0.66，离 0.8 很远，
+   这样每个时段都能稳定选中"自己那张"。
+3. **候选顺序 = 优先级**，把最独特、最不容易误命中别的时段的那张放最前
+   （天穹之境是把 `night` 放最前）。
+
+### 3. 在 `costume_base.py` 里注册成候选列表
+
+普通庭院是「一个 key → 一个资产名」；动态庭院把需要多状态的那些 key 写成**列表**：
+
+```python
+# 动态庭院（画面随时段变）：每个按钮都给多个时段各一份候选
+main_costume_model[MainType.COSTUME_MAIN_19] = {
+    **_main_costume_assets(19),
+    **{key: [f'{key}_19_NIGHT', f'{key}_19_DUSK', f'{key}_19_DAY']
+       for key in ('I_CHECK_MAIN', 'I_MAIN_GOTO_EXPLORATION', 'I_MAIN_GOTO_SUMMON',
+                   'I_MAIN_GOTO_TOWN', 'I_PET_HOUSE')},
+}
+```
+
+- 只有部分功能需要多状态时，就只把那几个 key 写成列表，其余保持字符串（走原来的单模板逻辑）。
+- 列表的处理在 `CostumeBase._pick_multi_state_rule()`：**按顺序试，命中第一张就用**；
+  没有截图或全不中时用第一张兜底。
+- 注意 `main_costume_model` 的字典推导式只到 `range(1, 18)`，**新增庭院编号要像上面这样单独补一行**
+  （并把 `config.py` 的枚举、两套 i18n 一起补上，见上面第 5、8 步）。
