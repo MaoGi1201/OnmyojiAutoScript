@@ -9,6 +9,10 @@
   "limit_time_help": "达到限制时间后不再开始下一局或下一场战斗，已经开始的战斗会正常完成",
   "LBS": "LBS鬼王",
   "lbs_config": "LBS鬼王配置",
+  "FrogChallenge": "青蛙挑战赛",
+  "frog_challenge_config": "青蛙挑战赛配置",
+  "limit_count": "挑战次数",
+  "limit_count_help": "达到挑战次数后结束任务",
   "lbs_mode": "运行模式",
   "lbs_mode_help": "单人挑战：创建不公开房间直接打\n组队匹配：寻找队伍自动匹配路人\n开车模式：创建公开房间，有人进来退出再开，结束条件为挑战次数（即是开车次数）或运行时间到达",
   "matchmaking_timeout_seconds": "匹配限制时间（秒）",
@@ -283,5 +287,8 @@
   "min_fish_value": "斗鱼最低收益",
   "min_fish_value_help": "只蹭体力收益不低于此值的斗鱼卡（5星118-134，6星134-151），0为不限制",
   "save_touch_fish": "惠比寿的摸鱼行动",
-  "save_touch_fish_help": "默认使用全部存储按钮，主要目的是为了配合真蛇每周打一次即可获得俩次奖励(并不会节省体力)"
+  "save_touch_fish_help": "默认使用全部存储按钮，主要目的是为了配合真蛇每周打一次即可获得俩次奖励(并不会节省体力)",
+  "exchange_soul": "兑换御魂",
+  "exchange_soul_enable": "启用兑换御魂",
+  "exchange_soul_enable_help": "开启后使用神秘骰子兑换随机六星御魂, 每10积分兑换一次, 兑换次数 = 积分总数 // 10"
 }
