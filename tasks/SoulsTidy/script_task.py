@@ -15,6 +15,9 @@ from tasks.SoulsTidy.assets import SoulsTidyAssets
 from tasks.SoulsTidy.config import SimpleTidy
 from typing import Optional
 
+# 奉纳时"金币图标还在、循环既点不动也退不出，会一路空转到 60 秒的卡死计时器。
+DONATE_IDLE_TIMEOUT = 15
+
 
 class ScriptTask(GameUi, SoulsTidyAssets):
     def run(self):
@@ -35,10 +38,12 @@ class ScriptTask(GameUi, SoulsTidyAssets):
         """
         while 1:
             self.screenshot()
-            if self.appear(self.I_ST_GREED) and self.appear(self.I_ST_TIDY):
+            if self.appear(self.I_ST_TIDY) or self.appear(self.I_ST_GREED):
                 break
 
             if self.appear_then_click(self.I_ST_REPLACE, interval=1):
+                # 点完"整理御魂"进整理页要等界面切过去再继续，
+                sleep(2)
                 continue
             if self.appear_then_click(self.I_ST_SOULS, interval=1):
                 continue
@@ -178,33 +183,43 @@ class ScriptTask(GameUi, SoulsTidyAssets):
 
     def donate_and_collect_reward(self):
         """点击奉纳和收取奖励"""
+        idle_timer = Timer(DONATE_IDLE_TIMEOUT).start()
         while True:
             self.screenshot()
+            acted = False
             if self.appear_then_click(self.I_UI_CONFIRM, interval=0.5):
-                continue
+                acted = True
             # 如果奉纳少就不是神赐而是获得奖励
-            if self.ui_reward_appear_click():
-                continue
+            elif self.ui_reward_appear_click():
+                acted = True
             # 出现神赐, 就点击然后消失，
-            if self.appear(self.I_ST_GOD_PRESENT):
+            elif self.appear(self.I_ST_GOD_PRESENT):
                 logger.info('God present appear')
                 self.click(self.C_ST_GOD_PRSENT, interval=2)
-                continue
-            if self.appear(self.I_ST_LUCK):
-                # 出现吉运
+                acted = True
+            # 出现吉运
+            elif self.appear(self.I_ST_LUCK):
                 logger.info('luck appear')
                 self.click(self.C_ST_SOUL_OFFERING_REWARD, interval=2)
-                continue
-            if self.appear(self.I_ST_SMALL_LUCK):
-                # 出现小吉运
+                acted = True
+            # 出现小吉运
+            elif self.appear(self.I_ST_SMALL_LUCK):
                 logger.info('small luck appear')
                 self.click(self.C_ST_SOUL_OFFERING_REWARD, interval=2)
-                continue
-            if self.appear_then_click(self.I_ST_DONATE, interval=5.5):
+                acted = True
+            elif self.appear_then_click(self.I_ST_DONATE, interval=5.5):
                 self.wait_until_appear(self.I_ST_GOLD, True, wait_time=5)
+                acted = True
+            if acted:
+                idle_timer.reset()
                 continue
             if not self.appear(self.I_ST_GOLD):
                 break
+            # 金币图标还在（奉纳没完成）却什么都没命中 —— 别纯截图空转到卡死计时器
+            if idle_timer.reached():
+                logger.warning('Donate popup not recognized, click to dismiss and retry')
+                self.click(self.C_ST_GOD_PRSENT, interval=2)
+                idle_timer.reset()
 
 if __name__ == '__main__':
     from module.config.config import Config

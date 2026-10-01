@@ -101,8 +101,8 @@
   {
     "itemName": "st_god_present",
     "imageName": "simple_st_god_present.png",
-    "roiFront": "578,234,131,73",
-    "roiBack": "542,117,204,219",
+    "roiFront": "586,162,124,40",
+    "roiBack": "550,129,193,180",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "神赐"
