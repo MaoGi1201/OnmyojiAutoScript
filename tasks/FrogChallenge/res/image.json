@@ -1,0 +1,92 @@
+[
+  {
+    "itemName": "entry",
+    "imageName": "fc_entry.png",
+    "roiFront": "1188,381,38,38",
+    "roiBack": "1169,203,78,320",
+    "method": "Template matching",
+    "threshold": 0.7,
+    "description": "庭院右侧青蛙挑战赛入口"
+  },
+  {
+    "itemName": "skip",
+    "imageName": "fc_skip.png",
+    "roiFront": "1142,27,85,37",
+    "roiBack": "1100,0,180,100",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "活动剧情跳过按钮"
+  },
+  {
+    "itemName": "title",
+    "imageName": "fc_title.png",
+    "roiFront": "433,12,312,60",
+    "roiBack": "420,0,370,85",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "青蛙瓷器挑战赛标题"
+  },
+  {
+    "itemName": "challenge",
+    "imageName": "fc_challenge.png",
+    "roiFront": "1153,591,72,57",
+    "roiBack": "1138,573,100,100",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "挑战按钮"
+  },
+  {
+    "itemName": "shikigami_records",
+    "imageName": "fc_shikigami_records.png",
+    "roiFront": "1055,639,46,39",
+    "roiBack": "1055,639,46,39",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "活动界面式神录按钮"
+  },
+  {
+    "itemName": "exchange",
+    "imageName": "fc_exchange.png",
+    "roiFront": "1107,382,117,37",
+    "roiBack": "1107,382,117,37",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "10兑换按钮"
+  },
+  {
+    "itemName": "select_1",
+    "imageName": "fc_select_1.png",
+    "roiFront": "186,519,121,49",
+    "roiBack": "186,519,121,49",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "随机御魂选择按钮1"
+  },
+  {
+    "itemName": "select_2",
+    "imageName": "fc_select_2.png",
+    "roiFront": "582,519,118,48",
+    "roiBack": "582,519,118,48",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "随机御魂选择按钮2"
+  },
+  {
+    "itemName": "select_3",
+    "imageName": "fc_select_3.png",
+    "roiFront": "972,519,123,49",
+    "roiBack": "972,519,123,49",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "随机御魂选择按钮3"
+  },
+  {
+    "itemName": "check_soul",
+    "imageName": "fc_check_soul.png",
+    "roiFront": "400,82,430,34",
+    "roiBack": "380,60,480,70",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "随机御魂购买页面标题"
+  }
+]

@@ -311,5 +311,12 @@
   "window_height": "窗口高度",
   "desktop_window_height_help": "目标窗口高度（客户区像素），建议 720",
   "keep_display_awake": "保持屏幕常亮",
-  "desktop_keep_display_awake_help": "息屏后游戏客户端会停止渲染，截图只剩黑图导致识别全部失败。开启后脚本运行期间显示器不会自动关闭、系统不会休眠。"
+  "desktop_keep_display_awake_help": "息屏后游戏客户端会停止渲染，截图只剩黑图导致识别全部失败。开启后脚本运行期间显示器不会自动关闭、系统不会休眠。",
+  "FrogChallenge": "青蛙挑战赛",
+  "frog_challenge_config": "青蛙挑战赛配置",
+  "limit_count": "挑战次数",
+  "limit_count_help": "达到挑战次数后结束任务",
+  "exchange_soul": "兑换御魂",
+  "exchange_soul_enable": "启用兑换御魂",
+  "exchange_soul_enable_help": "开启后使用神秘骰子兑换随机六星御魂, 每10积分兑换一次, 兑换次数 = 积分总数 // 10"
 }
