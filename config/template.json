@@ -1101,6 +1101,9 @@
       "group_name": "",
       "team_name": ""
     },
+    "exchange_soul": {
+      "enable": false
+    },
     "general_battle_config": {
       "lock_team_enable": false,
       "preset_enable": false,
