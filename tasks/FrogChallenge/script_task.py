@@ -14,7 +14,7 @@ from tasks.GameUi.page import page_main
 
 
 class ScriptTask(RightActivity, GeneralBattle, SwitchSoul, Buy, FrogChallengeAssets):
-    # 兑换御魂是否已结束(出现结算展示页表示御魂已全部选完)
+    # 兑换御魂是否已结束
     soul_exchange_done = False
 
     def run(self):
@@ -119,14 +119,12 @@ class ScriptTask(RightActivity, GeneralBattle, SwitchSoul, Buy, FrogChallengeAss
             logger.warning('Frog Challenge cannot return to activity after battle, skip exchange soul')
             return False
 
-        # 2. 购买: 点10兑换 -> 弹窗内拉满数量 -> 点积分购买按钮
-        #    兑换几个由游戏决定(积分拉满), 不需要在此推算次数
+        # 2. 购买:
         if not self._buy_souls():
             logger.warning('Frog Challenge buy souls failed')
             return False
 
-        # 3. 逐个随机选择御魂, 以页面实际状态为准(选择页面自身显示进度 X/N)
-        #    正常情况下选完最后一个会出现结算展示页, 由该标志结束循环
+        # 3. 逐个随机选择御魂, 以页面实际状态为准
         success = 0
         select_timeout = Timer(300).start()
         while not select_timeout.reached() and success < 50:
@@ -149,9 +147,6 @@ class ScriptTask(RightActivity, GeneralBattle, SwitchSoul, Buy, FrogChallengeAss
         return success > 0
 
     def _buy_souls(self) -> bool:
-        """购买御魂: 点10兑换 -> 等购买弹窗 -> 拉满数量 -> 点一次购买按钮
-        注意: 不使用 Buy 组件的 buy_more, 它的确认循环会盲点购买按钮多次,
-        而该按钮区域与御魂选择页面的"选择"按钮重叠, 会把御魂误点掉"""
         # 点10兑换, 等购买弹窗出现
         timeout = Timer(20).start()
         while not timeout.reached():
@@ -186,8 +181,6 @@ class ScriptTask(RightActivity, GeneralBattle, SwitchSoul, Buy, FrogChallengeAss
         return False
 
     def _select_soul_once(self) -> bool:
-        """在选择页面上随机选择一个御魂, 并等待页面加载完成
-        (下一批随机御魂出现, 或全部选择完成回到活动界面)"""
         # 随机三选一
         target = random.choice([self.I_SELECT_1, self.I_SELECT_2, self.I_SELECT_3])
         timer = Timer(10).start()
@@ -199,10 +192,6 @@ class ScriptTask(RightActivity, GeneralBattle, SwitchSoul, Buy, FrogChallengeAss
             logger.warning('Frog Challenge select soul failed')
             return False
 
-        # 等待页面加载: 处理奖励动画, 直到下一批御魂出现
-        # 结算展示页出现表示御魂已全部选完, 点掉后立即结束
-        # 注意: 选择页面是浮层, 背景活动界面的按钮可能透过遮罩被识别,
-        # 判断"回到活动界面"时要求选择页面标题已消失
         timer = Timer(30).start()
         while not timer.reached():
             self.screenshot()
