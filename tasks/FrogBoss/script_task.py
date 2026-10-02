@@ -25,6 +25,9 @@ class ScriptTask(RightActivity, FrogBossAssets, GeneralBattleAssets):
     def run(self):
         self.enter(self.I_FROG_BOSS_ENTER)
         # 进入主界面
+        # 刚进入时游戏会闪过一瞬的"休息中"过场图, 直接判断会误认为休息中,
+        # 先等待界面稳定再进入状态判断循环
+        self._wait_stable()
         while 1:
             self.screenshot()
 
@@ -65,6 +68,23 @@ class ScriptTask(RightActivity, FrogBossAssets, GeneralBattleAssets):
         logger.info('FrogBoss end')
         self.next_run()
         raise TaskEnd('FrogBoss')
+
+    def _wait_stable(self, delay: float = 1.0, timeout: int = 10) -> bool:
+        """
+        等待竞猜界面稳定, 用于跳过刚进入时闪过的"休息中"过场图。
+        :param delay: 固定延时, 跳过过场动画
+        :param timeout: 等待竞猜主页面标题出现的超时时间
+        :return: True 界面已稳定
+        """
+        logger.info('Wait frog boss page stable')
+        self.device.sleep(delay)
+        timer = Timer(timeout).start()
+        while not timer.reached():
+            self.screenshot()
+            if self.appear(self.I_FROG_CHECK):
+                return True
+        logger.warning('Frog Boss page not stable, continue anyway')
+        return False
 
     def next_run(self):
         time = self.config.model.frog_boss.frog_boss_config.before_end_frog
