@@ -12,8 +12,6 @@ from tasks.Component.config_scheduler import Scheduler
 class Strategy(str, Enum):
     Majority = 'frog_majority'
     Minority = 'frog_minority'
-    Bilibili = 'frog_bilibili'
-    Dashen = 'frog_dashen'
     AlwaysRed = 'frog_always_red'
     AlwaysBlue = 'frog_always_blue'
 

@@ -392,6 +392,11 @@ class ConfigModel(ConfigBase):
         'screenshot_method': 'auto',
         'control_method': 'minitouch',
     }
+    # FrogBoss 的"大神/哔哩哔哩"下注策略已移除（要联网抓国服博主），旧配置里残留的取值回退到多数派
+    _LEGACY_FROG_STRATEGY: ClassVar[dict] = {
+        'frog_dashen': 'frog_majority',
+        'frog_bilibili': 'frog_majority',
+    }
 
     @classmethod
     def migrate_legacy_config(cls, data: dict) -> dict:
@@ -401,9 +406,22 @@ class ConfigModel(ConfigBase):
         1. `script.device.desktop_*` 搬到 `script.desktop.*`（桌面版设置独立成组）
         2. 模拟器的 screenshot_method / control_method 若残留 window_win32，
            归位到默认值 —— 该值现在只属于桌面版，留在模拟器字段里会导致校验失败
+        3. frog_boss.strategy_frog 里已移除的 frog_dashen / frog_bilibili 回退到 frog_majority
         """
         if not isinstance(data, dict):
             return data
+
+        # 0. FrogBoss 下注策略里被删掉的两个取值
+        frog_boss = data.get('frog_boss')
+        if isinstance(frog_boss, dict):
+            frog_cfg = frog_boss.get('frog_boss_config')
+            if isinstance(frog_cfg, dict):
+                fallback = cls._LEGACY_FROG_STRATEGY.get(frog_cfg.get('strategy_frog'))
+                if fallback:
+                    logger.warning(f'Migrate legacy frog strategy: '
+                                   f'{frog_cfg["strategy_frog"]} -> {fallback}')
+                    frog_cfg['strategy_frog'] = fallback
+
         script = data.get('script')
         if not isinstance(script, dict):
             return data
