@@ -227,3 +227,14 @@ class ScriptTask(RightActivity, GeneralBattle, SwitchSoul, Buy, FrogChallengeAss
     def _finish(self):
         self.set_next_run(task='FrogChallenge', success=True)
         raise TaskEnd('FrogChallenge')
+
+
+if __name__ == '__main__':
+    from module.config.config import Config
+    from module.device.device import Device
+
+    c = Config('oas1')
+    d = Device(c)
+    t = ScriptTask(c, d)
+
+    t.run()
