@@ -65,6 +65,8 @@ from tasks.LBS.config import LBS
 from tasks.Quiz.config import Quiz
 from tasks.KittyShop.config import KittyShop
 from tasks.DyeTrials.config import DyeTrials
+from tasks.IbukiArena.config import IbukiArena
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 # 肝帝专属---------------------------------------------------------------------------------------------------------------
@@ -135,6 +137,7 @@ class ConfigModel(ConfigBase):
     kitty_shop: KittyShop = Field(default_factory=KittyShop)
     dye_trials: DyeTrials = Field(default_factory=DyeTrials)
     gugu_art_studio: GuguArtStudio = Field(default_factory=GuguArtStudio)
+    ibuki_arena: IbukiArena = Field(default_factory=IbukiArena)
 
     # 这些是肝帝专属
     bondling_fairyland: BondlingFairyland = Field(default_factory=BondlingFairyland)
