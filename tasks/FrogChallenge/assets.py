@@ -31,6 +31,8 @@ class FrogChallengeAssets:
 	I_SELECT_3 = RuleImage(roi_front=(972,519,123,49), roi_back=(972,519,123,49), threshold=0.8, method="Template matching", file="./tasks/FrogChallenge/res/fc_select_3.png")
 	# 随机御魂购买页面标题 
 	I_CHECK_SOUL = RuleImage(roi_front=(400,82,430,34), roi_back=(380,60,480,70), threshold=0.8, method="Template matching", file="./tasks/FrogChallenge/res/fc_check_soul.png")
+	# 挑战按钮下的免费标签, 表示奖励次数已达上限 
+	I_FREE = RuleImage(roi_front=(1148,644,84,38), roi_back=(1090,610,190,110), threshold=0.8, method="Template matching", file="./tasks/FrogChallenge/res/fc_free.png")
 
 
 	# Ocr Rule Assets

@@ -88,5 +88,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "随机御魂购买页面标题"
+  },
+  {
+    "itemName": "free",
+    "imageName": "fc_free.png",
+    "roiFront": "1148,644,84,38",
+    "roiBack": "1090,610,190,110",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "挑战按钮下的免费标签, 表示奖励次数已达上限"
   }
 ]
