@@ -1091,8 +1091,7 @@
       "float_time": "00:00:00"
     },
     "frog_challenge_config": {
-      "limit_time": "00:30:00",
-      "limit_count": 30
+      "limit_time": "00:30:00"
     },
     "switch_soul": {
       "enable": false,

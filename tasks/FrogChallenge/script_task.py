@@ -34,7 +34,8 @@ class ScriptTask(RightActivity, GeneralBattle, SwitchSoul, Buy, FrogChallengeAss
             seconds=limit.second,
         ).total_seconds()).start()
 
-        while self.current_count < config.limit_count and not timeout.reached():
+        # 只按时间控制, 次数上限由活动自身的奖励次数决定(挑战按钮出现"免费"即停止)
+        while not timeout.reached():
             if not self._enter_battle():
                 logger.info('Frog Challenge cannot start another battle')
                 break
@@ -227,3 +228,14 @@ class ScriptTask(RightActivity, GeneralBattle, SwitchSoul, Buy, FrogChallengeAss
     def _finish(self):
         self.set_next_run(task='FrogChallenge', success=True)
         raise TaskEnd('FrogChallenge')
+
+
+if __name__ == '__main__':
+    from module.config.config import Config
+    from module.device.device import Device
+
+    c = Config('oas1')
+    d = Device(c)
+    t = ScriptTask(c, d)
+
+    t.run()

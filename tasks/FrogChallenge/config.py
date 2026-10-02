@@ -9,7 +9,6 @@ from tasks.Component.SwitchSoul.switch_soul_config import SwitchSoulConfig
 
 class FrogChallengeConfig(BaseModel):
     limit_time: Time = Field(default=Time(minute=30), description='limit_time_help')
-    limit_count: int = Field(default=2, description='limit_count_help', ge=1)
 
 
 class ExchangeSoulConfig(BaseModel):
