@@ -38,8 +38,8 @@
   {
     "itemName": "bf_records",
     "imageName": "bf_bf_records.png",
-    "roiFront": "1028,566,43,42",
-    "roiBack": "1028,566,43,42",
+    "roiFront": "1031,563,43,42",
+    "roiBack": "1031,563,43,42",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "点击式神录"

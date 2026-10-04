@@ -18,7 +18,7 @@ class BondlingFairylandAssets:
 	# description 
 	I_BALL_LOCK = RuleImage(roi_front=(715,637,29,32), roi_back=(715,637,29,32), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/ball/ball_ball_lock.png")
 	# 点击式神录 
-	I_BALL_RECORDS = RuleImage(roi_front=(856,566,38,39), roi_back=(856,566,38,39), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/ball/ball_ball_records.png")
+	I_BALL_RECORDS = RuleImage(roi_front=(861,564,38,39), roi_back=(861,564,38,39), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/ball/ball_ball_records.png")
 	# 求援 
 	I_BALL_HELP = RuleImage(roi_front=(963,571,100,100), roi_back=(963,571,100,100), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/ball/ball_ball_help.png")
 	# 契灵创建队伍 
@@ -58,7 +58,7 @@ class BondlingFairylandAssets:
 	# description 
 	I_BF_STORE = RuleImage(roi_front=(261,632,57,57), roi_back=(261,632,57,57), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/bf/bf_bf_store.png")
 	# 点击式神录 
-	I_BF_RECORDS = RuleImage(roi_front=(1028,566,43,42), roi_back=(1028,566,43,42), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/bf/bf_bf_records.png")
+	I_BF_RECORDS = RuleImage(roi_front=(1031,563,43,42), roi_back=(1031,563,43,42), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/bf/bf_bf_records.png")
 	# 左边第一个球：截屏的时候是火灵 
 	I_BF_LOCAL_1_AZURE_BASAN = RuleImage(roi_front=(237,536,28,25), roi_back=(225,523,53,50), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/bf/bf_bf_local_1_azure_basan.png")
 	# 第二个，茨球 
@@ -173,10 +173,10 @@ class BondlingFairylandAssets:
 	# description 
 	I_BUY_PLUS = RuleImage(roi_front=(765,543,43,40), roi_back=(765,543,43,40), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/stone/buy_plus.png")
 	# description 
-	I_BUY_ADD = RuleImage(roi_front=(678,540,43,40), roi_back=(678,540,43,40), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/stone/buy_add.png")
+	I_BUY_ADD = RuleImage(roi_front=(681,542,43,40), roi_back=(681,542,43,40), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/stone/buy_add.png")
 	# description 
 	I_BUY_SUB = RuleImage(roi_front=(468,540,43,40), roi_back=(468,540,43,40), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/stone/buy_sub.png")
 	# 关闭购买契灵页面 
-	I_STONE_CLOSE = RuleImage(roi_front=(911,56,42,38), roi_back=(888,49,100,100), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/stone/stone_stone_close.png")
+	I_STONE_CLOSE = RuleImage(roi_front=(950,57,42,38), roi_back=(920,45,100,100), threshold=0.8, method="Template matching", file="./tasks/BondlingFairyland/stone/stone_stone_close.png")
 
 

@@ -29,8 +29,8 @@
   {
     "itemName": "ball_records",
     "imageName": "ball_ball_records.png",
-    "roiFront": "856,566,38,39",
-    "roiBack": "856,566,38,39",
+    "roiFront": "861,564,38,39",
+    "roiBack": "861,564,38,39",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "点击式神录"

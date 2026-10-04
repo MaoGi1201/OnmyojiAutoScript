@@ -29,8 +29,8 @@
   {
     "itemName": "buy_add",
     "imageName": "buy_add.png",
-    "roiFront": "678,540,43,40",
-    "roiBack": "678,540,43,40",
+    "roiFront": "681,542,43,40",
+    "roiBack": "681,542,43,40",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
@@ -47,8 +47,8 @@
   {
     "itemName": "stone_close",
     "imageName": "stone_stone_close.png",
-    "roiFront": "911,56,42,38",
-    "roiBack": "888,49,100,100",
+    "roiFront": "950,57,42,38",
+    "roiBack": "920,45,100,100",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "关闭购买契灵页面"
