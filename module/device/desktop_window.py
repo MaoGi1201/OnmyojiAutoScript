@@ -65,6 +65,9 @@ class DesktopWindowAmbiguous(DesktopWindowError):
     否则会退化成"随便挑一个窗口"，可能操作到别人的账号。
     """
 
+    # 这是"配置需要人去改"的问题，不是程序 bug。
+    log_without_traceback = True
+
 
 @contextmanager
 def dpi_aware():

@@ -659,7 +659,12 @@ class Script:
             exit(1)
 
         # generic
-        logger.exception(e)
+        if getattr(e, 'log_without_traceback', False):
+            # 预期内的配置问题（如桌面版多开但没绑账号）：给一条正常提示就好。
+            # 打整段 traceback 会让用户以为是代码出错，而不是"去改配置"。
+            logger.critical(f'{type(e).__name__}: {e}')
+        else:
+            logger.exception(e)
         self.exception_handler(e=e, command=command)
         self.save_error_log()
         self.config.notifier.push(
