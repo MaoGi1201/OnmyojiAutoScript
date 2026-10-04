@@ -53,17 +53,20 @@ class UserStatus(str, Enum):
 class BondlingConfig(ConfigBase):
     # 身份
     user_status: UserStatus = Field(default=UserStatus.ALONE, description='user_status_help')
-    bondling_mode: BondlingMode = Field(default=BondlingMode.MODE1,
+    # 勾选后直接沿用游戏里已有的结契配置, 跳过进入结契设置的过程
+    use_game_default_setting: bool = Field(default=False,
+                                           description='勾选: 使用游戏默认的配置, 跳过进入结契设置的过程')
+    bondling_mode: BondlingMode = Field(default=BondlingMode.MODE2,
                                         description='只刷探查:自动切换契灵对应地域\n低级式盘:自动切换非连续,非羁绊\n中级式盘:自动切换连续,羁绊')
     limit_time: Time = Field(default=Time(minute=30), description='limit_time_help')
     limit_count: int = Field(default=30, description='limit_count_help')
     bondling_stone_class: BondlingClass = Field(default=BondlingClass.TOMB_GUARD, description='设置需要刷的契灵')
-    bondling_stone_enable: bool = Field(default=False, description='没有契灵了是否使用鸣契石购买契灵')
+    bondling_stone_enable: bool = Field(default=False, description='')
     bondling_search_enable: bool = Field(default=False, description='没有契灵了是否自动探查(要求身份必须是alone,否则此项无效)\n'
                                                                     '若启用了购买契灵则优先购买契灵,购买失败则进行探查\n'
                                                                     '若启用了切换御魂则切换契灵御魂的同时也会切换探查御魂\n'
                                                                     '注:探查耗费的时间与次数也计入总时间和次数中')
-    check_enable: bool = Field(default=True, description='是否检查契忆数量')
+    check_enable: bool = Field(default=True, description='')
     limit_num: int = Field(default=2000, description='契忆数量限制,到达此限制将自动结束任务(仅在任务开始时判断)')
 
     @field_validator("bondling_mode", mode="before")

@@ -361,7 +361,10 @@ class ScriptTask(GameUi, GeneralInvite, GeneralRoom, GeneralBattle, SwitchSoul, 
                         break
                 # 检查结契设置
                 if not capture_setting_checked:
-                    self.capture_setting(bondling_config.bondling_mode)
+                    if bondling_config.use_game_default_setting:
+                        logger.info('使用游戏默认的配置, 跳过进入结契设置的过程')
+                    else:
+                        self.capture_setting(bondling_config.bondling_mode)
                     capture_setting_checked = True
                 try:
                     # 执行捕捉
