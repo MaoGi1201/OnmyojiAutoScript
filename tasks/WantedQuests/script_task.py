@@ -348,24 +348,50 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
             # 若是当周特殊秘闻则禁止连续进攻, 战斗结束之后直接退到探索页面重新进入挑战(避免当周秘闻没打结果跳转到第一层)
             if self.appear(self.I_WQSE_SPECIAL_FIRE):
                 logger.warning('Current is special secret, exit and retry')
-                return 
-            # 又臭又长的对话针的是服了这个网易
-            click_count = 0
-            while 1:
-                self.screenshot()
-                if self.get_current_page() in [page_battle_prepare, page_battle]:
-                    self.run_general_battle(self.battle_config, exit_matcher=any_of(self.I_UI_BACK_RED, self.I_WQSE_SPECIAL_FIRE))
-                    break
-                if self.appear_then_click(self.I_WQSE_FIRE, interval=1):
-                    continue
-                if self.appear(self.I_UI_BACK_RED, threshold=0.7) and not self.appear(self.I_WQSE_FIRE):
-                    self.click(self.C_SECRET_CHAT, interval=0.8)
-                    click_count += 1
-                    if click_count >= 6:
-                        logger.warning('Secret mission chat too long, force to close')
-                        click_count = 0
-                        self.device.click_record_clear()
+                return
+            # 挑战前又臭又长的对话
+            if not self.secret_chat_handle(before_battle=True):
+                logger.warning('Secret mission chat before battle not finished, skip')
+                break
+            self.run_general_battle(self.battle_config, exit_matcher=any_of(self.I_UI_BACK_RED, self.I_WQSE_SPECIAL_FIRE))
+            # 战斗结束之后同样会有剧情对话(通关剧情/奖励弹窗), 不点掉的话下一次挑战和退出都会被挡住
+            if not self.secret_chat_handle(before_battle=False, timeout=30):
+                logger.warning('Secret mission chat after battle not finished, exit')
+                break
         logger.info('Secret mission finished')
+
+    def secret_chat_handle(self, before_battle: bool = True, timeout: int = 60) -> bool:
+        """
+        处理秘闻里又臭又长的剧情对话, 挑战前后都可能出现
+        :param before_battle: True 处理挑战前的对话, 直到进入战斗准备/战斗页面;
+                              False 处理战斗结束后的对话, 直到重新出现挑战按钮
+        :param timeout: 超时时间(秒), 超时后放弃处理
+        :return: 是否在超时前处理完成
+        """
+        logger.info(f'Handle secret chat {"before" if before_battle else "after"} battle')
+        timeout_timer = Timer(timeout).start()
+        click_count = 0
+        while 1:
+            self.screenshot()
+            # 挑战前: 进入战斗准备/战斗页面说明对话已经结束
+            if before_battle and self.get_current_page() in [page_battle_prepare, page_battle]:
+                return True
+            # 战斗后: 重新出现挑战按钮(普通秘闻或当周特殊秘闻)说明对话已经结束
+            if not before_battle and (self.appear(self.I_WQSE_FIRE) or self.appear(self.I_WQSE_SPECIAL_FIRE)):
+                return True
+            # 没有对话挡着的时候直接点挑战(战斗结束后不点, 交给下一轮决定是否继续)
+            if before_battle and self.appear_then_click(self.I_WQSE_FIRE, interval=1):
+                continue
+            if self.appear(self.I_UI_BACK_RED, threshold=0.7) and not self.appear(self.I_WQSE_FIRE):
+                self.click(self.C_SECRET_CHAT, interval=0.8)
+                click_count += 1
+                if click_count >= 6:
+                    logger.warning('Secret mission chat too long, force to close')
+                    click_count = 0
+                    self.device.click_record_clear()
+            if timeout_timer.reached():
+                logger.warning('Secret mission chat handle timeout')
+                return False
 
     def invite_random(self, add_button: RuleImage):
         self.screenshot()
