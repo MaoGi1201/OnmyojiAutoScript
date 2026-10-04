@@ -73,6 +73,8 @@
   "member": "队员",
   "alone": "单刷",
   "wild": "野队",
+  "handoff1": "队长转队员",
+  "handoff2": "队员转队长",
   "thirteen_switch": "十三层御魂配置",
   "thirteen_switch_help": "虚无",
   "auto": "自动",
@@ -304,7 +306,7 @@
   "emulator_control_help": "脚本操作的目标。桌面版（可不配置模拟器相关参数）/模拟器。",
   "Account Id": "绑定账号",
   "account_id": "绑定账号",
-  "desktop_account_id_help": "多开时用它精确匹配要操作的窗口，选好后游戏重启也不用改。留空则只按窗口标题匹配。",
+  "desktop_account_id_help": "多开时用它精确匹配要操作的窗口，选好后游戏重启也不用改。\n同时开了多个窗口则无法确定该操作哪一个，需绑定账号。",
   "resize_window": "自动调整窗口大小",
   "desktop_resize_window_help": "开启后自动把游戏窗口拉到下面的尺寸。客户区小于 1280x720 时截图会被放大、画面变糊，容易识别失败。",
   "window_width": "窗口宽度",
@@ -319,5 +321,10 @@
   "limit_count_help": "达到挑战次数后结束任务",
   "exchange_soul": "兑换御魂",
   "exchange_soul_enable": "启用兑换御魂",
-  "exchange_soul_enable_help": "开启后使用神秘骰子兑换随机六星御魂, 每10积分兑换一次, 兑换次数 = 积分总数 // 10"
+  "exchange_soul_enable_help": "开启后使用神秘骰子兑换随机六星御魂, 每10积分兑换一次, 兑换次数 = 积分总数 // 10",
+  "use_game_default_setting":"默认配置",
+  "bondling_search_enable":"是否开启探查",
+  "limit_num":"契忆数量限制",
+  "check_enable":"是否检查契忆数量",
+  "search_switch":"探查御魂装配分组"
 }

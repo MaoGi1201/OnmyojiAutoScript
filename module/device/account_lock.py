@@ -39,11 +39,13 @@ def device_key(config) -> str | None:
         from module.device.env import is_desktop_mode
         if is_desktop_mode(config):
             raw = str(getattr(config.script.desktop, 'account_id', '') or '').strip()
-            if not raw:
+            from module.device.window_account import parse_account_id
+            # 未绑定时的「不绑定（按窗口标题匹配）」），只有能解析出纯账号 ID 才算绑了账号
+            account = parse_account_id(raw)
+            if not account:
                 # 没绑账号 → 按标题匹配，无法确定是哪个账号，不做互斥
                 return None
-            from module.device.window_account import parse_account_id
-            return f'desktop:{parse_account_id(raw) or raw}'
+            return f'desktop:{account}'
 
         serial = str(getattr(config.script.device, 'serial', '') or '').strip()
         if not serial or serial == 'auto':

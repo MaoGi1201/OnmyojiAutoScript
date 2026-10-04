@@ -223,6 +223,52 @@ def to_gui_schema(schema: dict) -> dict:
     return result
 
 
+# ------------------------- 按运行方式过滤设置组 -------------------------
+# 「运行方式」(script.device.emulator_control) 只有模拟器 / 桌面版两种取值，
+# 两组设置互不相干（见 tasks/Script/config_device.py 的类文档）。
+# 桌面版模式：device 组只留「运行方式」，其余模拟器专属字段不生效也不显示
+# device 组里装着「运行方式」字段本身，所以不能整组隐藏，只能按字段挑。
+_DEVICE_MODE_AGNOSTIC_FIELDS = ('emulator_control',)
+
+
+def filter_groups_by_mode(config, schema: dict) -> None:
+    """Qt GUI 路径（gui_args）：按运行方式删掉无关分组的 schema 定义。"""
+    from module.device.env import is_desktop_mode
+
+    if not is_desktop_mode(config):
+        # 模拟器模式：桌面版设置整组不显示
+        schema.get('properties', {}).pop('desktop', None)
+        definitions = schema.get('definitions')
+        if isinstance(definitions, dict):
+            definitions.pop('Desktop', None)
+            definitions.pop('DesktopAccountId', None)
+        return
+
+    # 桌面版模式：device 组只留「运行方式」，避免模拟器参数误导用户
+    definitions = schema.get('definitions')
+    device = definitions.get('Device') if isinstance(definitions, dict) else None
+    props = device.get('properties') if isinstance(device, dict) else None
+    if isinstance(props, dict):
+        for name in [k for k in props if k not in _DEVICE_MODE_AGNOSTIC_FIELDS]:
+            props.pop(name, None)
+
+
+def filter_items_by_mode(config, result: dict) -> None:
+    """Web UI 路径（script_task）：按运行方式删掉无关分组的字段列表。"""
+    from module.device.env import is_desktop_mode
+
+    if not is_desktop_mode(config):
+        result.pop('desktop', None)
+        return
+
+    items = result.get('device')
+    if isinstance(items, list):
+        result['device'] = [
+            item for item in items
+            if item.get('name') in _DEVICE_MODE_AGNOSTIC_FIELDS
+        ]
+
+
 # ------------------------- 桌面版「选择账号」下拉框 -------------------------
 # 选项由正在运行的游戏窗口动态生成，用户不用手抄账号 ID。
 # 配置页一次渲染会多次取 schema，所以扫描结果缓存几秒 —— 每次扫描都要
@@ -253,16 +299,27 @@ def desktop_account_options() -> list:
     return options
 
 
-def _options_with_current(options: list, current) -> list:
-    """把当前已选值并入选项列表。
+# 「不绑定账号」在下拉框里的显示文本。
+# 留空是合法取值（见 desktop_account_id_help：留空则只按窗口标题匹配）
+UNBOUND_ACCOUNT_OPTION = '不绑定（按窗口标题匹配）'
 
-    已选账号当前没在运行时也要留在选项里，否则下拉框会显示空白，
-    用户会以为配置丢了。
+
+def _options_with_current(options: list, current) -> list:
+    """把「不绑定」和当前已选值并入选项列表。
+
+    - 第一项固定是「不绑定」：不绑定是合法取值，必须能被选中
+    - 已选账号当前没在运行时也要留在选项里
     """
-    values = list(options)
+    values = [UNBOUND_ACCOUNT_OPTION]
+    values.extend(o for o in options if o and o != UNBOUND_ACCOUNT_OPTION)
     if current and current not in values:
-        values.insert(0, current)
+        values.insert(1, current)
     return values
+
+
+def _display_account_value(value) -> str:
+    """空值在下拉框里显示成「不绑定」，保证选项里一定能找到当前值。"""
+    return str(value or '').strip() or UNBOUND_ACCOUNT_OPTION
 
 
 def inject_desktop_account_options(items: list) -> list:
@@ -275,6 +332,7 @@ def inject_desktop_account_options(items: list) -> list:
             continue
         item['type'] = 'enum'
         item['enumEnum'] = _options_with_current(options, item.get('value'))
+        item['value'] = _display_account_value(item.get('value'))
     return items
 
 
@@ -301,7 +359,7 @@ def inject_desktop_account_options_v1(schema: dict) -> dict:
     }
     prop.pop('type', None)
     prop['allOf'] = [{'$ref': '#/definitions/DesktopAccountId'}]
-    prop['default'] = current if current else (values[0] if values else '')
+    prop['default'] = _display_account_value(current)
     return schema
 
 
@@ -521,6 +579,8 @@ class ConfigModel(ConfigBase):
         # pydantic v2 输出的是 $defs / 裸 $ref，前端 ModelParse.js 只认 v1 的
         # definitions / allOf，这里先归一化，否则设置页会整组渲染失败
         schema2 = to_gui_schema(task_gui.schema())
+        # 按运行方式去掉无关分组：选模拟器时不该再出现「桌面版设置 / 绑定账号」
+        filter_groups_by_mode(self, schema2)
         # 桌面版：给 account_id 注入当前检测到的账号，配置页直接下拉选择
         inject_desktop_account_options_v1(schema2)
         # https://github.com/pydantic/pydantic/discussions/5687
@@ -545,7 +605,13 @@ class ConfigModel(ConfigBase):
         if task is None:
             logger.warning(f'{task_name} is no inexistence')
             return ''
-        return task.json()
+        data = json.loads(task.json())
+        # 桌面版「绑定账号」留空时在下拉框里显示成「不绑定」：
+        # 否则选项里找不到空值，下拉框会显示成一片空白（Web UI 那边则会直接报校验错误）
+        desktop = data.get('desktop') if isinstance(data, dict) else None
+        if isinstance(desktop, dict) and 'account_id' in desktop:
+            desktop['account_id'] = _display_account_value(desktop['account_id'])
+        return json.dumps(data)
 
     def save(self) -> None:
         """
@@ -669,6 +735,8 @@ class ConfigModel(ConfigBase):
                         groups_value[key] = groups[group_name]
             result[key] = merge_value(groups_value[key], value, schema["$defs"])
 
+        # 按运行方式去掉无关分组：选模拟器时不该再出现「桌面版设置 / 绑定账号」
+        filter_items_by_mode(self, result)
         # 桌面版：给 account_id 注入当前检测到的账号，配置页直接下拉选择（不用手抄 ID）
         if 'desktop' in result:
             inject_desktop_account_options(result['desktop'])

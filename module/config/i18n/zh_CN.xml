@@ -325,7 +325,8 @@
 	<message><source>Account Id</source><translation>绑定账号</translation></message>
 	<message>
         <source>desktop_account_id_help</source>
-        <translation>多开时用它精确匹配要操作的窗口，选好后游戏重启也不用改。留空则只按窗口标题匹配。</translation>
+        <translation>多开时用它精确匹配要操作的窗口，选好后游戏重启也不用改。
+选「不绑定（按窗口标题匹配）」时：只开了一个游戏窗口会自动用它；同时开了多个窗口则无法确定该操作哪一个，脚本会停下来提示你先绑定。</translation>
     </message>
 	<message><source>Window Class</source><translation>窗口类名</translation></message>
 	<message>
