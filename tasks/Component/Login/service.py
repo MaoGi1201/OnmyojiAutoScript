@@ -17,11 +17,17 @@ class LoginService(
     GameUiAssets,
 ):
     character: str
+    # OCR 识别不到"进入"两个字时, 兜底点击"进入游戏"区域中心的最大次数
+    ENTER_GAME_FALLBACK_MAX: int = 5
+    # 兜底点击的间隔(秒)。需要大于 OCR 的点击间隔(3秒), 让 OCR 优先生效
+    ENTER_GAME_FALLBACK_INTERVAL: float = 5
 
     def __init__(self, *wargs, **kwargs):
         super().__init__(*wargs, **kwargs)
         self.character = self.config.restart.login_character_config.character
         self.O_LOGIN_SPECIFIC_SERVE.keyword = self.character
+        self.enter_game_fallback_count = 0
+        self.enter_game_fallback_timer = Timer(self.ENTER_GAME_FALLBACK_INTERVAL)
 
     def _app_handle_login(self) -> bool:
         """
@@ -36,6 +42,9 @@ class LoginService(
         skip_login_animation = True
         skip_click_mx_cnt = 5
         login_success = False
+        # 每次登录重新计数, 避免上一次的兜底次数残留
+        self.enter_game_fallback_count = 0
+        self.enter_game_fallback_timer = Timer(self.ENTER_GAME_FALLBACK_INTERVAL).start()
 
         while 1:
             if not login_success and orientation_timer.reached():
@@ -148,12 +157,43 @@ class LoginService(
                 if self.click(self.C_LOGIN_ANIMATION_CENTER, interval=5):  # 点击屏幕中央触发跳过显示
                     skip_click_mx_cnt -= 1
 
-            if self.ocr_appear_click(self.O_LOGIN_ENTER_GAME, interval=3):
+            if self.login_enter_game():
                 skip_login_animation = False  # 进入登录页面后不再处理登录动画逻辑
                 self.wait_until_appear(self.I_LOGIN_SPECIFIC_SERVE, True, wait_time=5)
                 continue
 
         return login_success
+
+    def login_enter_game(self) -> bool:
+        """
+        点击进入游戏按钮
+        OCR 能识别到"进入"时点击识别到的位置;
+        识别不到(字体/描边/动画等原因)时, 兜底点击 "进入游戏" OCR 区域的中心位置, 避免一直卡在登录首页
+        :return: 是否执行了点击
+        """
+        if self.ocr_appear_click(self.O_LOGIN_ENTER_GAME, interval=3):
+            self.enter_game_fallback_count = 0
+            return True
+        # 兜底次数已经用尽, 不再盲点
+        if self.enter_game_fallback_count >= self.ENTER_GAME_FALLBACK_MAX:
+            return False
+        # 只在登录首页(出现登录选区标志)兜底, 防止在角色选择等其它界面点错地方
+        if not self.appear(self.I_LOGIN_8):
+            return False
+        if not self.enter_game_fallback_timer.reached():
+            return False
+        self.enter_game_fallback_timer.reset()
+        self.enter_game_fallback_count += 1
+        x, y, w, h = self.O_LOGIN_ENTER_GAME.roi
+        x, y = int(x + w / 2), int(y + h / 2)
+        logger.warning(
+            f'OCR "进入" not found, click enter game area center ({x}, {y}), '
+            f'{self.enter_game_fallback_count}/{self.ENTER_GAME_FALLBACK_MAX}')
+        self.device.click(x=x, y=y, control_name='login_enter_game_center')
+        if self.enter_game_fallback_count >= self.ENTER_GAME_FALLBACK_MAX:
+            # 防止与主循环中其它点击叠加触发 GameTooManyClickError
+            self.device.click_record_clear()
+        return True
 
     def app_handle_login(self) -> bool:
         self.device.stuck_record_clear()
