@@ -466,7 +466,8 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
         :param friend_class: OCR 识别到的分类文本
         :return: 归一化后的分类文本
         """
-        mapping = {'蔡友员': '寮友', '路区': '跨区', '察友员': '寮友', '区': '跨区','友达':'好友','友速':'好友'}
+        mapping = {'蔡友员': '寮友', '路区': '跨区', '察友员': '寮友', '区': '跨区',
+                   '友达': '好友', '友速': '好友', '友達': '好友'}
         return mapping.get(friend_class, friend_class)
 
     def _read_friend_classes(self) -> list[str]:
@@ -482,8 +483,11 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
         ]
         friend_class = []
         for item in raw_list:
-            if item is not None and item != '' and item in self.friend_class:
-                friend_class.append(self._normalize_friend_class_name(item))
+            if item is None or item == '':
+                continue
+            normalized = self._normalize_friend_class_name(item)
+            if normalized in self.friend_class:
+                friend_class.append(normalized)
         logger.info(f'Friend class: {friend_class}')
         return friend_class
 
@@ -541,6 +545,12 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
         :param selected_set: 已成功选中的好友集合（原地更新）
         :return:
         """
+        if not friend_class:
+            # 只有一个页签且 OCR 失手时,
+            # 退化为在当前已打开的好友页上直接按名字精确匹配。
+            logger.warning('No friend class detected, try to select friend on current page')
+            self._select_current_page_friends(friend_list, selected_set)
+            return
         for index in range(len(friend_class)):
             if len(selected_set) == len(friend_list):
                 break
