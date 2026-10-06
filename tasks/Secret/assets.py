@@ -13,8 +13,6 @@ class SecretAssets:
 	# Click Rule Assets
 	# description 
 	C_SE_CLICK_LAYER = RuleClick(roi_front=(434,155,100,100), roi_back=(434,155,100,100), name="se_click_layer")
-	# 秘闻剧情对话，点屏幕中间推进 
-	C_SE_CHAT = RuleClick(roi_front=(597,296,59,100), roi_back=(597,296,59,100), name="se_chat")
 
 
 	# Image Rule Assets

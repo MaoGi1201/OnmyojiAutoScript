@@ -223,18 +223,13 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, SecretAssets):
                 self.swipe(self.S_SE_DOWN_SEIPE, interval=3)
                 time.sleep(2)
 
-    def click_battle(self) -> bool:
-        """
-        点挑战，并等到战斗页面真的出现再返回。
-
-        点完挑战会先播一段剧情对话（新层首次进入），那种画面认不出页面、也没有挑战按钮，
-        靠 `C_SE_CHAT` 点屏幕中间推进；否则会空转到卡死计时器把任务判死。
-
-        Returns:
-            bool: 是否等到了战斗页面
-        """
-        return self.click_fire_until_battle(self.I_SE_FIRE, stay_rule=self.I_SE_PLACEMENT,
-                                            advance_click=self.C_SE_CHAT)
+    def click_battle(self):
+        while 1:
+            self.screenshot()
+            if not self.appear(self.I_SE_FIRE):
+                break
+            if self.appear_then_click(self.I_SE_FIRE, interval=1):
+                continue
 
     def check_time(self) -> None:
         """
