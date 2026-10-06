@@ -643,7 +643,7 @@ class ScriptTask(GameUi, GeneralInvite, GeneralRoom, GeneralBattle, SwitchSoul, 
         click_count = 0
         while 1:
             self.screenshot()
-            if not self.appear(self.I_BALL_FIRE, threshold=0.7):
+            if not self.appear(self.I_BALL_FIRE, threshold=0.7, interval=2):
                 return True
             # 盘子少于10个停止,略过具体数量防止ocr识别错误导致退出
             if self.appear_then_click(self.I_C_PLATE_LESS, interval=1):
