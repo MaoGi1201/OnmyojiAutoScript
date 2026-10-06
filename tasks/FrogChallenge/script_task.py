@@ -14,8 +14,8 @@ from tasks.GameUi.page import page_main
 
 
 class ScriptTask(RightActivity, GeneralBattle, SwitchSoul, Buy, FrogChallengeAssets):
-    # 兑换御魂是否已结束
-    soul_exchange_done = False
+    # 单次最多可兑换的御魂个数, 每 10 个骰子兑换一个
+    MAX_EXCHANGE_PER_BATCH = 10
 
     def run(self):
         if not self._enter_activity():
@@ -107,123 +107,105 @@ class ScriptTask(RightActivity, GeneralBattle, SwitchSoul, Buy, FrogChallengeAss
         return False
 
     def _exchange_soul(self) -> bool:
-        """兑换御魂: 用神秘骰子积分兑换随机六星御魂, 每10积分兑换一次"""
+        """兑换御魂: 每10个神秘骰子兑换一个随机六星御魂, 单次最多兑10个。
+        骰子可以跨天累计, 一批兑满后如果骰子还有剩余就回到活动界面再开一批"""
         config = self.config.frog_challenge.exchange_soul
         if not config.enable:
             return True
 
         logger.hr('Frog Challenge exchange soul', 1)
-        self.soul_exchange_done = False
 
         # 1. 战斗结束后先等回到活动界面
         if not self._wait_activity():
             logger.warning('Frog Challenge cannot return to activity after battle, skip exchange soul')
             return False
 
-        # 2. 购买:
-        if not self._buy_souls():
-            logger.warning('Frog Challenge buy souls failed')
-            return False
+        # 2. 分批兑换, 每批都会把购买数量拉满
+        total = 0
+        batch = 0
+        exchange_timeout = Timer(600).start()
+        while not exchange_timeout.reached():
+            batch += 1
+            self.screenshot()
+            logger.info(f'Frog Challenge exchange batch {batch}')
+            if self.appear(self.I_CHECK_SOUL):
+                # 上次运行中断在选择页面, 直接接着选, 不要再点兑换
+                logger.info('Frog Challenge resume from soul select page')
+            elif not self._buy_souls():
+                logger.info('Frog Challenge cannot buy souls, exchange finished')
+                break
+            count = self._select_batch_souls()
+            total += count
+            logger.info(f'Frog Challenge batch {batch}: {count}, total: {total}')
+            # 每批都是拉满购买的, 没换够上限就说明骰子不够再开下一批了
+            if count < self.MAX_EXCHANGE_PER_BATCH:
+                logger.info(f'Frog Challenge dice used up, {count} in batch {batch}')
+                break
+            # 骰子可能还有剩余, 回到活动界面再开一批
+            if not self._wait_activity():
+                logger.warning('Frog Challenge cannot return to activity after batch, stop exchange')
+                break
 
-        # 3. 逐个随机选择御魂, 以页面实际状态为准
-        success = 0
-        select_timeout = Timer(300).start()
-        while not select_timeout.reached() and success < 50:
-            if self.soul_exchange_done:
-                break
-            # 等选择页面出现, 购买后第一波需要等它弹出
-            if not self._wait_select_page(20):
-                if self.appear(self.I_EXCHANGE) and not self.appear(self.I_CHECK_SOUL):
-                    # 兜底: 已回到活动界面且选择页面消失
-                    logger.info('Frog Challenge back to activity, all souls selected')
-                    break
-                logger.warning('Frog Challenge soul select page not found')
-                break
-            if not self._select_soul_once():
-                logger.warning(f'Exchange soul {success + 1} failed')
-                break
-            success += 1
-            logger.info(f'Exchange soul {success}')
-        logger.info(f'Exchange soul finished: {success}')
-        return success > 0
+        logger.info(f'Exchange soul finished: {total}')
+        return total > 0
 
     def _buy_souls(self) -> bool:
-        # 点10兑换, 等购买弹窗出现
-        timeout = Timer(20).start()
+        """点兑换按钮买一批御魂
+        :return: True 已就绪: 购买弹窗出现, 或者已经直接进到御魂选择界面"""
+        timeout = Timer(12).start()
         while not timeout.reached():
             self.screenshot()
+            # 已经进到御魂选择界面就不用再点兑换了
+            if self.appear(self.I_CHECK_SOUL):
+                logger.info('Frog Challenge already in soul select page')
+                return True
             if self.appear(self.I_BUY_PLUS):
                 break
             self.appear_then_click(self.I_EXCHANGE, interval=2)
         else:
-            logger.warning('Frog Challenge buy dialog not found')
+            logger.info('Frog Challenge buy dialog not found')
             return False
 
-        # 拉满购买数量
-        for _ in range(2):
-            self.screenshot()
-            self.appear_then_click(self.I_BUY_PLUS, interval=1)
+        # 拉满购买数量: 两次点击之间必须留出间隔, 否则第二次会被 interval 抑制
+        self.appear_then_click(self.I_BUY_PLUS, interval=0.4)
+        self.device.sleep(0.5)
+        self.appear_then_click(self.I_BUY_PLUS, interval=0.4)
 
         # 只点一次购买按钮, 之后交给选择页面处理
-        self.screenshot()
         self.click(self.C_BUY_MORE)
         logger.info('Frog Challenge buy souls')
         return True
 
-    def _wait_select_page(self, timeout: int = 20) -> bool:
-        """等待随机御魂选择页面(check_soul)出现
-        结算展示页只在最后一个御魂选完时出现, 由 _select_soul_once 处理, 此处不判断"""
-        timer = Timer(timeout).start()
-        while not timer.reached():
+    def _select_batch_souls(self) -> int:
+        """逐个随机选择御魂: 在御魂选择页面就随机三选一
+        :return: 本批成功兑换的个数"""
+        count = 0
+        timeout = Timer(300).start()
+        idle = Timer(20).start()      # 选择页面迟迟不出现, 本批就没有可换的
+        while not timeout.reached() and count < self.MAX_EXCHANGE_PER_BATCH:
             self.screenshot()
-            if self.appear(self.I_CHECK_SOUL):
-                return True
-        logger.warning('Frog Challenge soul select page not found')
-        return False
 
-    def _select_soul_once(self) -> bool:
-        # 随机三选一
-        target = random.choice([self.I_SELECT_1, self.I_SELECT_2, self.I_SELECT_3])
-        timer = Timer(10).start()
-        while not timer.reached():
-            self.screenshot()
-            if self.appear_then_click(target, interval=1):
+            # 结算页出现, 本批兑换完成, 点掉它
+            if self.appear_then_click(self.I_REWARD, interval=1):
+                logger.info('Frog Challenge batch exchange done')
                 break
-        else:
-            logger.warning('Frog Challenge select soul failed')
-            return False
 
-        timer = Timer(30).start()
-        while not timer.reached():
-            self.screenshot()
-            if self.ui_reward_appear_click():
+            # 不在选择页面: 购买后需要等它弹出
+            if not self.appear(self.I_CHECK_SOUL):
+                if idle.reached():
+                    logger.info('Frog Challenge select page not appear')
+                    break
                 continue
-            if self.appear(self.I_REWARD):
-                # 结算展示页: 出现即代表御魂已兑换完
-                logger.info('Frog Challenge soul exchange done')
-                self.soul_exchange_done = True
-                self._close_reward_page()
-                return True
-            if self.appear(self.I_CHECK_SOUL) and (
-                    self.appear(self.I_SELECT_1)
-                    or self.appear(self.I_SELECT_2)
-                    or self.appear(self.I_SELECT_3)):
-                # 下一批随机御魂已加载
-                return True
-            if self.appear(self.I_EXCHANGE) and not self.appear(self.I_CHECK_SOUL):
-                # 兜底: 全部选择完成, 回到活动界面
-                return True
-        logger.warning('Frog Challenge exchange page load timeout')
-        return False
+            idle.reset()
 
-    def _close_reward_page(self):
-        """点击结算展示页直到其关闭"""
-        timer = Timer(5).start()
-        while not timer.reached():
-            self.screenshot()
-            if not self.appear(self.I_REWARD):
-                return
-            self.appear_then_click(self.I_REWARD, interval=1)
+            # 在御魂选择页面: 随机三选一
+            target = random.choice([self.I_SELECT_1, self.I_SELECT_2, self.I_SELECT_3])
+            if self.appear_then_click(target, interval=1):
+                count += 1
+                logger.info(f'Exchange soul {count}')
+                # 等这一次的处理动画结束, 否则下一轮会把同一个再选一遍
+                self.device.sleep(1)
+        return count
 
     def _finish(self):
         self.set_next_run(task='FrogChallenge', success=True)
