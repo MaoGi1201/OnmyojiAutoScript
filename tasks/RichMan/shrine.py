@@ -68,14 +68,9 @@ class Shrine(GameUi, RichManAssets):
         if not self.appear(self.I_S_BLACK):
             logger.info('Already bought black daruma')
             return
+        # 点达摩进入购买界面, I_S_CHECK_BLACK 确认弹窗里是这个达摩
         self.ui_click(self.I_S_BLACK, self.I_S_CHECK_BLACK)
-        self.screenshot()
-        if not self.appear(self.I_S_BUY_BLACK, threshold=0.6):
-            logger.info('Already bought black daruma')
-            self.ui_click_until_disappear(self.I_UI_BACK_RED)
-            time.sleep(0.5)
-            return
-        self.ui_click(self.I_S_BUY_BLACK, self.I_S_CONFIRM_BLACK)
+        # I_S_CONFIRM_BLACK 就是"确认购买"按钮, 点它即购买成功
         self.ui_get_reward(self.I_S_CONFIRM_BLACK)
         self.ui_click_until_disappear(self.I_UI_BACK_RED)
         time.sleep(1)
@@ -88,14 +83,9 @@ class Shrine(GameUi, RichManAssets):
             return
         if not self.shrine_check_money(1200):
             return
+        # 点达摩进入购买界面, I_S_CHECK_WHITE_FIVE 确认弹窗里是这个达摩
         self.ui_click(self.I_S_WHITE_FIVE, self.I_S_CHECK_WHITE_FIVE)
-        self.screenshot()
-        if not self.appear(self.I_S_BUY_WHITE_FIVE, threshold=0.9):
-            logger.info('Already bought white five')
-            self.ui_click_until_disappear(self.I_UI_BACK_RED)
-            time.sleep(1)
-            return
-        self.ui_click(self.I_S_BUY_WHITE_FIVE, self.I_S_CONFIRM_WHITE_FIVE)
+        # I_S_CONFIRM_WHITE_FIVE 就是"确认购买"按钮, 点它即购买成功
         self.ui_get_reward(self.I_S_CONFIRM_WHITE_FIVE)
         self.ui_click_until_disappear(self.I_UI_BACK_RED)
         time.sleep(1)
@@ -108,14 +98,9 @@ class Shrine(GameUi, RichManAssets):
             return
         if not self.shrine_check_money(400):
             return
+        # 点达摩进入购买界面, I_S_CHECK_WHITE_FOUR 确认弹窗里是这个达摩
         self.ui_click(self.I_S_WHITE_FOUR, self.I_S_CHECK_WHITE_FOUR)
-        self.screenshot()
-        if not self.appear(self.I_S_BUY_WHITE_FOUR, threshold=0.9):
-            logger.info('Already bought white four')
-            self.ui_click_until_disappear(self.I_UI_BACK_RED)
-            time.sleep(1)
-            return
-        self.ui_click(self.I_S_BUY_WHITE_FOUR, self.I_S_CONFIRM_WHITE_FOUR)
+        # I_S_CONFIRM_WHITE_FOUR 就是"确认购买"按钮, 点它即购买成功
         self.ui_get_reward(self.I_S_CONFIRM_WHITE_FOUR)
         self.ui_click_until_disappear(self.I_UI_BACK_RED)
         time.sleep(1)
@@ -126,13 +111,12 @@ if __name__ == '__main__':
     from module.config.config import Config
     from module.device.device import Device
 
-    c = Config('oas1')
+    c = Config('CDB-HJ')
     d = Device(c)
     t = Shrine(c, d)
 
     # t.shrine_white_four()
     t.execute_shrine(t.config.model.rich_man.shrine)
     # t.screenshot()
-    # print(t.appear(t.I_S_BUY_WHITE_FIVE, threshold=0.9))
 
 
