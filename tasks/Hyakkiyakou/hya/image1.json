@@ -29,7 +29,7 @@
   {
     "itemName": "hselected",
     "imageName": "hya_hselected.png",
-    "roiFront": "980,265,41,44",
+    "roiFront": "248,243,41,44",
     "roiBack": "226,53,836,348",
     "method": "Template matching",
     "threshold": 0.8,

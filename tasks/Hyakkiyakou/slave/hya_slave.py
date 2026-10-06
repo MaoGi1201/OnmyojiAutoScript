@@ -217,7 +217,7 @@ class HyaSlave(HyaDevice, HyaColor, HyakkiyakouAssets):
 
     def invite_friend(self):
         logger.hr('Invite friend', 2)
-        self.ui_click(self.I_HINVITE, self.I_CHECK_INVITATION, interval=4)
+        self.ui_click(self.I_HINVITE, self.I_CHECK_INVITATION, interval=8)
         logger.info('Entry check invitation')
         self.screenshot()  # 回归活动标志后出现会导致上一帧截图可能并不包含召回活动标志
         # 是否有召回活动(星重聚阴阳师)
@@ -225,42 +225,30 @@ class HyaSlave(HyaDevice, HyaColor, HyakkiyakouAssets):
             logger.info('Recall activity detected')
             hya_recall_activity = True
             # 应该动态改roi而不是新开一个图
-            friend_buttons1 = [self.I_FRIEND_SAME_1_RECALL, self.I_FRIEND_REMOTE_1_RECALL, ]
-            friend_buttons2 = [self.I_FRIEND_SAME_2_RECALL, self.I_FRIEND_REMOTE_2_RECALL, ]
+            friend_buttons1 = [self.I_FRIEND_SAME_1_RECALL]
+            friend_buttons2 = [self.I_FRIEND_SAME_2_RECALL]
+            friend_labels = ['same server']
         else:
             hya_recall_activity = False
-            friend_buttons1 = [self.I_FRIEND_SAME_1, self.I_FRIEND_REMOTE_1, self.I_FRIEND_RYOU_1]
-            friend_buttons2 = [self.I_FRIEND_SAME_2, self.I_FRIEND_REMOTE_2, self.I_FRIEND_RYOU_2]
-        # 依次邀请,
+            friend_buttons1 = [self.I_FRIEND_SAME_1, self.I_FRIEND_RYOU_1]
+            friend_buttons2 = [self.I_FRIEND_SAME_2, self.I_FRIEND_RYOU_2]
+            friend_labels = ['same server', 'guild']
+        # 依次邀请(跨区好友按钮已移除)
         self.friend_state = 0  # 不需要每一次都从0开始，可以固定一下
-        while self.friend_state < 3:
-            match self.friend_state:
-                case 0:
-                    logger.info('Invite same server friend')
-                    if not self._invite_friend(button1=friend_buttons1[0], button2=friend_buttons2[0], hya_recall_activity=hya_recall_activity):
-                        self.friend_state += 1
-                    else:
-                        return True
-                case 1:
-                    logger.info('Invite remote friend')
-                    if not self._invite_friend(button1=friend_buttons1[1], button2=friend_buttons2[1], hya_recall_activity=hya_recall_activity):
-                        self.friend_state += 1
-                    else:
-                        return True
-                case 2:
-                    logger.info('Invite guild friend')
-                    if not self._invite_friend(button1=friend_buttons1[2], button2=friend_buttons2[2], hya_recall_activity=hya_recall_activity):
-                        self.friend_state += 1
-                    else:
-                        return True
-                case _:
-                    raise RequestHumanTakeover('Invite friend failed')
+        while self.friend_state < len(friend_buttons1):
+            logger.info(f'Invite {friend_labels[self.friend_state]} friend')
+            if self._invite_friend(button1=friend_buttons1[self.friend_state],
+                                   button2=friend_buttons2[self.friend_state],
+                                   hya_recall_activity=hya_recall_activity):
+                return True
+            self.friend_state += 1
+        raise RequestHumanTakeover('Invite friend failed')
 
     def _invite_friend(self, button1: RuleImage, button2: RuleImage, hya_recall_activity: bool = False ) -> bool:
         logger.info('Start clicking')
         self.ui_click(button1, button2)
         logger.info('End clicking')
-        invite_timer = Timer(8)
+        invite_timer = Timer(10)
         invite_timer.start()
         while 1:
             self.screenshot()
