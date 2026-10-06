@@ -38,7 +38,7 @@ WQ_TYPE_COLOR_REFERENCE: tuple[tuple[WQType, int], ...] = (
 WQ_TYPE_COLOR_MIN_SATURATION = 70
 # 判定阈值：非白像素占比低于此值认为不是类型标签（标签会填满整个 ROI）
 WQ_TYPE_COLOR_MIN_COVERAGE = 0.4
-# 秘闻剧情对话最多点多少次就放弃
+# 秘闻剧情对话最多点多少次就放弃（循环兜底，防止挑战按钮一直不出现时空转）
 SECRET_CHAT_MAX_CLICKS = 60
 # 判定阈值：亮度低于此值认为不是类型标签（标签 V 在 130 以上；UI 暗部只有 40 左右）
 WQ_TYPE_COLOR_MIN_VALUE = 80
@@ -437,13 +437,18 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
                 return 
             # 又臭又长的对话针的是服了这个网易
             # 注意：秘闻的剧情对话画面**没有任何可识别页面、也没有红色返回键**
+            # 战斗前会播一段，战斗结算之后**还会**再接一段（首通该层/打完该层首领时），
             click_count = 0
             chat_total = 0
+            battle_done = False
             while 1:
                 self.screenshot()
                 current_page = self.get_current_page()
                 if current_page in [page_battle_prepare, page_battle]:
                     self.run_general_battle(self.battle_config, exit_matcher=any_of(self.I_UI_BACK_RED, self.I_WQSE_SPECIAL_FIRE))
+                    battle_done = True
+                    continue
+                if battle_done and self.appear(self.I_WQSE_FIRE):
                     break
                 if self.appear_then_click(self.I_WQSE_FIRE, interval=1):
                     continue
