@@ -68,14 +68,8 @@ class Shrine(GameUi, RichManAssets):
         if not self.appear(self.I_S_BLACK):
             logger.info('Already bought black daruma')
             return
+        # 点达摩 → 等 I_S_CHECK_BLACK 确认达摩 → 确认购买即购买成功
         self.ui_click(self.I_S_BLACK, self.I_S_CHECK_BLACK)
-        self.screenshot()
-        if not self.appear(self.I_S_BUY_BLACK, threshold=0.6):
-            logger.info('Already bought black daruma')
-            self.ui_click_until_disappear(self.I_UI_BACK_RED)
-            time.sleep(0.5)
-            return
-        self.ui_click(self.I_S_BUY_BLACK, self.I_S_CONFIRM_BLACK)
         self.ui_get_reward(self.I_S_CONFIRM_BLACK)
         self.ui_click_until_disappear(self.I_UI_BACK_RED)
         time.sleep(1)
@@ -88,14 +82,8 @@ class Shrine(GameUi, RichManAssets):
             return
         if not self.shrine_check_money(1200):
             return
+        # 点达摩 → 等 I_S_CHECK_WHITE_FIVE 确认达摩 → 确认购买即购买成功
         self.ui_click(self.I_S_WHITE_FIVE, self.I_S_CHECK_WHITE_FIVE)
-        self.screenshot()
-        if not self.appear(self.I_S_BUY_WHITE_FIVE, threshold=0.9):
-            logger.info('Already bought white five')
-            self.ui_click_until_disappear(self.I_UI_BACK_RED)
-            time.sleep(1)
-            return
-        self.ui_click(self.I_S_BUY_WHITE_FIVE, self.I_S_CONFIRM_WHITE_FIVE)
         self.ui_get_reward(self.I_S_CONFIRM_WHITE_FIVE)
         self.ui_click_until_disappear(self.I_UI_BACK_RED)
         time.sleep(1)
@@ -108,14 +96,8 @@ class Shrine(GameUi, RichManAssets):
             return
         if not self.shrine_check_money(400):
             return
+        # 点达摩 → 等 I_S_CHECK_WHITE_FOUR 确认达摩 → 确认购买即购买成功
         self.ui_click(self.I_S_WHITE_FOUR, self.I_S_CHECK_WHITE_FOUR)
-        self.screenshot()
-        if not self.appear(self.I_S_BUY_WHITE_FOUR, threshold=0.9):
-            logger.info('Already bought white four')
-            self.ui_click_until_disappear(self.I_UI_BACK_RED)
-            time.sleep(1)
-            return
-        self.ui_click(self.I_S_BUY_WHITE_FOUR, self.I_S_CONFIRM_WHITE_FOUR)
         self.ui_get_reward(self.I_S_CONFIRM_WHITE_FOUR)
         self.ui_click_until_disappear(self.I_UI_BACK_RED)
         time.sleep(1)
@@ -133,6 +115,5 @@ if __name__ == '__main__':
     # t.shrine_white_four()
     t.execute_shrine(t.config.model.rich_man.shrine)
     # t.screenshot()
-    # print(t.appear(t.I_S_BUY_WHITE_FIVE, threshold=0.9))
 
 
