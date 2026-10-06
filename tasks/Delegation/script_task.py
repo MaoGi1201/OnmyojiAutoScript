@@ -121,7 +121,10 @@ class ScriptTask(GameUi, DelegationAssets):
                 continue
             if check_timer.reached():
                 break
-            if self.ocr_appear_click(self.O_D_DONE, interval=1):
+            if self.ocr_appear(self.O_D_DONE, interval=1):
+                x, y, w, h = self.O_D_DONE.area
+                self.device.click(x=int(x + w // 2), y=int(y + 68),
+                                  control_name='D_DONE')
                 check_timer.reset()
                 continue
 

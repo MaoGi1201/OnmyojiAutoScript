@@ -2,7 +2,7 @@
   {
     "itemName": "rewards_done",
     "imageName": "rewards_rewards_done.png",
-    "roiFront": "975,132,115,39",
+    "roiFront": "998,311,115,39",
     "roiBack": "982,303,149,60",
     "method": "Template matching",
     "threshold": 0.8,

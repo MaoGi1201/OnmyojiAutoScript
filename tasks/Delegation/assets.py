@@ -53,7 +53,7 @@ class DelegationAssets:
 
 	# Image Rule Assets
 	# description 
-	I_REWARDS_DONE = RuleImage(roi_front=(975,132,115,39), roi_back=(982,303,149,60), threshold=0.8, method="Template matching", file="./tasks/Delegation/rewards/rewards_rewards_done.png")
+	I_REWARDS_DONE = RuleImage(roi_front=(998,311,115,39), roi_back=(982,303,149,60), threshold=0.8, method="Template matching", file="./tasks/Delegation/rewards/rewards_rewards_done.png")
 	# description 
 	I_REWARDS_CHAT = RuleImage(roi_front=(1171,124,48,65), roi_back=(1171,124,48,65), threshold=0.8, method="Template matching", file="./tasks/Delegation/rewards/rewards_rewards_chat.png")
 	# 完美达成 
