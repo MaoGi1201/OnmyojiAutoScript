@@ -7,7 +7,6 @@ from time import sleep
 import cv2
 import numpy as np
 
-from tasks.GameUi.default_pages import page_battle_prepare, page_battle
 from tasks.GameUi.matcher import any_of
 from typing import List, Callable, Optional
 
@@ -38,8 +37,8 @@ WQ_TYPE_COLOR_REFERENCE: tuple[tuple[WQType, int], ...] = (
 WQ_TYPE_COLOR_MIN_SATURATION = 70
 # 判定阈值：非白像素占比低于此值认为不是类型标签（标签会填满整个 ROI）
 WQ_TYPE_COLOR_MIN_COVERAGE = 0.4
-# 秘闻剧情对话最多点多少次就放弃（循环兜底，防止挑战按钮一直不出现时空转）
-SECRET_CHAT_MAX_CLICKS = 60
+# 秘闻战斗结算后推进剧情/奖励弹窗的超时(秒)。
+SECRET_CHAT_TIMEOUT_AFTER = 30
 # 判定阈值：亮度低于此值认为不是类型标签（标签 V 在 130 以上；UI 暗部只有 40 左右）
 WQ_TYPE_COLOR_MIN_VALUE = 80
 # 色相离所有参考值都超过这个度数就不判定（避免把背景误判成某个类型）
@@ -428,43 +427,53 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         logger.info('Soul mission finished')
 
     def secret(self, goto, num=1):
-        self.ui_click(goto, self.I_WQSE_FIRE)
+        while 1:
+            self.screenshot()
+            if self.appear(self.I_WQSE_FIRE) or self.appear(self.I_WQSE_SPECIAL_FIRE):
+                break
+            if self.appear_then_click(self.I_SE_ENTER, interval=1):
+                logger.info('Click enter to enter the secret')
+                continue
+            if self.appear_then_click(goto, interval=1):
+                continue
         for i in range(num):
             self.screenshot()
             # 若是当周特殊秘闻则禁止连续进攻, 战斗结束之后直接退到探索页面重新进入挑战(避免当周秘闻没打结果跳转到第一层)
             if self.appear(self.I_WQSE_SPECIAL_FIRE):
                 logger.warning('Current is special secret, exit and retry')
-                return 
-            # 又臭又长的对话针的是服了这个网易
-            # 注意：秘闻的剧情对话画面**没有任何可识别页面、也没有红色返回键**
-            # 战斗前会播一段，战斗结算之后**还会**再接一段（首通该层/打完该层首领时），
-            click_count = 0
-            chat_total = 0
-            battle_done = False
-            while 1:
-                self.screenshot()
-                current_page = self.get_current_page()
-                if current_page in [page_battle_prepare, page_battle]:
-                    self.run_general_battle(self.battle_config, exit_matcher=any_of(self.I_UI_BACK_RED, self.I_WQSE_SPECIAL_FIRE))
-                    battle_done = True
-                    continue
-                if battle_done and self.appear(self.I_WQSE_FIRE):
-                    break
-                if self.appear_then_click(self.I_WQSE_FIRE, interval=1):
-                    continue
-                if current_page is None or (
-                        self.appear(self.I_UI_BACK_RED, threshold=0.7) and not self.appear(self.I_WQSE_FIRE)):
-                    self.click(self.C_SECRET_CHAT, interval=0.8)
-                    click_count += 1
-                    chat_total += 1
-                    if click_count >= 6:
-                        logger.warning('Secret mission chat too long, force to close')
-                        click_count = 0
-                        self.device.click_record_clear()
-                    if chat_total >= SECRET_CHAT_MAX_CLICKS:
-                        logger.warning('Secret mission chat too long, give up this quest')
-                        return
+                return
+            # 战前: 点挑战 -> 首次进入该层会先播一段又臭又长的剧情 -> 等战斗页真的出现。
+            if not self.click_fire_until_battle(self.I_WQSE_FIRE, advance_click=self.C_SECRET_CHAT):
+                logger.warning('Secret battle page not appeared, skip this round')
+                break
+            self.run_general_battle(self.battle_config, exit_matcher=any_of(self.I_UI_BACK_RED, self.I_WQSE_SPECIAL_FIRE))
+            # 战后: 结算之后还会再接一段剧情/奖励弹窗, 不推掉的话下一轮和退出都会被挡住
+            if not self.secret_chat_until_fire():
+                logger.warning('Secret mission post-battle chat not finished, exit')
+                break
         logger.info('Secret mission finished')
+
+    def secret_chat_until_fire(self, timeout: int = SECRET_CHAT_TIMEOUT_AFTER) -> bool:
+        """
+        :param timeout: 超时时间(秒), 超时后返回 False
+        :return: 是否在超时前等到挑战按钮
+        """
+        logger.info('Handle secret chat after battle')
+        stop = any_of(self.I_WQSE_FIRE, self.I_WQSE_SPECIAL_FIRE)
+        timeout_timer = Timer(timeout).start()
+        click_count = 0
+        while 1:
+            self.screenshot()
+            if self._evaluate_exit_matcher(stop):
+                logger.info(f'Secret mission chat done in {click_count} clicks')
+                return True
+            if self.click(self.C_SECRET_CHAT, interval=0.8):
+                click_count += 1
+                self.device.click_record_clear()
+            if timeout_timer.reached():
+                logger.warning('Secret mission chat after battle timeout, force close')
+                self.ui_click_until_disappear(self.I_UI_BACK_RED)
+                return False
 
     def invite_random(self, add_button: RuleImage):
         self.screenshot()
