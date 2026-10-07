@@ -70,9 +70,15 @@ class WindowWin32:
             return self.desktop_window.screenshot(SCREEN_SIZE)
 
     # ------------------------------------------------------------------ 控制
-    def click_window_win32(self, x: int, y: int) -> None:
+    def click_window_win32(self, x: int, y: int, fast: bool = False) -> None:
+        """后台点击桌面版游戏窗口。
+
+        Args:
+            fast: 缩短按下时长（0.01~0.04s），百鬼这类高频点击场景用；
+                默认走 press_time（0.1~0.2s）的常规节奏。
+        """
         with _translate_window_errors(RequestHumanTakeover, 'Failed to click desktop game window'):
-            self.desktop_window.click(x, y, SCREEN_SIZE)
+            self.desktop_window.click(x, y, SCREEN_SIZE, fast=fast)
 
     def long_click_window_win32(self, x: int, y: int, duration: float) -> None:
         with _translate_window_errors(RequestHumanTakeover, 'Failed to long click desktop game window'):

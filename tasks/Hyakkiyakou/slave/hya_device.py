@@ -3,6 +3,7 @@ import numpy as np
 from datetime import datetime
 
 from module.base.timer import Timer
+from module.device.env import is_desktop_mode
 from module.device.handle import Handle, WindowNode, handle_num2title, handle_title2num, is_handle_valid
 from module.logger import logger
 from module.base.utils import point2str
@@ -37,6 +38,10 @@ class HyaDevice(BaseTask):
         """
         if hasattr(self.device, 'root_node'):
             return
+        # 桌面版模式没有模拟器句柄树, 必须跳过 (与 Handle.__init__ 保持一致)。
+        if is_desktop_mode(self.device.config):
+            logger.info('Desktop mode enabled, skip emulator root_node init')
+            return
         from module.config.config import Config
         root_handle = self.device.config.script.device.handle
         if not root_handle:
@@ -58,6 +63,11 @@ class HyaDevice(BaseTask):
                 if handle_title2num(root_handle) != 0:
                     root_handle_num = handle_title2num(root_handle)
                     root_handle_title = root_handle
+        # 解析不到有效窗口就别建节点: 保持 hasattr=False, 让 fast_screenshot / fast_click
+        if not root_handle_num:
+            logger.warning(f'Cannot resolve handle {root_handle!r} to a window, '
+                           'fall back to standard screenshot/click')
+            return
         self.device.root_handle_title = root_handle_title
         self.device.root_handle_num = root_handle_num
         self.device.root_node = WindowNode(name=root_handle_title, num=root_handle_num)
@@ -65,14 +75,20 @@ class HyaDevice(BaseTask):
         logger.info(f'root_node initialized: title={root_handle_title}, num={root_handle_num}')
 
     def fast_screenshot(self, screenshot: ScreenshotMethod):
-        self._ensure_root_node()
         self.hya_screenshot_interval.wait()
         self.hya_screenshot_interval.reset()
-        if hasattr(self.device, 'root_node'):
-            self.device.image = self.device.screenshot_window_background() if screenshot == ScreenshotMethod.WINDOW_BACKGROUND else self.device.screenshot_nemu_ipc()
+        if self.device.is_desktop:
+            # 桌面版: 目标是本机 PC 客户端窗口, 没有模拟器句柄树。
+            # hya_screenshot_method(window_background / nemu_ipc) 是模拟器专用设置, 这里忽略,
+            # 直接用桌面版自己的 PrintWindow 后台截图。
+            self.device.image = self.device.screenshot_window_win32()
         else:
-            logger.warning('root_node unavailable, falling back to standard screenshot')
-            self.device.screenshot()
+            self._ensure_root_node()
+            if hasattr(self.device, 'root_node'):
+                self.device.image = self.device.screenshot_window_background() if screenshot == ScreenshotMethod.WINDOW_BACKGROUND else self.device.screenshot_nemu_ipc()
+            else:
+                logger.warning('root_node unavailable, falling back to standard screenshot')
+                self.device.screenshot()
         self.device.image_frame_id = None
         if image_black(self.device.image):
             logger.error('Screenshot image is black, try again')
@@ -86,10 +102,15 @@ class HyaDevice(BaseTask):
         return self.device.image
 
     def fast_click(self, x: int, y: int, control_method: ControlMethod = ControlMethod.WINDOW_MESSAGE) -> None:
-        self._ensure_root_node()
         logger.info(
             'Click %s @ %s' % (point2str(x, y), 'Click')
         )
+        if self.device.is_desktop:
+            # 桌面版: 后台 PostMessage 点击, fast=True 缩短按下时长。
+            # hya_control_method(minitouch / window_message) 是模拟器专用设置, 这里忽略。
+            self.device.click_window_win32(x=x, y=y, fast=True)
+            return
+        self._ensure_root_node()
         if not hasattr(self.device, 'root_node'):
             logger.warning('root_node unavailable, falling back to standard click')
             self.device.click(x, y)
