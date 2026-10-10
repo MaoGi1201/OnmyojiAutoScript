@@ -382,8 +382,8 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
             # 没有对话挡着的时候直接点挑战(战斗结束后不点, 交给下一轮决定是否继续)
             if before_battle and self.appear_then_click(self.I_WQSE_FIRE, interval=1):
                 continue
-            if self.appear(self.I_UI_BACK_RED, threshold=0.7) and not self.appear(self.I_WQSE_FIRE):
-                self.click(self.C_SECRET_CHAT, interval=0.8)
+            # 剧情对话: 点屏幕推进。
+            if self.click(self.C_SECRET_CHAT, interval=0.8):
                 click_count += 1
                 if click_count >= 6:
                     logger.warning('Secret mission chat too long, force to close')
