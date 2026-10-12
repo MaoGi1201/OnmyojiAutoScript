@@ -187,7 +187,13 @@ class ScriptTask(GameUi, WeeklyTriflesAssets):
             obtained = True
         if not obtained:
             # 点击分享
-            self.click_share(self.I_WT_AB_WECHAT)
+            if not self.click_share(self.I_WT_AB_WECHAT):
+                # 兜底: 奖励弹窗偶尔识别不到, 分享界面上没有勾玉就说明已经分享成功
+                self.screenshot()
+                if self.appear(self.I_WT_AB_JADE):
+                    logger.warning('Share area boss failed, jade still exists')
+                else:
+                    logger.info('Jade disappeared, share area boss succeeded')
         self.goto_page(page_main)
 
     def _share_secret(self):
@@ -226,7 +232,13 @@ class ScriptTask(GameUi, WeeklyTriflesAssets):
             logger.warning('This week has been obtained')
         # 点击分享
         if not obtained:
-            self.click_share(self.I_WT_SE_WECHAT)
+            if not self.click_share(self.I_WT_SE_WECHAT):
+                # 兜底: 奖励弹窗偶尔识别不到, 分享界面上没有勾玉就说明已经分享成功
+                self.screenshot()
+                if self.appear(self.I_WT_SE_JADE):
+                    logger.warning('Share secret failed, jade still exists')
+                else:
+                    logger.info('Jade disappeared, share secret succeeded')
         # 返回
         self.goto_page(page_main)
 
