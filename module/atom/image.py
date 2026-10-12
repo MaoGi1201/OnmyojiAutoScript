@@ -13,6 +13,20 @@ from module.logger import logger
 from module.base.utils import is_approx_rectangle
 from module.base.utils.utils import random_normal_distribution_int
 
+# 模板匹配容差：把搜索区域（roi_back）四边各外扩该像素数，用于吸收非原生渲染
+# 环境相对模板截图环境的整体相位差（桌面客户端受 DPI 缩放重采样，约 1px）。
+# 桌面模式由 Device 置为 2，模拟器保持 0。
+# 注意：本仓库 match() 走图像服务（zerorpc），外扩不在客户端执行，
+# 这里保留常量与 setter 供设备层导入调用，不改变现有匹配行为。
+ROI_MATCH_PAD = 0
+DESKTOP_ROI_MATCH_PAD = 2
+
+
+def set_roi_match_padding(pad: int) -> None:
+    """设置模板匹配的 roi_back 外扩容差（像素，四边同值）。0 表示不启用。"""
+    global ROI_MATCH_PAD
+    ROI_MATCH_PAD = max(0, int(pad))
+
 
 class RuleImage:
     debug_mode: bool = False
