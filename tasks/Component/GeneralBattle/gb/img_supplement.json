@@ -20,8 +20,8 @@
   {
     "itemName": "confirm_close_diff_soul",
     "imageName": "gb_confirm_close_diff_soul.png",
-    "roiFront": "571,404,135,54",
-    "roiBack": "517,374,226,112",
+    "roiFront": "552,408,179,63",
+    "roiBack": "513,376,226,112",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "关闭御魂不一致提示弹窗"
@@ -29,7 +29,7 @@
   {
     "itemName": "disable_7days_diff_soul",
     "imageName": "gb_disable_7days_diff_soul.png",
-    "roiFront": "547,342,27,36",
+    "roiFront": "548,347,26,31",
     "roiBack": "524,325,70,71",
     "method": "Template matching",
     "threshold": 0.8,
