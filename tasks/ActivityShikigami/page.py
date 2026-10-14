@@ -1,3 +1,8 @@
+"""活动爬塔的静态页面图。
+
+这里只定义**所有形态共享**的页面骨架：主页、中转页、四个爬塔页，以及主页与庭院
+之间的固定往返边。
+"""
 from tasks.ActivityShikigami.assets import ActivityShikigamiAssets
 from tasks.Component.GeneralBattle.assets import GeneralBattleAssets
 from tasks.Component.RightActivity.assets import RightActivityAssets
@@ -21,7 +26,12 @@ page_act.add_enter_failure_hooks(
     RightActivityAssets.I_TOGGLE_BUTTON,
     conditional_action(GlobalGameAssets.I_UI_REWARD, random_click),
     GlobalGameAssets.I_UI_BACK_RED,
-    ActivityShikigamiAssets.I_SKIP_BUTTON,
+    # 点「跳过」后还会弹一个确认框，必须再点「确定跳过」才真的跳过去；
+    # 只点第一个会一直被弹窗挡着，页面识别不出来。
+    sequence(
+        ActivityShikigamiAssets.I_SKIP_BUTTON,
+        ActivityShikigamiAssets.I_CONFIRM_SKIP,
+    ),
 )
 page_act.connect(
     page_main, GlobalGameAssets.I_UI_BACK_YELLOW, key="page_act->page_main"

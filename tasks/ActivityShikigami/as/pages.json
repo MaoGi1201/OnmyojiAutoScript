@@ -2,7 +2,7 @@
   {
     "itemName": "main_goto_act",
     "imageName": "as_main_goto_act.png",
-    "roiFront": "1184,211,46,32",
+    "roiFront": "1185,296,46,32",
     "roiBack": "1164,134,83,393",
     "method": "Template matching",
     "threshold": 0.7,
@@ -29,8 +29,8 @@
   {
     "itemName": "to_battle_boss",
     "imageName": "as_to_battle_boss.png",
-    "roiFront": "126,421,79,87",
-    "roiBack": "42,353,234,327",
+    "roiFront": "1057,290,117,39",
+    "roiBack": "979,189,225,255",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "点击进入boss战斗页面"
@@ -119,8 +119,8 @@
   {
     "itemName": "to_battle_ap",
     "imageName": "as_to_battle_ap.png",
-    "roiFront": "825,321,39,139",
-    "roiBack": "720,255,238,269",
+    "roiFront": "216,251,106,39",
+    "roiBack": "177,199,185,140",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "活动主界面进入体力爬塔标志"
@@ -128,10 +128,82 @@
   {
     "itemName": "map_goto_battle",
     "imageName": "as_map_goto_battle.png",
-    "roiFront": "71,93,99,36",
-    "roiBack": "71,93,99,36",
+    "roiFront": "673,40,99,36",
+    "roiBack": "692,53,99,36",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "活动中转界面进入战斗界面"
+  },
+  {
+    "itemName": "check_ap",
+    "imageName": "as_check_ap.png",
+    "roiFront": "151,18,129,46",
+    "roiBack": "141,0,151,85",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "体力爬塔页面标志"
+  },
+  {
+    "itemName": "check_pass",
+    "imageName": "as_check_pass.png",
+    "roiFront": "595,0,129,46",
+    "roiBack": "583,0,151,85",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "门票爬塔页面标志"
+  },
+  {
+    "itemName": "check_ap100",
+    "imageName": "as_check_ap100.png",
+    "roiFront": "151,18,129,46",
+    "roiBack": "141,0,151,85",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "100体爬塔页面标志"
+  },
+  {
+    "itemName": "check_boss",
+    "imageName": "as_check_boss.png",
+    "roiFront": "151,18,129,46",
+    "roiBack": "141,0,151,85",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "boss爬塔页面标志(占位roi待实测替换)"
+  },
+  {
+    "itemName": "to_battle_ap100",
+    "imageName": "as_to_battle_ap100.png",
+    "roiFront": "394,457,123,34",
+    "roiBack": "330,315,238,269",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "主页进入100体爬塔入口"
+  },
+  {
+    "itemName": "to_battle_pass",
+    "imageName": "as_to_battle_pass.png",
+    "roiFront": "810,456,135,40",
+    "roiBack": "758,305,238,269",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "主页进入门票爬塔入口"
+  },
+  {
+    "itemName": "check_pass_2",
+    "imageName": "as_check_pass_2.png",
+    "roiFront": "153,15,129,46",
+    "roiBack": "139,0,151,85",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "门票战斗界面检查"
+  },
+  {
+    "itemName": "pass_map_goto_battle",
+    "imageName": "as_pass_map_goto_battle.png",
+    "roiFront": "66,150,97,36",
+    "roiBack": "66,150,97,36",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": ""
   }
 ]
