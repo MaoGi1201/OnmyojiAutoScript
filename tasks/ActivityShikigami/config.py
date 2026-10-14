@@ -42,7 +42,8 @@ class GeneralClimb(ConfigBase):
 
     @property
     def run_sequence_v(self) -> list[str]:
-        """得到limit>0且配置好的运行顺序序列"""
+        """得到 limit>0 且配置好的运行顺序序列。
+        """
         self.valid_run_sequence()
         str_list = [climb_type.strip() for climb_type in self.run_sequence.split(',')]
         return [climb_type for climb_type in str_list if getattr(self, f'{climb_type}_limit', 0) > 0]
@@ -156,10 +157,14 @@ class ActivityShikigami(ConfigBase):
     general_climb: GeneralClimb = Field(default_factory=GeneralClimb)
     rich_man: RichManConfig = Field(default_factory=RichManConfig)
     switch_soul_config: SwitchSoulConfig = Field(default_factory=SwitchSoulConfig)
+    # 活动入口形态
+    #   normal = 主页只有一个入口，经中转地图再分体力/门票（需模式互切）
+    #   direct = 主页同时摆放 100体/体力/门票/boss 四个入口，各自直达
+    entrance_mode: str = Field(default='direct', description='活动入口模式，normal=中转地图，direct=主页四入口直连')
 
     pass_battle_conf: GeneralBattleConfig = Field(default_factory=GeneralBattleConfig)
     ap_battle_conf: GeneralBattleConfig = Field(default_factory=GeneralBattleConfig)
     boss_battle_conf: GeneralBattleConfig = Field(default_factory=GeneralBattleConfig)
     ap100_battle_conf: GeneralBattleConfig = Field(default_factory=GeneralBattleConfig)
 
-    hide_fields = dynamic_hide('rich_man')
+    hide_fields = dynamic_hide('rich_man', 'entrance_mode')
