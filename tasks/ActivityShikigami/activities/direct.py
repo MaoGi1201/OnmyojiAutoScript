@@ -1,14 +1,5 @@
 # This Python file uses the following encoding: utf-8
 """主页直连式爬塔活动。
-
-适用形态：庭院进入活动主页后，主页上同时摆着四个入口
-（100 体 / 体力 / 门票 / boss），各自直达，既不需要经过体力-门票的中转地图，
-也不需要在爬塔页里再点 `I_CLIMB_MODE_SWITCH` 切换模式。
-
-中转模式仍完整保留在 `NormalClimbAct` 中。两者共用同一套静态 `Page` 定义，
-差异只体现在 `before_run()` 里对 **session 副本**重新接线，因此互不干扰：
-`session._snapshot_pages()` 会把静态页面深拷贝成任务级副本，
-runtime 的 `connect()` / `remove_transition()` 只改动副本，不会污染全局 registry。
 """
 import time
 
@@ -54,8 +45,9 @@ class DirectClimbAct(BaseAct):
     DETACH_MAP_ROUTES: bool = True
 
     # 四个爬塔页各自的「上锁图 / 未上锁图」。
-    # 活动换皮时只需替换对应 asset 的模板与 roi，不必改这里；
-    # asset 还没截图时 getattr 拿到 None，会自动降级到 LOCK_FALLBACK。
+    # 活动换皮时只需替换对应 asset 的模板与 roi，不必改这里。
+    # 注意：判定顺序上通用图（LOCK_FALLBACK）在前，这里属于第二轮的补充；
+    # 某项 asset 未配置时 `_own_lock_names()` 返回 None，该轮直接跳过。
     LOCK_RULES: dict[str, tuple[str, str]] = {
         'ap100': ('I_AP100_LOCK', 'I_AP100_UNLOCK'),
         'ap': ('I_AP_LOCK', 'I_AP_UNLOCK'),
@@ -63,28 +55,18 @@ class DirectClimbAct(BaseAct):
         'boss': ('I_BOSS_LOCK', 'I_BOSS_UNLOCK'),
     }
 
-    # 专属锁图缺失、或判定失败时的兜底（通用的那一对）。置为 None 则跳过锁容操作。
+    # 通用的那一对锁图（I_LOCK / I_UNLOCK）。判定顺序上**优先**用它，
+    # 它判定失败后才退到各页面专属的 LOCK_RULES。
+    # 置为 None 则完全不用通用图，只走专属图。
     LOCK_FALLBACK: tuple[str, str] | None = ('I_LOCK', 'I_UNLOCK')
 
-    # 单次锁容点击的超时（秒）。
-    # 基类 `ui_click` 是 while 1 死循环，专属图匹配不上时会一直空转，
-    # 因此这里统一走带超时的 ui_click_until_appear_or_timeout，超时后再用兜底图判断一轮。
+    # 单轮锁容点击的超时（秒）。
+    # 基类 `ui_click` 是 while 1 死循环，图匹配不上时会一直空转，
+    # 因此统一走带超时的 ui_click_until_appear_or_timeout；
+    # 一轮超时即视为该轮判定失败，交给下一组图继续。
     LOCK_CLICK_TIMEOUT: float = 5.0
 
     # 到达层：哪些类型的目标页只是地图页，还要再点一次才到真正的战斗页。
-    # 格式 climb_type -> (跳转按钮, 到达确认图)。不在表里的类型视为进页即战斗页。
-    # 门票就是这种：主页点入口先进 pass_map，再点按钮才到能挑战的战斗页。
-    # 不能用共用的 `I_MAP_GOTO_BATTLE` 当按钮：那张图同时是 `page_act_map` 的识别判据，
-    # 在门票页用它会把当前页误判成中转地图页。
-    #
-    # ── 调整方式（详细字段照抄 as/pages.json 里现有条目即可）──────────────────
-    #   · 某类型从「直达」改成「地图页」：这里加一行，再到 pages.json 补
-    #     <type>_map_goto_battle（跳转按钮）与 check_<type>_2（到达确认图）两条，
-    #     截两张图放进 as/，重新生成 assets.py；
-    #     并把 check_<type>_2 加进 PAGE_EXTRA_CHECKS，否则战斗结束后页面认不出来，
-    #     主循环会静默空转直到卡死。
-    #   · 某类型从「地图页」改回「直达」：删掉这里对应的一行即可，图片不用动。
-    #   · 锁容无需另外处理，基类 `_lock_team_should_defer()` 会自动推迟到战斗页。
 
     BATTLE_PAGE_ENTER: dict[str, tuple[str, str]] = {
         'pass': ('I_PASS_MAP_GOTO_BATTLE', 'I_CHECK_PASS_2'),
@@ -103,9 +85,7 @@ class DirectClimbAct(BaseAct):
 
     # 同一爬塔类型存在多个页面时，主 check 图之外的补充判据。
     # 门票就是典型：pass_map 页的标题在顶部中间（check_pass），
-    # 点进战斗页后标题挪到左上角（check_pass_2）。主 check 只覆盖其中一个位置，
-    # 另一个页面会「谁都认不出来」，`get_current_page()` 静默返回 None，
-    # 主循环就空转到卡死。这里补的图与主 check 一起参与该类型的页面识别。
+    # 点进战斗页后标题挪到左上角（check_pass_2）。主 check 只覆盖其中一个位置
     PAGE_EXTRA_CHECKS: dict[str, tuple[str, ...]] = {
         'pass': ('I_CHECK_PASS_2',),
     }
@@ -178,37 +158,54 @@ class DirectClimbAct(BaseAct):
         return remain_times > 0
 
     def lock_team(self, battle_conf: GeneralBattleConfig):
-        """按当前爬塔类型取对应的锁图，执行上锁或解锁。
+        """执行上锁或解锁。
 
-        四个页面的锁按钮坐标各不相同，因此各自维护一对图。
-        专属图缺失时降级到 LOCK_FALLBACK，避免还没补图就整个跑不起来。
+        判定顺序（与旧版相反，通用图优先）：
+            1. 通用的 `I_LOCK` / `I_UNLOCK`（`LOCK_FALLBACK`）
+            2. 当前爬塔页专属的那一对（按 `LOCK_RULES` 查表）
 
-        凡是配了到达层的类型（锁按钮只在战斗页上），锁容会自动推迟到
-        切进战斗页之后由 `_run_climb()` 补做。因为这里覆写了 `lock_team()`，
-        必须显式调一次，否则推迟逻辑被绕过、会在地图页上白点一轮。
+        通用锁图位置固定、多数活动都能命中，放第一轮可以少走一次超时；
+        专属图作为它判定失败时的补充。
         """
 
         if self._lock_team_should_defer():
             return
 
-        lock_name, unlock_name = self._resolve_lock_names()
-        if lock_name is None:
+        # 第一轮：通用的 lock / unlock
+        if self.LOCK_FALLBACK is not None:
+            if self._lock_with(self.LOCK_FALLBACK, battle_conf, stage='通用'):
+                return
+            logger.warning(f'Direct climb: {self.climb_type} generic lock failed')
+        # 第二轮：当前爬塔页专属的锁图
+        own_names = self._own_lock_names()
+        if own_names is None:
             return
+        self._lock_with(own_names, battle_conf, stage='专属')
+
+    def _lock_with(self, names: tuple[str, str], battle_conf: GeneralBattleConfig,
+                   stage: str = '') -> bool:
+        """用指定的一对锁图执行上锁或解锁。
+
+        Args:
+            names: (上锁图 asset 名, 解锁图 asset 名)
+            battle_conf: 当前爬塔类型的战斗配置
+            stage: 仅用于日志标识当前用的是通用图还是专属图
+
+        Returns:
+            bool: 是否在超时前判定成功。
+        """
+
+        lock_name, unlock_name = names
         lock = getattr(self, lock_name, None)
         unlock = getattr(self, unlock_name, None)
         if lock is None or unlock is None:
-            logger.warning(f'Direct climb: lock assets missing {lock_name}/{unlock_name}')
-            return
+            logger.warning(f'Direct climb: {stage}lock assets missing {names}')
+            return False
         if battle_conf.lock_team_enable:
-            logger.info(f'Lock {self.climb_type} team')
-            if self._click_until_locked(unlock, lock):
-                return
-        else:
-            logger.info(f'Unlock {self.climb_type} team')
-            if self._click_until_locked(lock, unlock):
-                return
-        # 专属图判定失败（超时/匹配不上），最后用通用的 lock/unlock 再判断一轮
-        self._lock_team_fallback(battle_conf)
+            logger.info(f'Lock {self.climb_type} team with {stage}图 {names}')
+            return self._click_until_locked(unlock, lock)
+        logger.info(f'Unlock {self.climb_type} team with {stage}图 {names}')
+        return self._click_until_locked(lock, unlock)
 
     def _click_until_locked(self, click, stop) -> bool:
         """点 `click` 图直到出现 `stop` 图，带超时返回是否达成。"""
@@ -217,43 +214,17 @@ class DirectClimbAct(BaseAct):
             click, stop, interval=1.5, timeout=self.LOCK_CLICK_TIMEOUT
         )
 
-    def _lock_team_fallback(self, battle_conf: GeneralBattleConfig) -> None:
-        """用 `LOCK_FALLBACK` 指定的通用锁图再判定一轮。"""
-
-        if self.LOCK_FALLBACK is None:
-            return
-        lock_name, unlock_name = self.LOCK_FALLBACK
-        lock = getattr(self, lock_name, None)
-        unlock = getattr(self, unlock_name, None)
-        if lock is None or unlock is None:
-            logger.warning(f'Direct climb: fallback lock assets missing {self.LOCK_FALLBACK}')
-            return
-        logger.warning(
-            f'Direct climb: {self.climb_type} lock judgement failed, '
-            f'retry with {self.LOCK_FALLBACK}'
-        )
-        if battle_conf.lock_team_enable:
-            self._click_until_locked(unlock, lock)
-            return
-        self._click_until_locked(lock, unlock)
-
-    def _resolve_lock_names(self) -> tuple[str, str] | tuple[None, None]:
-        """读出当前爬塔类型的锁图 asset 名，缺失时回退或放弃。"""
+    def _own_lock_names(self) -> tuple[str, str] | None:
+        """读出当前爬塔类型**专属**的锁图 asset 名；缺失或未配置时返回 None。"""
 
         names = self.LOCK_RULES.get(self.climb_type)
-        if names and all(getattr(self, name, None) is not None for name in names):
-            return names
-        if names:
-            logger.warning(
-                f'Direct climb: {self.climb_type} 专属锁图 {names} 未配置, '
-                f'fallback to {self.LOCK_FALLBACK}'
-            )
-        else:
+        if not names:
             logger.warning(f'Direct climb: no lock rule for {self.climb_type}')
-        if self.LOCK_FALLBACK is None:
-            logger.warning(f'Direct climb: skip lock team for {self.climb_type}')
-            return None, None
-        return self.LOCK_FALLBACK
+            return None
+        if any(getattr(self, name, None) is None for name in names):
+            logger.warning(f'Direct climb: {self.climb_type} 专属锁图 {names} 未配置, skip')
+            return None
+        return names
 
     def before_run(self):
         super().before_run()
