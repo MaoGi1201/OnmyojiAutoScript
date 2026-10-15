@@ -1,17 +1,17 @@
 [
   {
     "itemName": "fire",
-    "roiFront": "962,529,308,171",
-    "roiBack": "964,530,309,171",
+    "roiFront": "1128,590,103,66",
+    "roiBack": "1128,590,103,66",
     "mode": "Full",
     "method": "Default",
-    "keyword": "挑战",
+    "keyword": "挑聘",
     "description": "挑战"
   },
   {
     "itemName": "remain_ap",
-    "roiFront": "746,15,105,29",
-    "roiBack": "746,15,105,29",
+    "roiFront": "916,28,105,29",
+    "roiBack": "916,28,105,29",
     "mode": "DigitCounter",
     "method": "Default",
     "keyword": "",

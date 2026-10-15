@@ -2,7 +2,7 @@
   {
     "itemName": "main_goto_act",
     "imageName": "as_main_goto_act.png",
-    "roiFront": "1185,296,46,32",
+    "roiFront": "1184,461,46,32",
     "roiBack": "1164,134,83,393",
     "method": "Template matching",
     "threshold": 0.7,
@@ -119,8 +119,8 @@
   {
     "itemName": "to_battle_ap",
     "imageName": "as_to_battle_ap.png",
-    "roiFront": "216,251,106,39",
-    "roiBack": "177,199,185,140",
+    "roiFront": "1085,224,44,188",
+    "roiBack": "1085,224,44,188",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "活动主界面进入体力爬塔标志"
@@ -137,8 +137,8 @@
   {
     "itemName": "check_ap",
     "imageName": "as_check_ap.png",
-    "roiFront": "151,18,129,46",
-    "roiBack": "141,0,151,85",
+    "roiFront": "87,12,129,46",
+    "roiBack": "76,0,151,85",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "体力爬塔页面标志"

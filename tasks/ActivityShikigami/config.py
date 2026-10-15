@@ -16,9 +16,6 @@ class GeneralClimb(ConfigBase):
     limit_time: Time = Field(default=Time(hour=1, minute=30), description='总限制时间')
     pass_limit: int = Field(default=50)
     ap_limit: int = Field(default=300)
-    # boss 与 100 体默认关闭（limit=0 的类型会被 run_sequence_v 过滤掉，不进入执行流程）。
-    # 需要打时把对应数值调大即可，注意同时要保证该类型的入口图与页面 check 图已截取，
-    # 否则 json 登记了条目而 png 缺失，首次匹配就会报错。
     boss_limit: int = Field(default=0)
     ap100_limit: int = Field(default=0)
     run_sequence: str = Field(default='pass,ap,ap100,boss',

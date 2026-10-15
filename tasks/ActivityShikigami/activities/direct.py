@@ -69,7 +69,7 @@ class DirectClimbAct(BaseAct):
     # 到达层：哪些类型的目标页只是地图页，还要再点一次才到真正的战斗页。
 
     BATTLE_PAGE_ENTER: dict[str, tuple[str, str]] = {
-        'pass': ('I_PASS_MAP_GOTO_BATTLE', 'I_CHECK_PASS_2'),
+        #'pass': ('I_PASS_MAP_GOTO_BATTLE', 'I_CHECK_PASS_2'),
     }
 
     # 四个爬塔页「进入后」的页面标志 check 图。
@@ -87,7 +87,7 @@ class DirectClimbAct(BaseAct):
     # 门票就是典型：pass_map 页的标题在顶部中间（check_pass），
     # 点进战斗页后标题挪到左上角（check_pass_2）。主 check 只覆盖其中一个位置
     PAGE_EXTRA_CHECKS: dict[str, tuple[str, ...]] = {
-        'pass': ('I_CHECK_PASS_2',),
+        #'pass': ('I_CHECK_PASS_2',),
     }
 
     # check 图与旧识别器的合并策略：
