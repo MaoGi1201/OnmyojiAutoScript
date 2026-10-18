@@ -88,5 +88,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "返回"
+  },
+  {
+    "itemName": "d_auto_select",
+    "imageName": "d_auto_select.png",
+    "roiFront": "1100,456,118,30",
+    "roiBack": "1090,445,140,55",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "一键选择（自动上阵式神）"
   }
 ]

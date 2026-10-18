@@ -21,6 +21,8 @@ class DelegationAssets:
 	C_D_4 = RuleClick(roi_front=(563,493,100,174), roi_back=(563,493,100,174), name="d_4")
 	# description 
 	C_D_5 = RuleClick(roi_front=(695,491,100,178), roi_back=(695,491,100,178), name="d_5")
+	# 对话框：点屏幕中部推进剧情对话 
+	C_D_CHAT = RuleClick(roi_front=(597,296,59,100), roi_back=(597,296,59,100), name="d_chat")
 
 
 	# Image Rule Assets
@@ -44,6 +46,8 @@ class DelegationAssets:
 	I_D_SELECT_5 = RuleImage(roi_front=(767,593,41,40), roi_back=(721,556,103,86), threshold=0.7, method="Template matching", file="./tasks/Delegation/d/d_d_select_5.png")
 	# 返回 
 	I_D_BACK = RuleImage(roi_front=(940,415,138,51), roi_back=(940,415,138,51), threshold=0.8, method="Template matching", file="./tasks/Delegation/d/d_d_back.png")
+	# 一键选择（自动上阵式神） 
+	I_D_AUTO_SELECT = RuleImage(roi_front=(1100,456,118,30), roi_back=(1090,445,140,55), threshold=0.8, method="Template matching", file="./tasks/Delegation/d/d_auto_select.png")
 
 
 	# Ocr Rule Assets

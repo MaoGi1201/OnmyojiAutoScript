@@ -19,6 +19,8 @@ class DelegationConfig(ConfigBase):
     miyoshino: bool = Field(default=False, description='miyoshino_help')
     # 奇怪的痕迹-100-金币九万八
     strange_trace: bool = Field(default=False, description='strange_trace_help')
+    # 一键上阵：勾选后点「一键选择」自动上阵，否则逐个选择候选式神
+    auto_select_enable: bool = Field(default=True, description='auto_select_enable_help')
 
 class Delegation(ConfigBase):
     scheduler: Scheduler = Field(default_factory=Scheduler)

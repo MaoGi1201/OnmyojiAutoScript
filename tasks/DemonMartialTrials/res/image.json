@@ -1,0 +1,101 @@
+[
+  {
+    "itemName": "demon_entry",
+    "imageName": "demon_entry.png",
+    "roiFront": "1183,449,52,42",
+    "roiBack": "1150,130,130,460",
+    "method": "Template matching",
+    "threshold": 0.75,
+    "description": "庭院右栏逢魔演武入口"
+  },
+  {
+    "itemName": "demon_check",
+    "imageName": "demon_check.png",
+    "roiFront": "152,15,128,45",
+    "roiBack": "100,8,230,60",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "逢魔演武界面"
+  },
+  {
+    "itemName": "demon_yanwu_challenge",
+    "imageName": "demon_yanwu_challenge.png",
+    "roiFront": "292,181,42,154",
+    "roiBack": "265,145,115,340",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "演武挑战按钮"
+  },
+  {
+    "itemName": "demon_challenge_check",
+    "imageName": "demon_challenge_check.png",
+    "roiFront": "152,17,132,42",
+    "roiBack": "100,8,230,60",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "演武挑战界面"
+  },
+  {
+    "itemName": "demon_challenge_fire",
+    "imageName": "demon_challenge_fire.png",
+    "roiFront": "1140,588,95,50",
+    "roiBack": "1095,555,185,125",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "挑战界面右下角挑战按钮"
+  },
+  {
+    "itemName": "demon_delegate_entry",
+    "imageName": "demon_delegate_entry.png",
+    "roiFront": "1058,325,38,136",
+    "roiBack": "1045,305,68,195",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "进式神委派页面"
+  },
+  {
+    "itemName": "demon_delegate_tag",
+    "imageName": "demon_delegate_tag.png",
+    "roiFront": "1084,169,70,21",
+    "roiBack": "1040,145,145,90",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "委派中标签"
+  },
+  {
+    "itemName": "demon_delegate_task",
+    "imageName": "demon_delegate_task.png",
+    "roiFront": "1009,156,44,50",
+    "roiBack": "970,128,177,513",
+    "method": "Template matching",
+    "threshold": 0.75,
+    "description": "式神委派地图上带参标的活动委派任务"
+  },
+  {
+    "itemName": "demon_team_entry",
+    "imageName": "demon_team_entry.png",
+    "roiFront": "974,604,96,46",
+    "roiBack": "950,550,150,125",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "挑战界面右下角组队按钮（进组队列表页）"
+  },
+  {
+    "itemName": "demon_team_create",
+    "imageName": "demon_team_create.png",
+    "roiFront": "998,605,145,40",
+    "roiBack": "960,588,215,72",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "组队列表页右下角创建队伍按钮（队长建房入口兼列表页标志）"
+  },
+  {
+    "itemName": "demon_team_ensure",
+    "imageName": "demon_team_ensure.png",
+    "roiFront": "545,498,200,42",
+    "roiBack": "500,480,290,110",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "创建队伍弹窗的创建按钮"
+  }
+]
