@@ -101,6 +101,11 @@ class ScriptTask(GameUi, GeneralBattle, GeneralRoom, GeneralInvite, SwitchSoul, 
                                     private_rules=[self.I_LBS_ENSURE_PRIVATE],
                                     private_false_rules=[self.I_LBS_ENSURE_PRIVATE_FALSE])
                 self.create_ensure(ensure_rules=[self.I_LBS_CREATE_ENSURE])
+                # 等进房渲染完成：创建确认后的过渡帧 is_in_room 为 False，
+                # 此时 click_fire 会立刻跳出什么都不点，故先等房间出现再开火
+                enter_timer = Timer(3).start()
+                while not self.is_in_room() and not enter_timer.reached():
+                    pass
             fail_count = 0
             self.click_fire()
             self.run_general_battle(config=self.config.lbs.general_battle_config)
