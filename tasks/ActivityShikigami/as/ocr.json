@@ -70,5 +70,14 @@
     "method": "Default",
     "keyword": "雪山修行",
     "description": "进入100体活动标识"
+  },
+  {
+    "itemName": "check_ap_num",
+    "roiFront": "1148,16,82,28",
+    "roiBack": "1148,16,82,28",
+    "mode": "Quantity",
+    "method": "Default",
+    "keyword": "",
+    "description": "右上角体力数量"
   }
 ]

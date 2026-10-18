@@ -20,7 +20,7 @@ class RichManAct(BaseAct, Debugger):
             更新前请先看 ./README.md
         """
         logger.hr(f'Start run climb type PASS', 1)
-        self.click(self.I_TO_BATTLE_MAIN)
+        self.click(self.I_TO_BATTLE_PASS)
         switch_souled = False
         click_ticket, no_tickets = 0, random.randint(4, 6)
         click_fire, no_fire = 0, random.randint(3, 5)
@@ -133,7 +133,7 @@ class RichManAct(BaseAct, Debugger):
             #     continue
         while True:
             self.screenshot()
-            if self.appear(self.I_TO_BATTLE_MAIN, interval=1):
+            if self.appear(self.I_TO_BATTLE_PASS, interval=1):
                 break
             if self.appear_then_click(self.I_UI_CONFIRM, interval=1) or self.appear_then_click(self.I_UI_CONFIRM_SAMLL, interval=1):
                 continue

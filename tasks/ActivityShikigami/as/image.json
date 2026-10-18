@@ -2,10 +2,10 @@
   {
     "itemName": "lock",
     "imageName": "as_lock.png",
-    "roiFront": "897,646,23,24",
-    "roiBack": "685,612,330,86",
+    "roiFront": "801,654,23,25",
+    "roiBack": "691,613,330,86",
     "method": "Template matching",
-    "threshold": 0.7,
+    "threshold": 0.6,
     "description": "上锁图标"
   },
   {

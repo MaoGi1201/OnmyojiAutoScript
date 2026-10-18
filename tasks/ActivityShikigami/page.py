@@ -1,8 +1,5 @@
 """活动爬塔的静态页面图。
-
-这里只定义**所有形态共享**的页面骨架：主页、中转页、四个爬塔页，以及主页与庭院
-之间的固定往返边。
-"""
+只定义所有形态共享的骨架；连线与识别器的形态差异由各 Act 在 before_run 里改动。"""
 from tasks.ActivityShikigami.assets import ActivityShikigamiAssets
 from tasks.Component.GeneralBattle.assets import GeneralBattleAssets
 from tasks.Component.RightActivity.assets import RightActivityAssets
@@ -21,17 +18,10 @@ from tasks.GameUi.page import (
 from tasks.GlobalGame.assets import GlobalGameAssets
 
 # 爬塔活动主界面
-page_act = Page(ActivityShikigamiAssets.I_TO_BATTLE_MAIN)
+page_act = Page(ActivityShikigamiAssets.I_TO_BATTLE_PASS)
 page_act.add_enter_failure_hooks(
     RightActivityAssets.I_TOGGLE_BUTTON,
     conditional_action(GlobalGameAssets.I_UI_REWARD, random_click),
-    GlobalGameAssets.I_UI_BACK_RED,
-    # 点「跳过」后还会弹一个确认框，必须再点「确定跳过」才真的跳过去；
-    # 只点第一个会一直被弹窗挡着，页面识别不出来。
-    sequence(
-        ActivityShikigamiAssets.I_SKIP_BUTTON,
-        ActivityShikigamiAssets.I_CONFIRM_SKIP,
-    ),
 )
 page_act.connect(
     page_main, GlobalGameAssets.I_UI_BACK_YELLOW, key="page_act->page_main"
@@ -49,7 +39,7 @@ if special_act_Flag:
     )
     page_act.connect(
         page_act_map,
-        ActivityShikigamiAssets.I_TO_BATTLE_MAIN,
+        ActivityShikigamiAssets.I_TO_BATTLE_PASS,
         key="page_act->page_act_map",
     )
 
@@ -66,8 +56,15 @@ else:
         page_act, GlobalGameAssets.I_UI_BACK_YELLOW, key="page_act_ap->page_act"
     )
 
-# 门票爬塔页面
+# 门票爬塔页面（战斗页）
 page_act_pass = Page(ActivityShikigamiAssets.I_CLIMB_MODE_PASS)
+# 门票地图页：活动页点 as_to_battle_pass 抵达，再点 as_pass_map_goto_battle 进战斗页。
+page_act_pass_map = Page(ActivityShikigamiAssets.I_CHECK_PASS_MAP)
+page_act_pass.connect(
+    page_act_pass_map,
+    GlobalGameAssets.I_UI_BACK_YELLOW,
+    key="page_act_pass->page_act_pass_map",
+)
 # 存在特殊活动界面
 if special_act_Flag:
     page_act_pass.connect(
@@ -83,7 +80,6 @@ else:
 
 # 100体爬塔页面
 page_act_ap100 = Page(ActivityShikigamiAssets.I_CLIMB_MODE_AP100)
-page_act_ap100.add_enter_failure_hooks(GlobalGameAssets.I_UI_BACK_RED)
 # BOSS爬塔页面
 page_act_boss = Page(ActivityShikigamiAssets.I_CHECK_BATTLE_BOSS)
 page_act_boss.connect(
