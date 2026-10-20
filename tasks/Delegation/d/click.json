@@ -28,5 +28,11 @@
     "roiFront": "695,491,100,178",
     "roiBack": "695,491,100,178",
     "description": "description"
+  },
+  {
+    "itemName": "d_chat",
+    "roiFront": "597,296,59,100",
+    "roiBack": "597,296,59,100",
+    "description": "对话框：点屏幕中部推进剧情对话"
   }
 ]

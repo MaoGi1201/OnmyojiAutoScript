@@ -16,13 +16,16 @@ from module.base.timer import Timer
 
 class GeneralRoom(BaseTask, GeneralRoomAssets):
 
-    def create_room(self, create_room_rule: RuleImage = None) -> bool:
+    def create_room(self, create_room_rule: RuleImage = None, ensure_rules: list[RuleImage] = None) -> bool:
         """
         创建队伍  一般是下方的黄色按钮
+        :param create_room_rule: 创建房间入口按钮；缺省用组件自带资产
+        :param ensure_rules: 创建确认弹窗的识别规则；缺省用组件自带资产
         :return:
         """
         logger.info('Create room')
         create_room_rule = self.I_CREATE_ROOM if create_room_rule is None else create_room_rule
+        ensure_rules = ensure_rules if ensure_rules is not None else [self.I_CREATE_ENSURE, self.I_CREATE_ENSURE_2]
         if not self.appear(create_room_rule):
             logger.warning('No create room button')
             return False
@@ -36,9 +39,7 @@ class GeneralRoom(BaseTask, GeneralRoomAssets):
             if self.appear_then_click(create_room_rule, interval=2):
                 click_number += 1
                 continue
-            if self.appear(self.I_CREATE_ENSURE):
-                return True
-            if self.appear(self.I_CREATE_ENSURE_2):
+            if any(self.appear(rule) for rule in ensure_rules):
                 return True
         return False
 
@@ -89,19 +90,19 @@ class GeneralRoom(BaseTask, GeneralRoomAssets):
             if self.appear_then_click(self.I_ENSURE_PUBLIC_FALSE_2, interval=1):
                 continue
 
-    def create_ensure(self) -> bool:
+    def create_ensure(self, ensure_rules: list[RuleImage] = None) -> bool:
         """
         创建确认
+        :param ensure_rules: 确认按钮的识别规则；缺省用组件自带资产
         :return:
         """
         logger.info('Create ensure')
-        appear1 = self.I_CREATE_ENSURE.match(self.device.image, frame_id=self.device.image_frame_id)
-        appear2 = self.I_CREATE_ENSURE_2.match(self.device.image, frame_id=self.device.image_frame_id)
+        rules = ensure_rules if ensure_rules is not None else [self.I_CREATE_ENSURE, self.I_CREATE_ENSURE_2]
         target = None
-        if appear1:
-            target = self.I_CREATE_ENSURE
-        elif appear2:
-            target = self.I_CREATE_ENSURE_2
+        for rule in rules:
+            if rule.match(self.device.image, frame_id=self.device.image_frame_id):
+                target = rule
+                break
         if not target:
             logger.warning('No create ensure button')
             return False

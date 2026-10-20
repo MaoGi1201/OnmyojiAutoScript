@@ -1,0 +1,29 @@
+[
+  {
+    "itemName": "demon_count",
+    "roiFront": "1196,669,54,26",
+    "roiBack": "1196,669,54,26",
+    "mode": "DigitCounter",
+    "method": "Default",
+    "keyword": "",
+    "description": "挑战按钮下方剩余次数数字区"
+  },
+  {
+    "itemName": "demon_delegate_count",
+    "roiFront": "1058,254,44,30",
+    "roiBack": "1058,254,44,30",
+    "mode": "DigitCounter",
+    "method": "Default",
+    "keyword": "",
+    "description": "委派剩余次数"
+  },
+  {
+    "itemName": "demon_team_count",
+    "roiFront": "830,132,100,38",
+    "roiBack": "830,132,100,38",
+    "mode": "DigitCounter",
+    "method": "Default",
+    "keyword": "",
+    "description": "组队页顶部剩余挑战次数"
+  }
+]
