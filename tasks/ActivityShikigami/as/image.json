@@ -5,7 +5,7 @@
     "roiFront": "783,647,23,24",
     "roiBack": "685,612,330,86",
     "method": "Template matching",
-    "threshold": 0.7,
+    "threshold": 0.6,
     "description": "上锁图标"
   },
   {

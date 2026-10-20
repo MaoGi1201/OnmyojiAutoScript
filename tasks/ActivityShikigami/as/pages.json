@@ -18,15 +18,6 @@
     "description": "右上跳过按钮"
   },
   {
-    "itemName": "to_battle_main",
-    "imageName": "as_to_battle_main.png",
-    "roiFront": "320,176,87,105",
-    "roiBack": "282,76,155,370",
-    "method": "Template matching",
-    "threshold": 0.8,
-    "description": "进入主要的战斗界面"
-  },
-  {
     "itemName": "to_battle_boss",
     "imageName": "as_to_battle_boss.png",
     "roiFront": "1057,290,117,39",
@@ -144,13 +135,13 @@
     "description": "体力爬塔页面标志"
   },
   {
-    "itemName": "check_pass",
-    "imageName": "as_check_pass.png",
+    "itemName": "check_pass_map",
+    "imageName": "as_check_pass_map.png",
     "roiFront": "595,0,129,46",
     "roiBack": "583,0,151,85",
     "method": "Template matching",
     "threshold": 0.8,
-    "description": "门票爬塔页面标志"
+    "description": "门票地图页(map页)判定：活动页点 as_to_battle_pass 后抵达"
   },
   {
     "itemName": "check_ap100",
@@ -189,13 +180,13 @@
     "description": "主页进入门票爬塔入口"
   },
   {
-    "itemName": "check_pass_2",
-    "imageName": "as_check_pass_2.png",
+    "itemName": "check_pass_battle",
+    "imageName": "as_check_pass_battle.png",
     "roiFront": "153,15,129,46",
     "roiBack": "139,0,151,85",
     "method": "Template matching",
     "threshold": 0.8,
-    "description": "门票战斗界面检查"
+    "description": "门票战斗页判定：map页点 as_pass_map_goto_battle 后抵达"
   },
   {
     "itemName": "pass_map_goto_battle",
@@ -204,6 +195,24 @@
     "roiBack": "66,150,97,36",
     "method": "Template matching",
     "threshold": 0.8,
-    "description": ""
+    "description": "门票进入战斗"
+  },
+  {
+    "itemName": "ap_map_goto_battle",
+    "imageName": "as_ap_map_goto_battle.png",
+    "roiFront": "73,242,97,36",
+    "roiBack": "73,242,97,36",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "体力进入战斗"
+  },
+  {
+    "itemName": "ap100_map_goto_battle",
+    "imageName": "as_ap100_map_goto_battle.png",
+    "roiFront": "71,331,97,36",
+    "roiBack": "71,331,97,36",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "ap100进入战斗"
   }
 ]

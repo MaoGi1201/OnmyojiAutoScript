@@ -1,11 +1,5 @@
 """ActivityShikigami
-
-    入口层   主页 → 目标爬塔页      由 `ENTRY_GROUPS` 描述（可能经中转页）
-    到达层   目标页 → 真正的战斗页   由 `BATTLE_PAGE_ENTER` 描述（可能还要点一次）
-    战斗层   查票 → 换魂 → 挑战 → 通用战斗  `_run_common()`，四个类型完全共用
-
-每一层的差异都外置成类常量，因此换一期活动通常只需要改配置与图片
-"""
+入口层 / 到达层 / 战斗层的差异都外置成类常量，换活动通常只需改配置与图片。"""
 import time
 
 from datetime import datetime
@@ -45,10 +39,7 @@ class TicketsNotEnough(Exception):
 
 
 class StateMachine(BaseTask):
-    """爬塔类型游标与计数状态。
-
-    外层循环按 `run_sequence_v` 逐个切换爬塔类型，这里保存游标与每类型的计次。
-    """
+    """爬塔类型游标与计数状态：按 `run_sequence_v` 切换类型并记次。"""
 
     # 当前爬塔类型在 `run_sequence_v` 中的下标
     run_idx: int = 0
@@ -111,11 +102,7 @@ class StateMachine(BaseTask):
             raise LimitCountOut
 
     def switch_next(self):
-        """推进到下一个爬塔类型。
-
-        Returns:
-            bool: True 还有下一个类型，False 表示全部跑完。
-        """
+        """推进到下一个爬塔类型，返回 True 表示还有下一个。"""
 
         self.run_idx += 1
         if self.run_idx >= len(self.conf.general_climb.run_sequence_v):
@@ -129,22 +116,8 @@ class StateMachine(BaseTask):
 
 class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigamiAssets):
     """爬塔活动基类。
+    入口层 / 到达层 / 战斗层的差异分别是 `ENTRY_GROUPS`、`BATTLE_PAGE_ENTER`、查票与战斗配置。"""
 
-    - 入口层：`ENTRY_GROUPS` / `MODE_ICONS` / `DETACH_MAP_ROUTES` / `BACK_BUTTONS`
-    - 到达层：`BATTLE_PAGE_ENTER`（含等待与超时）
-    - 战斗层：`check_tickets_enough()` 的读数规则、`xxx_battle_conf` 战斗配置
-    """
-
-    # ══════════════════════════ 入口层配置 ══════════════════════════
-    # 决定「从主页怎么到达某个爬塔类型的页面」。
-
-    # 入口层配置：主页到各爬塔页的连线规则。
-    # 每项 = (该组包含的爬塔类型, 从主页出发依次点击的按钮, 组内模式切换按钮)
-    #   - 组里 1 个类型  -> 该类型独占一个入口，点进去就是它
-    #   - 组里多个类型   -> 共用一个入口，进哪个由游戏当前模式决定，靠切换按钮纠正
-    #   - 按钮列表 1 项  -> 主页一点直达目标页
-    #   - 按钮列表 2 项  -> 主页先到中转页 page_act_map，再由中转页进目标页
-    # 四入口与三入口的差别只是分组方式不同，因此都用这张表表达，不需要两个类。
     ENTRY_GROUPS: tuple[tuple[tuple[str, ...], tuple[str, ...], str | None], ...] = ()
 
     # 仅组里多于一个类型时才用到：进错模式时靠它识别出来再点切换。
@@ -157,22 +130,34 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
     DETACH_MAP_ROUTES: bool = False
 
     # 爬塔页返回时依次尝试的按钮。
-    # 不同页面的返回键样式不一样：有的是黄色箭头，有的是弯曲箭头，
-    # 两者都在左上角，同一时刻只会出现一个，因此按顺序都试一遍即可。
     BACK_BUTTONS: tuple[str, ...] = ("I_UI_BACK_YELLOW", "I_UI_BACK_CIRCLE")
+
+    # 地图页退回活动页那一跳的返回键候选。
+    MAP_BACK_BUTTONS: tuple[str, ...] = None
+
+    # 地图页上各类型「进入战斗」的按钮。
+    MAP_GOTO_BATTLE: dict[str, str] = {}
 
    
    
     # 某些活动的目标页只是地图页，还要再点一次才到真正的战斗页。
-    # 格式 climb_type -> (跳转按钮 asset 名, 到达确认图 asset 名)。
-    # 不在表里的类型视为「进目标页即战斗页」，什么都不做。
     BATTLE_PAGE_ENTER: dict[str, tuple[str, str]] = {}
-
+    
     # 进入战斗页前的等待时长（秒），给页面切换留时间。
+    
     BATTLE_PAGE_ENTER_WAIT: float = 1.0
-
+    
     # 点跳转按钮后等待确认图出现的上限（秒）。
     BATTLE_PAGE_ENTER_TIMEOUT: float = 5.0
+    
+    # 进界面时统一清一遍的干扰元素：每项 = (要处理的图, 处理方式)。
+    POPUP_CLEARS: tuple[tuple[tuple[str, ...], str], ...] = (
+        (("I_UI_BACK_RED",), "disappear"),
+        (("I_SKIP_BUTTON", "I_CONFIRM_SKIP"), "chain"),
+    )
+
+    # 清理干扰元素时的点击/等待间隔（秒）。
+    POPUP_CLEAR_INTERVAL: float = 1.5
 
     # 是否已经到达战斗页；决定锁容是否需要推迟。
     _battle_page_ready: bool = False
@@ -187,24 +172,82 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
         self, context: BattleContext, config: GeneralBattleConfig
     ) -> BattleAction:
         if self.climb_type == "boss":
-            self.appear_then_click(self.I_UI_BACK_RED, interval=1.5)
+            self.clear_popups()
         return super()._handle_result(context, config)
+
+    def clear_popups(self) -> bool:
+
+        handled = False
+        for names, mode in self.POPUP_CLEARS:
+            images = [getattr(self, name, None) for name in names]
+            if any(image is None for image in images):
+                logger.warning(f"Climb: popup clear asset missing {names}, skip")
+                continue
+            self.screenshot()
+            if not self.appear(images[0]):
+                continue
+            logger.info(f"Climb: clear popup {names} with {mode}")
+            if mode == "disappear":
+                self.ui_click_until_disappear(
+                    images[0], interval=self.POPUP_CLEAR_INTERVAL
+                )
+            else:
+                self._click_popup_chain(images)
+            handled = True
+        return handled
+
+    def _click_popup_chain(self, images) -> None:
+        """依次点一组图：后面的图要点完前面的才会冒出来。"""
+
+        for index, image in enumerate(images):
+            if index:
+                time.sleep(self.POPUP_CLEAR_INTERVAL)
+            self.screenshot()
+            if not self.appear_then_click(image, interval=self.POPUP_CLEAR_INTERVAL):
+                logger.warning(f"Climb: popup chain stopped at {index}: {image.name}")
+                return
+
+    def _register_popup_hooks(self) -> None:
+
+        for name in (
+            "page_act",
+            "page_act_ap",
+            "page_act_pass",
+            "page_act_ap100",
+            "page_act_boss",
+        ):
+            page = self.navigator.resolve_page(getattr(pages, name, None))
+            if page is None:
+                continue
+            page.add_enter_failure_hooks(self.clear_popups)
 
     def before_run(self):
         pages.page_battle_result = self.navigator.resolve_page(pages.page_battle_result)
         pages.page_battle_result.recognizer = pages.any_of(
             self.I_UI_BACK_RED, pages.page_battle_result.recognizer
         )
-        # 点「跳过」后还会弹一个确认框，必须再点「确定跳过」才真的跳过去。
-        # closers（排在全局之前），一次点完。
-        self.navigator.add_unknown_closer(
-            pages.sequence(self.I_SKIP_BUTTON, self.I_CONFIRM_SKIP)
-        )
+        self.navigator.add_unknown_closer(self.clear_popups)
+        self._register_popup_hooks()
 
     def _page_of(self, climb_type: str):
         """取该爬塔类型在本次 session 里的页面副本。"""
 
         return self.navigator.resolve_page(getattr(pages, f"page_act_{climb_type}", None))
+
+    def _resolve_map_back_action(self):
+        """地图页回程动作"""
+
+        names = self.MAP_BACK_BUTTONS
+        if names is None:
+            names = self.BACK_BUTTONS
+        buttons = [getattr(self, name, None) for name in names]
+        buttons = [button for button in buttons if button is not None]
+        if not buttons:
+            logger.warning("Climb: no map back button configured")
+            return None
+        if len(buttons) == 1:
+            return buttons[0]
+        return pages.sequence(*buttons, success_index=len(buttons))
 
     def _resolve_back_action(self):
         """回程动作：依次尝试 `BACK_BUTTONS`，任一按钮点中即算成功。
@@ -230,7 +273,6 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
         page_act_map = self.navigator.resolve_page(getattr(pages, "page_act_map", None))
         if page_act_map is None:
             return
-        logger.info("Climb: detach intermediate map page")
         page_act.remove_transition(destination=page_act_map)
         for name in ("page_act_ap", "page_act_pass", "page_act_ap100", "page_act_boss"):
             page = self.navigator.resolve_page(getattr(pages, name, None))
@@ -238,18 +280,29 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
                 continue
             page.remove_transition(destination=page_act_map)
 
-    def _wire_entries(self, page_act) -> None:
-        """按 `ENTRY_GROUPS` 铺主页到各爬塔页的连线。
+    def _wire_map_goto_battles(self, map_page) -> None:
+        """地图页 -> 各类型战斗页：组内切换时在地图页点一下就进，不用退回活动页。"""
 
-        一个组 = 一个入口按钮（或主页→中转页→目标页两跳）+ 可选的模式切换按钮。
-        组里承载多个类型时，额外挂两样东西：
-        进错模式的自救 hook（看到别的类型的模式图标就点切换），以及组内互切边。
-        """
+        for climb_type, button_name in self.MAP_GOTO_BATTLE.items():
+            button = getattr(self, button_name, None)
+            target = self._page_of(climb_type)
+            if button is None or target is None:
+                logger.warning(f"Climb: map goto battle {climb_type} missing, skip")
+                continue
+            if target is map_page:
+                continue
+            map_page.connect(
+                target, button, key=f"{map_page.key}->page_act_{climb_type}"
+            )
+
+    def _wire_entries(self, page_act) -> None:
+        """按 `ENTRY_GROUPS` 铺主页到各爬塔页的连线。"""
 
         if not self.ENTRY_GROUPS:
             logger.warning("Climb: ENTRY_GROUPS is empty, no entry route wired")
             return
         back_action = self._resolve_back_action()
+        map_pages: list = []
         for climb_types, button_names, switch_name in self.ENTRY_GROUPS:
             if not climb_types or not button_names:
                 continue
@@ -275,21 +328,43 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
                     if target is None:
                         logger.warning(f"Climb: page_act_{climb_type} not registered")
                         continue
+                    # 有中间层的类型（到达层还要再点一次才到战斗页）：
+                    mid_page = None
+                    if climb_type in self.BATTLE_PAGE_ENTER:
+                        mid_page = self.navigator.resolve_page(
+                            getattr(pages, f"page_act_{climb_type}_map", None)
+                        )
+                        if mid_page is None:
+                            logger.warning(
+                                f"Climb: page_act_{climb_type}_map not registered, wire to battle page"
+                            )
+                        else:
+                            target = mid_page
+                            if mid_page not in map_pages:
+                                map_pages.append(mid_page)
+                            # 地图页 -> 活动页：候选返回键轮流判断，哪个存在点哪个
+                            mid_back = self._resolve_map_back_action()
+                            if mid_back is None:
+                                logger.warning(
+                                    f"Climb: no map back button for {climb_type}, "
+                                    f"page_act_{climb_type}_map has no way back"
+                                )
+                            else:
+                                mid_page.connect(
+                                    page_act,
+                                    mid_back,
+                                    key=f"page_act_{climb_type}_map->page_act",
+                                )
                     source.connect(
-                        target, button, key=f"{source.name}->page_act_{climb_type}"
+                        target, button, key=f"{source.name}->{target.key}"
                     )
-                    # 回程只在直连形态补；经中转页的回程由 page.py 静态定义，
-                    # 再连一条到主页会让导航挑错路径（返回键其实落在中转页上）
-                    if source is page_act and back_action is not None:
+                    # 回程只在直连形态补；经中转页的回程由 page.py 静态定义
+                    if source is page_act and back_action is not None and mid_page is None:
                         target.connect(
                             page_act,
                             back_action,
                             key=f"page_act_{climb_type}->page_act",
                         )
-                    logger.info(
-                        f"Climb wired: {source.name} -> page_act_{climb_type} via {button_name}"
-                    )
-            # 组内多个类型：进错模式时自救 + 互切
             if switch is None or len(climb_types) < 2:
                 continue
             for climb_type in climb_types:
@@ -311,6 +386,10 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
                     target.connect(
                         other_page, switch, key=f"page_act_{climb_type}->page_act_{other}"
                     )
+
+        # 地图页上直接进各类型战斗页（组内切换用，省掉退回活动页再进来）
+        for map_page in map_pages:
+            self._wire_map_goto_battles(map_page)
 
     @property
     def act_page_handle_dict(self) -> dict[pages.Page, Callable]:
@@ -388,10 +467,7 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
 
     def _run_climb(self):
         """四个爬塔类型共用的单局执行体。
-
-        分两段：先按 `BATTLE_PAGE_ENTER` 把当前页切到战斗页（需要的话），
-        再走通用的锁容/查票/换魂/挑战流程。
-        """
+        先按 `BATTLE_PAGE_ENTER` 切到战斗页，再走通用的锁容/查票/换魂/挑战。"""
 
         if not self._ensure_battle_page():
             return
@@ -403,11 +479,7 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
         self._run_common()
 
     def _ensure_battle_page(self) -> bool:
-        """到达层：目标页不是战斗页时，点跳转按钮切过去，用确认图判定到位。
-
-        表里没配置的类型直接返回 True，行为与原来一致。
-        已经在战斗页时确认图会立刻命中，因此这段是幂等的。
-        """
+        """到达层：点跳转按钮切到战斗页，用确认图判定到位。"""
 
         rule = self.BATTLE_PAGE_ENTER.get(self.climb_type)
         if rule is None:
@@ -420,11 +492,8 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
             logger.warning(f"Climb: battle page enter assets missing: {rule}")
             return False
         time.sleep(self.BATTLE_PAGE_ENTER_WAIT)
-        self.screenshot()
-        # 地图页偶尔会弹提示框（红色叉），不关掉会挡住下面的跳转按钮
-        if self.appear(self.I_UI_BACK_RED):
-            logger.info(f"Climb: dismiss red close button on {self.climb_type} page")
-            self.ui_click_until_disappear(self.I_UI_BACK_RED, interval=1.5)
+        # 地图页上的红叉弹窗、跳过框统一在这一步清掉
+        self.clear_popups()
         arrived = self.ui_click_until_appear_or_timeout(
             button, confirm, interval=1.5, timeout=self.BATTLE_PAGE_ENTER_TIMEOUT
         )
@@ -459,6 +528,8 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
                     f"{self.climb_type} cannot enter battle, click reach max times"
                 )
                 raise TicketsNotEnough
+            # 这里的红叉不是挡路的弹窗，而是"票不够"的提示
+            # 关掉它只会让这一轮反复重试，交给 `TicketsNotEnough` 直接结束该类型。
             if self.appear(self.I_UI_BACK_RED, interval=1):
                 logger.warning(
                     f"{self.climb_type} cannot enter battle, appear red close button, maybe not enough tickets"
@@ -497,12 +568,7 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
         self.goto_page(getattr(pages, f"page_act_{self.climb_type}"))
 
     def lock_team(self, battle_conf: GeneralBattleConfig):
-        """
-        根据配置判断当前爬塔类型是否锁定阵容, 并执行锁定或解锁
-
-        当前类型配了到达层时，锁按钮只存在于战斗页，而这里是在刚到达目标页
-        （地图页）时被调用的，必然点不到，因此推迟到 `_run_climb()` 切过去之后补做。
-        """
+        """按配置执行上锁或解锁。"""
         if self._lock_team_should_defer():
             return
         enable = battle_conf.lock_team_enable
@@ -522,11 +588,7 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
                 self.ui_click(self.I_LOCK, stop=self.I_UNLOCK, interval=1.5)
 
     def _lock_team_should_defer(self) -> bool:
-        """锁按钮是否只在战斗页上：配了到达层且还没切过去。
-
-        子类覆写 `lock_team()` 时也要在开头调一下，否则推迟逻辑会被绕过，
-        补做的时机就落在地图页上了。
-        """
+        """锁按钮是否只在战斗页上：配了到达层且还没切过去。"""
 
         if self.climb_type not in self.BATTLE_PAGE_ENTER or self._battle_page_ready:
             return False
@@ -535,10 +597,7 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
         return True
 
     def check_tickets_enough(self) -> bool:
-        """
-        判断当前爬塔门票是否足够
-        :return: True 可以运行 or False
-        """
+        """判断当前爬塔门票是否足够。"""
         logger.hr(f"Check {self.climb_type} tickets")
         self.screenshot()
         remain_times = 0
@@ -552,6 +611,7 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
             )
         if self.climb_type == "ap100":
             remain_times = self.O_REMAIN_AP100.ocr_digit(self.device.image)
+        remain_times = remain_times or 0  # OCR 空值统一当成 0
         # 上一次识别的票的数量和这一次识别的数量差距大于1, 则认为票数量有误, 允许继续挑战
         if self.pre_tickets_map[self.climb_type] - remain_times > 1:
             self.pre_tickets_map[self.climb_type] -= 1

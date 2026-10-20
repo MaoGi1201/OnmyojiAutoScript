@@ -16,7 +16,7 @@ class FakeGodAct(BaseAct):
         page_act_2 = self.navigator.add_page(pages.Page(ActivityShikigamiAssets.I_AS_CHECK_MAIN_2,
                                                         category='activity_shikigami'))
         page_act_2.add_enter_success_hooks(GlobalGameAssets.I_UI_BACK_RED)
-        page_act.connect(page_act_2, ActivityShikigamiAssets.I_TO_BATTLE_MAIN, key="page_act->page_act_2")
+        page_act.connect(page_act_2, ActivityShikigamiAssets.I_TO_BATTLE_PASS, key="page_act->page_act_2")
         page_act_2.connect(page_act, GlobalGameAssets.I_UI_BACK_CIRCLE, key="page_act_2->page_act")
         # 爬塔暗黑页面
         page_act_dark = self.navigator.add_page(pages.Page(ActivityShikigamiAssets.I_AS_CLOSE_EYE,
