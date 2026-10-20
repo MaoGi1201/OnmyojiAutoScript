@@ -689,8 +689,13 @@ class ConfigModel(ConfigBase):
             for key, value in sch["properties"].items():
                 if 'items' in value:
                     properties[key] = re.search(r"/([^/]+)$", value['items']['$ref']).group(1)
-                else:
+                elif '$ref' in value:
                     properties[key] = re.search(r"/([^/]+)$", value['$ref']).group(1)
+                else:
+                    # 标量字段(str/int/bool...)没有 $ref。旧实现直接取 value['$ref'] 会抛 KeyError，
+                    # 导致整个任务的配置页打不开（不只是这个字段不显示）。
+                    # 这里把它包成"单字段分组"，前端当普通一项渲染。
+                    results[key] = {"properties": {key: value}}
 
             for key, value in properties.items():
                 results[key] = sch["$defs"][value]
@@ -733,7 +738,9 @@ class ConfigModel(ConfigBase):
                 for group_name in groups.keys():
                     if group_name in key:
                         groups_value[key] = groups[group_name]
-            result[key] = merge_value(groups_value[key], value, schema["$defs"])
+            # 标量字段的 dump 结果不是 dict，包成 {字段名: 值} 与单字段分组对齐
+            payload = value if isinstance(value, dict) else {key: value}
+            result[key] = merge_value(groups_value[key], payload, schema["$defs"])
 
         # 按运行方式去掉无关分组：选模拟器时不该再出现「桌面版设置 / 绑定账号」
         filter_items_by_mode(self, result)
@@ -772,6 +779,18 @@ class ConfigModel(ConfigBase):
             value = False
 
         task_object = getattr(self, task, None)
+        # 顶层标量字段(str/int/bool...): 没有子分组，group 与 argument 同名，
+        # 直接设在任务对象上。否则 getattr(标量, argument) 必然拿不到东西，
+        # 前端会出现"改了不保存"的假控件。
+        if group == argument and argument in type(task_object).model_fields:
+            try:
+                setattr(task_object, argument, value)
+                logger.info(f'Set arg {self.config_name}.{task}.{argument}.{value}')
+                self.save()
+                return True
+            except ValidationError as e:
+                logger.error(e)
+                return False
         group_object = getattr(task_object, group, None)
         if group_object is None:  # deal list
             matchs = re.findall(r'\d+', group)
