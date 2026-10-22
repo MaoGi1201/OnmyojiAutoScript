@@ -39,6 +39,8 @@ WQ_TYPE_COLOR_MIN_SATURATION = 70
 WQ_TYPE_COLOR_MIN_COVERAGE = 0.4
 # 秘闻战斗结算后推进剧情/奖励弹窗的超时(秒)。
 SECRET_CHAT_TIMEOUT_AFTER = 30
+# 副本页稳定存在这么久仍没有挑战按钮，就认为本轮秘闻已结束（不再瞎点剧情区）。
+SECRET_CHAT_IDLE_SECONDS = 5
 # 判定阈值：亮度低于此值认为不是类型标签（标签 V 在 130 以上；UI 暗部只有 40 左右）
 WQ_TYPE_COLOR_MIN_VALUE = 80
 # 色相离所有参考值都超过这个度数就不判定（避免把背景误判成某个类型）
@@ -460,16 +462,28 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         """
         logger.info('Handle secret chat after battle')
         stop = any_of(self.I_WQSE_FIRE, self.I_WQSE_SPECIAL_FIRE)
+        # 剧情是全屏过场，左上角不会有返回键；回到任何真实页面都会露出返回键。
+        page_marks = (self.I_UI_BACK_BLUE, self.I_UI_BACK_RED, self.I_UI_BACK_YELLOW)
         timeout_timer = Timer(timeout).start()
+        # 返回键稳定存在这么久仍没有挑战按钮，说明本轮秘闻已经结束（层已清/次数用完），
+        # 此时点屏幕中间推不动任何东西，只会空转 30s。
+        idle_timer = Timer(SECRET_CHAT_IDLE_SECONDS).start()
         click_count = 0
         while 1:
             self.screenshot()
             if self._evaluate_exit_matcher(stop):
                 logger.info(f'Secret mission chat done in {click_count} clicks')
                 return True
-            if self.click(self.C_SECRET_CHAT, interval=0.8):
-                click_count += 1
-                self.device.click_record_clear()
+            on_page = any(self.appear(mark, threshold=0.75) for mark in page_marks)
+            if on_page:
+                if idle_timer.reached():
+                    logger.info('Secret mission ended without challenge button, stop advancing chat')
+                    return False
+            else:
+                idle_timer.reset()
+                if self.click(self.C_SECRET_CHAT, interval=0.8):
+                    click_count += 1
+                    self.device.click_record_clear()
             if timeout_timer.reached():
                 logger.warning('Secret mission chat after battle timeout, force close')
                 self.ui_click_until_disappear(self.I_UI_BACK_RED)
