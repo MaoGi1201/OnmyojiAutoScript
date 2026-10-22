@@ -101,7 +101,7 @@
   {
     "itemName": "cm_get_reward",
     "imageName": "cm_cm_get_reward.png",
-    "roiFront": "921,466,108,48",
+    "roiFront": "921,467,134,50",
     "roiBack": "522,448,547,94",
     "method": "Template matching",
     "threshold": 0.8,
