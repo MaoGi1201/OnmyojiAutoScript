@@ -10,6 +10,23 @@ page_sr_prepare_exit = Page(SixRealmsAssets.I_MS_CHECK_EXIT_PREPARE, priority=88
 # 商店打开弹窗
 page_sr_open_store = Page(SixRealmsAssets.I_MS_CHECK_OPEN_STORE, priority=88)
 
+
+# ----------------弹窗兜底 hook----------------
+def handle_six_realms_popup_hook(task) -> bool:
+    """六道里到处都会弹的弹窗(过场「跳过」/ 带「非表示」勾选框的确认框)。
+
+    挂到各页的 enter/leave failure hook 上兜底: 弹窗出现在 goto_page 内部时,
+    run 循环里的统一入口够不着。page_six_gates 等是全局页, 别的任务也可能触发, 所以做兜底。
+    """
+    handler = getattr(task, 'handle_six_realms_popup', None)
+    return bool(handler()) if handler else False
+
+
+# 探索 -> 六道之门(进入失败) / 六道之门 -> 副本(离开失败) 都会卡在同一批弹窗上
+page_six_gates.add_enter_failure_hooks(handle_six_realms_popup_hook)
+page_six_gates.add_leave_failure_hooks(handle_six_realms_popup_hook)
+
+
 # ----------------月之海----------------
 def handle_enter_moon_sea(task) -> bool:
     """六道之门页面切换到月之海"""

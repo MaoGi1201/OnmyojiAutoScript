@@ -43,6 +43,9 @@ class PeacockKingdom(BasePeacockKingdom):
         logger.hr('Peacock Kingdom', 1)
         while True:
             self.screenshot()
+            # 跳过过场动画 / 带「非表示」的确认框, 都先处理掉再判页面
+            if self.handle_six_realms_popup():
+                continue
             current_page = self.get_current_page()
             if current_page is None:
                 time.sleep(0.5)

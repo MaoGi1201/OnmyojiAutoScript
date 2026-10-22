@@ -151,5 +151,23 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "不再提醒"
+  },
+  {
+    "itemName": "sr_not_show_uncheck",
+    "imageName": "sr_sr_not_show_uncheck.png",
+    "roiFront": "560,340,38,40",
+    "roiBack": "560,340,38,40",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "非表示勾选框-未勾选"
+  },
+  {
+    "itemName": "sr_not_show_check",
+    "imageName": "sr_sr_not_show_check.png",
+    "roiFront": "559,342,39,41",
+    "roiBack": "559,342,39,41",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "非表示勾选框-已勾选"
   }
 ]

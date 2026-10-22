@@ -4,7 +4,8 @@ from tasks.GameUi.matcher import any_of, all_of
 from tasks.GameUi.page_definition import Page
 from tasks.GlobalGame.assets import GlobalGameAssets
 from tasks.SixRealms.assets import SixRealmsAssets
-from tasks.SixRealms.page import page_peacock_kingdom, page_sr_prepare_exit, page_sr_open_store
+from tasks.SixRealms.page import (handle_six_realms_popup_hook, page_peacock_kingdom, page_sr_prepare_exit,
+                                  page_sr_open_store)
 
 # 孔雀国准备界面
 page_pk_prepare = Page(any_of(SixRealmsAssets.I_PK_START_CONFIRM, SixRealmsAssets.I_PK_START_CONFIRM2,
@@ -68,3 +69,9 @@ page_sr_prepare_exit.add_enter_failure_hooks(GlobalGameAssets.I_UI_BACK_BLUE)
 # 商店打开弹窗
 page_sr_open_store.connect(page_pk_main, GlobalGameAssets.I_UI_CANCEL, key="page_sr_open_store->page_pk_main")
 page_pk_main.connect(page_sr_open_store, SixRealmsAssets.I_M_STORE_ACTIVITY, key="page_pk_main->page_sr_open_store")
+
+# 这些弹窗会挡住"离开本页"的跳转(弹窗出现在 goto_page 内部时 run 循环够不着), 逐页兜底
+for _page in (page_pk_prepare, page_pk_main, page_pk_shop_land, page_pk_mistery_land, page_pk_chaos_land,
+              page_pk_bloom_land, page_pk_battle_land, page_pk_map, page_pk_challenge, page_pk_exit):
+    _page.add_enter_failure_hooks(handle_six_realms_popup_hook)
+    _page.add_leave_failure_hooks(handle_six_realms_popup_hook)

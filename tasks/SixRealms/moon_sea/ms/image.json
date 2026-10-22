@@ -36,28 +36,10 @@
     "description": "主选式神确定"
   },
   {
-    "itemName": "mstart_uncheck",
-    "imageName": "ms_mstart_uncheck.png",
-    "roiFront": "543,340,38,40",
-    "roiBack": "543,340,38,40",
-    "method": "Template matching",
-    "threshold": 0.8,
-    "description": "description"
-  },
-  {
-    "itemName": "mstart_check",
-    "imageName": "ms_mstart_check.png",
-    "roiFront": "542,340,39,41",
-    "roiBack": "542,340,39,41",
-    "method": "Template matching",
-    "threshold": 0.8,
-    "description": "description"
-  },
-  {
     "itemName": "mskip",
     "imageName": "ms_mskip.png",
-    "roiFront": "1117,17,85,36",
-    "roiBack": "1117,17,85,36",
+    "roiFront": "1096,27,85,36",
+    "roiBack": "1096,27,85,36",
     "method": "Template matching",
     "threshold": 0.8,
     "description": ""

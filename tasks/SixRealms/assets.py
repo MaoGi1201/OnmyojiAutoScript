@@ -37,12 +37,8 @@ class SixRealmsAssets:
 	I_MSTART = RuleImage(roi_front=(1136,575,100,100), roi_back=(1043,527,215,167), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_mstart.png")
 	# 主选式神确定 
 	I_MSTART_CONFIRM = RuleImage(roi_front=(1136,575,100,100), roi_back=(1080,548,182,150), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_mstart_confirm.png")
-	# description 
-	I_MSTART_UNCHECK = RuleImage(roi_front=(543,340,38,40), roi_back=(543,340,38,40), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_mstart_uncheck.png")
-	# description 
-	I_MSTART_CHECK = RuleImage(roi_front=(542,340,39,41), roi_back=(542,340,39,41), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_mstart_check.png")
 	#  
-	I_MSKIP = RuleImage(roi_front=(1117,17,85,36), roi_back=(1117,17,85,36), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_mskip.png")
+	I_MSKIP = RuleImage(roi_front=(1096,27,85,36), roi_back=(1096,27,85,36), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_mskip.png")
 	# 继续执行 
 	I_MCONINUE = RuleImage(roi_front=(1121,578,100,100), roi_back=(1121,578,100,100), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_mconinue.png")
 	# 选第一个柔风 
@@ -198,7 +194,7 @@ class SixRealmsAssets:
 	# 选择祈愿之舞 
 	I_PK_START_THIRD_SKILL = RuleImage(roi_front=(1006,601,85,41), roi_back=(1006,601,85,41), threshold=0.8, method="Template matching", file="./tasks/SixRealms/peacock_kingdom/pk/pk_pk_start_third_skill.png")
 	# 孔雀国主界面标志 
-	I_PK_CHECK_MAIN = RuleImage(roi_front=(93,18,112,48), roi_back=(93,18,112,48), threshold=0.8, method="Template matching", file="./tasks/SixRealms/peacock_kingdom/pk/pk_pk_check_main.png")
+	I_PK_CHECK_MAIN = RuleImage(roi_front=(93,18,145,49), roi_back=(93,18,145,49), threshold=0.8, method="Template matching", file="./tasks/SixRealms/peacock_kingdom/pk/pk_pk_check_main.png")
 
 
 	# Image Rule Assets
@@ -216,15 +212,15 @@ class SixRealmsAssets:
 
 	# Image Rule Assets
 	# 神秘之屿 
-	I_PK_LAND_MYSTERY = RuleImage(roi_front=(380,354,24,82), roi_back=(107,144,1041,439), threshold=0.8, method="Template matching", file="./tasks/SixRealms/peacock_kingdom/pk/pk_pk_land_mystery.png")
+	I_PK_LAND_MYSTERY = RuleImage(roi_front=(655,341,26,83), roi_back=(107,144,1041,439), threshold=0.8, method="Template matching", file="./tasks/SixRealms/peacock_kingdom/pk/pk_pk_land_mystery.png")
 	# 混沌之屿 
-	I_PK_LAND_CHAOS = RuleImage(roi_front=(912,432,24,82), roi_back=(107,144,1041,439), threshold=0.8, method="Template matching", file="./tasks/SixRealms/peacock_kingdom/pk/pk_pk_land_chaos.png")
+	I_PK_LAND_CHAOS = RuleImage(roi_front=(651,347,24,82), roi_back=(107,144,1041,439), threshold=0.8, method="Template matching", file="./tasks/SixRealms/peacock_kingdom/pk/pk_pk_land_chaos.png")
 	# 绽放之屿 
-	I_PK_LAND_BLOOM = RuleImage(roi_front=(646,338,24,82), roi_back=(107,144,1041,439), threshold=0.8, method="Template matching", file="./tasks/SixRealms/peacock_kingdom/pk/pk_pk_land_bloom.png")
+	I_PK_LAND_BLOOM = RuleImage(roi_front=(652,326,25,151), roi_back=(107,144,1041,439), threshold=0.8, method="Template matching", file="./tasks/SixRealms/peacock_kingdom/pk/pk_pk_land_bloom.png")
 	# 鏖战之屿 
-	I_PK_LAND_FIRE = RuleImage(roi_front=(286,280,24,82), roi_back=(107,144,1041,439), threshold=0.8, method="Template matching", file="./tasks/SixRealms/peacock_kingdom/pk/pk_pk_land_fire.png")
+	I_PK_LAND_FIRE = RuleImage(roi_front=(377,336,27,96), roi_back=(107,144,1041,439), threshold=0.8, method="Template matching", file="./tasks/SixRealms/peacock_kingdom/pk/pk_pk_land_fire.png")
 	# 宁息商店 
-	I_PK_LAND_STORE = RuleImage(roi_front=(463,430,24,82), roi_back=(107,144,1041,439), threshold=0.8, method="Template matching", file="./tasks/SixRealms/peacock_kingdom/pk/pk_pk_land_store.png")
+	I_PK_LAND_STORE = RuleImage(roi_front=(379,383,28,95), roi_back=(107,144,1041,439), threshold=0.8, method="Template matching", file="./tasks/SixRealms/peacock_kingdom/pk/pk_pk_land_store.png")
 
 
 	# Image Rule Assets
@@ -259,7 +255,7 @@ class SixRealmsAssets:
 	# 商店刷新 
 	I_PK_STORE_REFRESH = RuleImage(roi_front=(591,595,53,52), roi_back=(566,577,110,80), threshold=0.8, method="Template matching", file="./tasks/SixRealms/peacock_kingdom/pk/pk_pk_store_refresh.png")
 	# 商店稳定标志 
-	I_PK_STORE_STABLE_FLAG = RuleImage(roi_front=(1059,257,29,31), roi_back=(1059,257,29,31), threshold=0.7, method="Template matching", file="./tasks/SixRealms/peacock_kingdom/pk/pk_pk_store_stable_flag.png")
+	I_PK_STORE_STABLE_FLAG = RuleImage(roi_front=(1209,125,39,58), roi_back=(1209,125,39,58), threshold=0.7, method="Template matching", file="./tasks/SixRealms/peacock_kingdom/pk/pk_pk_store_stable_flag.png")
 	# 商店轰雷技能 
 	I_PK_STORE_SKILL_THUNDER = RuleImage(roi_front=(1076,135,41,38), roi_back=(697,91,482,626), threshold=0.8, method="Template matching", file="./tasks/SixRealms/peacock_kingdom/pk/pk_pk_store_skill_thunder.png")
 
@@ -332,5 +328,9 @@ class SixRealmsAssets:
 	I_SR_CHECK_BUY_BOX = RuleImage(roi_front=(422,282,443,60), roi_back=(405,230,467,255), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_check_buy_box.png")
 	# 不再提醒 
 	I_SR_NOT_TIP = RuleImage(roi_front=(586,342,37,37), roi_back=(405,230,467,255), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_not_tip.png")
+	# 非表示勾选框-未勾选 
+	I_SR_NOT_SHOW_UNCHECK = RuleImage(roi_front=(560,340,38,40), roi_back=(560,340,38,40), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_not_show_uncheck.png")
+	# 非表示勾选框-已勾选 
+	I_SR_NOT_SHOW_CHECK = RuleImage(roi_front=(559,342,39,41), roi_back=(559,342,39,41), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_not_show_check.png")
 
 

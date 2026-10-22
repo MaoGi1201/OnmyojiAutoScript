@@ -20,8 +20,8 @@
   {
     "itemName": "pk_store_stable_flag",
     "imageName": "pk_pk_store_stable_flag.png",
-    "roiFront": "1059,257,29,31",
-    "roiBack": "1059,257,29,31",
+    "roiFront": "1209,125,39,58",
+    "roiBack": "1209,125,39,58",
     "method": "Template matching",
     "threshold": 0.7,
     "description": "商店稳定标志"

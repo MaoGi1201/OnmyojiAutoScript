@@ -74,8 +74,8 @@
   {
     "itemName": "pk_check_main",
     "imageName": "pk_pk_check_main.png",
-    "roiFront": "93,18,112,48",
-    "roiBack": "93,18,112,48",
+    "roiFront": "93,18,145,49",
+    "roiBack": "93,18,145,49",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "孔雀国主界面标志"

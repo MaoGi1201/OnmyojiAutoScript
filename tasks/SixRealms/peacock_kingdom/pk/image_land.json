@@ -2,7 +2,7 @@
   {
     "itemName": "pk_land_mystery",
     "imageName": "pk_pk_land_mystery.png",
-    "roiFront": "380,354,24,82",
+    "roiFront": "655,341,26,83",
     "roiBack": "107,144,1041,439",
     "method": "Template matching",
     "threshold": 0.8,
@@ -11,7 +11,7 @@
   {
     "itemName": "pk_land_chaos",
     "imageName": "pk_pk_land_chaos.png",
-    "roiFront": "912,432,24,82",
+    "roiFront": "651,347,24,82",
     "roiBack": "107,144,1041,439",
     "method": "Template matching",
     "threshold": 0.8,
@@ -20,7 +20,7 @@
   {
     "itemName": "pk_land_bloom",
     "imageName": "pk_pk_land_bloom.png",
-    "roiFront": "646,338,24,82",
+    "roiFront": "652,326,25,151",
     "roiBack": "107,144,1041,439",
     "method": "Template matching",
     "threshold": 0.8,
@@ -29,7 +29,7 @@
   {
     "itemName": "pk_land_fire",
     "imageName": "pk_pk_land_fire.png",
-    "roiFront": "286,280,24,82",
+    "roiFront": "377,336,27,96",
     "roiBack": "107,144,1041,439",
     "method": "Template matching",
     "threshold": 0.8,
@@ -38,7 +38,7 @@
   {
     "itemName": "pk_land_store",
     "imageName": "pk_pk_land_store.png",
-    "roiFront": "463,430,24,82",
+    "roiFront": "379,383,28,95",
     "roiBack": "107,144,1041,439",
     "method": "Template matching",
     "threshold": 0.8,

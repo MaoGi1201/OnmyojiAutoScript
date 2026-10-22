@@ -12,6 +12,25 @@ import tasks.SixRealms.page as pages
 
 class SixRealmsCommon(GameUi, SixRealmsAssets):
 
+    def handle_six_realms_popup(self) -> bool:
+        """统一处理高难度提示 / 混沌之岛离脱 / 神秘之岛离脱 / 商店离脱
+        """
+        if self.appear_then_click(self.I_MSKIP, interval=0.8):
+            self.appear_then_click(self.I_UI_CONFIRM_SAMLL, interval=0.8)
+            return True
+        # 「非表示」勾选框: 未勾选就先勾上, 等它变成"已勾选"再点确认
+        if self.appear(self.I_SR_NOT_SHOW_UNCHECK):
+            self.appear_then_click(self.I_SR_NOT_SHOW_UNCHECK, interval=0.8)
+            # 等勾选生效再确认; 超时也照常确认, 别把弹窗留在屏幕上
+            self.wait_until_appear(self.I_SR_NOT_SHOW_CHECK, wait_time=2)
+            self.appear_then_click(self.I_UI_CONFIRM, interval=1)
+            return True
+        # 已经是勾选状态(勾选生效了但上次确认没点成功)时, 弹窗还在就直接确认
+        if self.appear(self.I_SR_NOT_SHOW_CHECK):
+            self.appear_then_click(self.I_UI_CONFIRM, interval=1)
+            return True
+        return False
+
     def get_skill_select(self, skill_rule_list: List[RuleImage]) -> RuleImage:
         """
         获取技能对应的选择按钮

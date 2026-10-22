@@ -4,7 +4,8 @@ from tasks.GameUi.matcher import any_of, all_of
 from tasks.GameUi.page_definition import Page
 from tasks.GlobalGame.assets import GlobalGameAssets
 from tasks.SixRealms.assets import SixRealmsAssets
-from tasks.SixRealms.page import page_moon_sea, page_sr_prepare_exit, page_sr_open_store
+from tasks.SixRealms.page import (handle_six_realms_popup_hook, page_moon_sea, page_sr_prepare_exit,
+                                  page_sr_open_store)
 
 # 月之海准备界面
 page_ms_prepare = Page(any_of(SixRealmsAssets.I_MSTART_CONFIRM, SixRealmsAssets.I_MSTART_CONFIRM2,
@@ -71,3 +72,9 @@ page_sr_prepare_exit.add_enter_failure_hooks(GlobalGameAssets.I_UI_BACK_BLUE)
 # 商店
 page_sr_open_store.connect(page_ms_main, GlobalGameAssets.I_UI_CANCEL, key="page_sr_open_store->page_ms_main")
 page_ms_main.connect(page_sr_open_store, SixRealmsAssets.I_M_STORE_ACTIVITY, key="page_ms_main->page_sr_open_store")
+
+# 这些弹窗会挡住"离开本页"的跳转(弹窗出现在 goto_page 内部时 run 循环够不着), 逐页兜底
+for _page in (page_ms_prepare, page_ms_main, page_ms_shop_land, page_ms_mistery_land, page_ms_chaos_land,
+              page_ms_star_land, page_ms_battle_land, page_ms_map, page_ms_challenge, page_ms_exit):
+    _page.add_enter_failure_hooks(handle_six_realms_popup_hook)
+    _page.add_leave_failure_hooks(handle_six_realms_popup_hook)
