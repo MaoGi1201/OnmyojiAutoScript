@@ -67,6 +67,8 @@ class ScriptTask(GameUi, GeneralBattle, GeneralRoom, GeneralInvite, SwitchSoul, 
         return super()._handle_reward(context, config)
 
     def run(self) -> None:
+        # 永生之海房间的返回键(I_BACK_YELLOW_SEA)不在全局关闭清单里, 退房被跳过时会卡死, 登记成任务级关闭动作
+        self.navigator.add_unknown_closer(self.I_BACK_YELLOW_SEA)
         self._member_stage_preset_switched = False
         self._two_teams_switch_sous(self._task_config.switch_soul_config_1)
         self._two_teams_switch_sous(self._task_config.switch_soul_config_2)
