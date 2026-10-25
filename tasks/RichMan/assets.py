@@ -138,7 +138,7 @@ class RichManAssets:
 	# 购买检查 
 	I_ME_CHECK_BLUE = RuleImage(roi_front=(592,493,100,52), roi_back=(550,463,179,106), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/medal/medal_me_check_blue.png")
 	# 购买检查 
-	I_ME_CHECK_AP = RuleImage(roi_front=(588,242,100,100), roi_back=(588,242,100,100), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/medal/medal_me_check_ap.png")
+	I_ME_CHECK_AP = RuleImage(roi_front=(592,492,110,54), roi_back=(548,482,185,101), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/medal/medal_me_check_ap.png")
 	# 购买检查 
 	I_ME_CHECK_SOULS = RuleImage(roi_front=(596,493,100,52), roi_back=(541,453,192,106), threshold=0.8, method="Template matching", file="./tasks/RichMan/mall/medal/medal_me_check_souls.png")
 

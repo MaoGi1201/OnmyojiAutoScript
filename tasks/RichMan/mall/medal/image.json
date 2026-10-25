@@ -92,8 +92,8 @@
   {
     "itemName": "me_check_ap",
     "imageName": "medal_me_check_ap.png",
-    "roiFront": "588,242,100,100",
-    "roiBack": "588,242,100,100",
+    "roiFront": "592,492,110,54",
+    "roiBack": "548,482,185,101",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "购买检查"
