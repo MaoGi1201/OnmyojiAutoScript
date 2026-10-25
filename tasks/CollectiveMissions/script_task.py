@@ -23,6 +23,15 @@ from tasks.GameUi.page import page_main, page_guild
 from tasks.CollectiveMissions.assets import CollectiveMissionsAssets
 
 
+def clean_mission_text(text: str) -> str:
+    """去掉 OCR 结果首尾的非文字字符。
+    """
+    if not text:
+        return ''
+    text = re.sub(r'\s+', '', text)
+    return re.sub(r'^[^\u4e00-\u9fff]+|[^\u4e00-\u9fff]+$', '', text)
+
+
 class ScriptTask(GameUi, CollectiveMissionsAssets):
     """阴阳寮集体任务"""
 
@@ -33,11 +42,13 @@ class ScriptTask(GameUi, CollectiveMissionsAssets):
         logger.info('Start to detect missions')
         self.get_task_reward()
         if self.is_finish():
+            self.ui_click_until_disappear(self.I_CM_CLOSE, interval=1)
             self.goto_page(page_main)
             self.set_next_run(task='CollectiveMissions', success=True)
             raise TaskEnd
         self.select_and_update_cur_mission(self.config.collective_missions.missions_config.missions_select)
         if self.current_mission is None:
+            self.ui_click_until_disappear(self.I_CM_CLOSE, interval=1)
             self.goto_page(page_main)
             self.set_next_run(task='CollectiveMissions', success=False)
             raise TaskEnd
@@ -48,6 +59,7 @@ class ScriptTask(GameUi, CollectiveMissionsAssets):
                 self._donate()  # 捐材料
             case MC.SO1 | MC.SO2:
                 self._soul()  # 捐御魂
+        self.ui_click_until_disappear(self.I_CM_CLOSE, interval=1)
         self.goto_page(page_main)
         self.set_next_run(task='CollectiveMissions', success=True)
         raise TaskEnd
@@ -68,7 +80,8 @@ class ScriptTask(GameUi, CollectiveMissionsAssets):
                 return False
             self.screenshot()
             # 识别当前任务
-            mission_text = self.O_CM_2.ocr(self.device.image)
+            raw_text = self.O_CM_2.ocr(self.device.image)
+            mission_text = clean_mission_text(raw_text)
             try:
                 detect_mission = MC(mission_text)
                 logger.info(f"Current: {detect_mission.value}, target: {mission.value}")
@@ -77,10 +90,10 @@ class ScriptTask(GameUi, CollectiveMissionsAssets):
                     logger.info(f"Success select mission[{mission_text}]")
                     return True
             except ValueError as e:
-                logger.warning(f'Unknown {mission_text}, skip')
+                logger.warning(f'Unknown {raw_text}, skip')
             logger.info("Try switch to next mission")
-            switch_fail_cnt = 0 if pre_mission != mission_text else (switch_fail_cnt + 1)
-            pre_mission = mission_text
+            switch_fail_cnt = 0 if pre_mission != raw_text else (switch_fail_cnt + 1)
+            pre_mission = raw_text
             if self.appear_then_click(self.I_CM_SWITCH, interval=0.6):
                 sleep(random.uniform(0.6, 1.2))
                 switch_cnt += 1
