@@ -4,11 +4,18 @@
 import time
 
 from module.logger import logger
+from module.base.timer import Timer
 
 from tasks.Component.Buy.buy import Buy
 from tasks.RichMan.mall.navbar import MallNavbar
 from tasks.RichMan.config import Scales as ScalesConfig
 from tasks.Utils.config_enum import DemonClass
+
+# 御魂兑换的单价与单笔上限
+DEMON_UNIT_PRICE = 50
+DEMON_BATCH_LIMIT = 20
+SEA_UNIT_PRICE = 200
+SEA_BATCH_LIMIT = 10
 
 
 class Scales(Buy, MallNavbar):
@@ -28,13 +35,22 @@ class Scales(Buy, MallNavbar):
         # 海国御魂
         self._scales_sea(con.picture_book_scrap, con.picture_book_rule)
 
-    def _scales_buy_confirm(self, start_click, number: int = None):
+    def _scales_buy_confirm(self, start_click, number: int = None) -> bool:
+        """打开兑换弹窗并设置购买数量。
+
+        :return: 是否成功打开弹窗（货币不足/已售罄时按钮点不动，返回 False）
+        """
+        open_timer = Timer(15).start()
         while 1:
             self.screenshot()
             if self.appear(self.I_BUY_PLUS):
                 break
+            # 停在对魂页说明弹窗根本没打开
             if self.appear(self.I_SCA_SELECT_1) and self.appear(self.I_SCA_SELECT_2):
-                return
+                return False
+            if open_timer.reached():
+                logger.warning('Scales buy dialog not opened, give up')
+                return False
             if self.appear_then_click(start_click, interval=1):
                 continue
         # 设置购买的数量
@@ -45,6 +61,7 @@ class Scales(Buy, MallNavbar):
         else:
             # 四次截图数字都一样，就可以退出了
             number_record = []
+            click_count = 0
             while 1:
                 self.screenshot()
                 current = self.O_BUY_NUMBER.ocr(self.device.image)
@@ -55,15 +72,26 @@ class Scales(Buy, MallNavbar):
                     if number_record[0] == number_record[1] == number_record[2] == number_record[3]:
                         break
                     number_record.pop(0)
-
+                # 数量加不上去（钱不够/售罄）时不要死循环
+                click_count += 1
+                if click_count > 30:
+                    logger.warning('Scales buy number stuck, give up')
+                    return False
                 if self.appear_then_click(self.I_BUY_ADD, interval=0.6):
                     continue
+        return True
 
-    def _scales_buy_more(self, start_click, number: int = None):
-        # 重写
-        self._scales_buy_confirm(start_click, number)
+    def _scales_buy_more(self, start_click, number: int = None) -> bool:
+        """兑换并领取，返回是否买到。
+
+        基类 `Buy.buy_more` 有尝试次数上限，这里重写过必须自己兜住：
+        否则弹窗没打开会一直点购买键，直到 GameTooManyClickError 把游戏重启。
+        """
+        if not self._scales_buy_confirm(start_click, number):
+            return False
 
         # 购买确认
+        max_click = 3
         while 1:
             self.screenshot()
             if self.appear(self.I_SCA_SIX_STAR) or self.appear(self.I_SCA_REWARD):
@@ -77,21 +105,45 @@ class Scales(Buy, MallNavbar):
                         continue
                 # 收获购买的东西
                 logger.info('Scales get success')
-                break
+                return True
+
+            # 已达上限/数量不足的提示框，关掉后退出
+            if self.appear(self.I_UI_CONFIRM_SAMLL):
+                self.ui_click_until_disappear(self.I_UI_CONFIRM_SAMLL, interval=1)
+                logger.warning('Scales buy number limit')
+                return False
+
+            if max_click <= 0:
+                logger.warning('Scales buy more click times limit')
+                return False
 
             if self.click(self.C_BUY_MORE, interval=5):
+                max_click -= 1
                 continue
 
-    def _scales_buy_sea_more(self, start_click, number: int = None):
-        self._scales_buy_confirm(start_click, number)
+    def _scales_buy_sea_more(self, start_click, number: int = None) -> bool:
+        """海国御魂：兑换后还要在选魂页挑一个六星。"""
+        if not self._scales_buy_confirm(start_click, number):
+            return False
+
+        max_click = 3
         while 1:
             self.screenshot()
             if self.appear(self.I_SCA_SELECT_1):
                 break
+            if self.appear(self.I_UI_CONFIRM_SAMLL):
+                self.ui_click_until_disappear(self.I_UI_CONFIRM_SAMLL, interval=1)
+                logger.warning('Scales buy number limit')
+                return False
+            if max_click <= 0:
+                logger.warning('Scales buy more click times limit')
+                return False
             if self.click(self.C_BUY_MORE, interval=3):
+                max_click -= 1
                 continue
         logger.info('Scales start select souls')
         # 选择魂
+        max_click = 3
         while 1:
             self.screenshot()
             if self.appear(self.I_SCA_SIX_STAR):
@@ -105,9 +157,14 @@ class Scales(Buy, MallNavbar):
                         continue
                 # 收获购买的东西
                 logger.info('Scales get success')
-                break
+                return True
+
+            if max_click <= 0:
+                logger.warning('Scales select souls click times limit')
+                return False
 
             if self.appear_then_click(self.I_SCA_SELECT_1, interval=1.6):
+                max_click -= 1
                 continue
 
     def _scales_orochi_new(self, buy_number: int):
@@ -141,7 +198,9 @@ class Scales(Buy, MallNavbar):
                 logger.warning(f'紫色蛇皮不足,数量:{cu}')
                 return
             # 购买
-            self._scales_buy_more(self.I_SCA_OROCHI_SCALES)
+            if not self._scales_buy_more(self.I_SCA_OROCHI_SCALES):
+                logger.warning('Scales orochi buy failed, stop')
+                return
             time.sleep(0.5)
 
     def _scales_orochi(self, buy_number: int):
@@ -216,14 +275,14 @@ class Scales(Buy, MallNavbar):
         if not isinstance(current_money, int):
             logger.warning('OCR error')
             return
-        money_enough = current_money >= 50*buy_number
+        money_enough = current_money >= DEMON_UNIT_PRICE*buy_number
         if not money_enough:
             logger.warning('Scales demon money is not enough')
             # 判断够不够买2个
-            if current_money < 100:
+            if current_money < DEMON_UNIT_PRICE*2:
                 logger.warning('Scales demon money can not buy two')
                 return
-            buy_number = current_money // 50
+            buy_number = current_money // DEMON_UNIT_PRICE
         # 选择购买的御魂和位置
         logger.info(f'Scales demon buy {buy_number} {buy_class} in {buy_position} position')
         match_class = {
@@ -264,20 +323,28 @@ class Scales(Buy, MallNavbar):
                 break
             if self.click(target_position, interval=0.7):
                 continue
-        # 购买
-        # 一次最多可以买20个所以要分开来
-        if buy_number >= 20:
-            buy_cycles_number = buy_number // 20
-            buy_res_number = buy_number % 20
-        else:
-            buy_cycles_number = None
-            buy_res_number = buy_number
-        if buy_cycles_number:
-            for i in range(buy_cycles_number):
-                self._scales_buy_more(self.I_SCA_DEMON_BUY)
-                time.sleep(0.5)
-        if buy_res_number:
-            self._scales_buy_more(self.I_SCA_DEMON_BUY, buy_res_number)
+        # 购买：每批买完都重读库存和余额，买不起/卖光了立刻停
+        bought = 0
+        while bought < buy_number:
+            self.screenshot()
+            remain_number = self.O_SCA_NUMBER_DEMON.ocr(self.device.image)
+            if not isinstance(remain_number, int) or remain_number <= 0:
+                logger.warning(f'Scales demon remain {remain_number}, stop')
+                break
+            current_money = self.O_SCA_RES_DEMON.ocr(self.device.image)
+            if not isinstance(current_money, int):
+                logger.warning('OCR error')
+                break
+            affordable = current_money // DEMON_UNIT_PRICE
+            if affordable <= 0:
+                logger.warning(f'Scales demon money {current_money} not enough, stop')
+                break
+            batch = min(buy_number - bought, remain_number, affordable, DEMON_BATCH_LIMIT)
+            logger.info(f'Scales demon buy {batch} ({bought}/{buy_number})')
+            if not self._scales_buy_more(self.I_SCA_DEMON_BUY, batch):
+                logger.warning('Scales demon buy failed, stop')
+                break
+            bought += batch
             time.sleep(0.5)
 
         # 回到御魂礼盒界面
@@ -306,48 +373,36 @@ class Scales(Buy, MallNavbar):
         if not self.appear(self.I_SCA_PICTURE_BOOK):
             logger.warning('Scales sea is not appear')
             return
-        # 检查剩余数量
-        remain_number = self.O_SCA_NUMBER_SEA.ocr(self.device.image)
-        if remain_number == 0:
-            logger.warning(f'The remaining purchase quantity of xx is {remain_number}')
-            return
-        if remain_number < buy_number:
-            buy_number = remain_number
-            logger.warning(f'Remaining purchase quantity is {remain_number}, buy_number is {buy_number}')
-        # 检查钱是否够
-        current_money = self.O_SCA_RES_SEA.ocr(self.device.image)
-        if not isinstance(current_money, int):
-            logger.warning('OCR error')
-            return
-        money_enough = current_money >= 200*buy_number
-        if not money_enough:
-            logger.warning('Scales sea money is not enough')
-            # 判断够不够买2个
-            if current_money < 400:
-                logger.warning('Scales sea money can not buy two')
+
+        # 购买：每批买完都重读库存和余额，买不起/卖光了立刻停
+        bought = 0
+        while bought < buy_number:
+            self.screenshot()
+            remain_number = self.O_SCA_NUMBER_SEA.ocr(self.device.image)
+            if not isinstance(remain_number, int) or remain_number <= 0:
+                logger.warning(f'Scales sea remain {remain_number}, stop')
                 return
-            buy_number = current_money // 200
-        # 购买# 一次最多可以买10个所以要分开来
-        logger.info(f'Scales sea buy {buy_number}')
-        if buy_number >= 10:
-            buy_cycles_number = buy_number // 10
-            buy_res_number = buy_number % 10
-        else:
-            buy_cycles_number = None
-            buy_res_number = buy_number
-        if buy_cycles_number:
-            for i in range(buy_cycles_number):
-                if self.config.rich_man.scales.enable_book_auto:
-                    self._scales_buy_more(self.I_SCA_PICTURE_BOOK)
-                else:
-                    self._scales_buy_sea_more(self.I_SCA_PICTURE_BOOK)
-                time.sleep(0.5)
-        if buy_res_number and buy_res_number >= 2:
+            current_money = self.O_SCA_RES_SEA.ocr(self.device.image)
+            if not isinstance(current_money, int):
+                logger.warning('OCR error')
+                return
+            affordable = current_money // SEA_UNIT_PRICE
+            if affordable <= 0:
+                logger.warning(f'Scales sea money {current_money} not enough, stop')
+                return
+            # 本批数量：目标剩余、库存、可负担三者取最小，再受单笔上限约束
+            batch = min(buy_number - bought, remain_number, affordable, SEA_BATCH_LIMIT)
+            logger.info(f'Scales sea buy {batch} ({bought}/{buy_number})')
             if self.config.rich_man.scales.enable_book_auto:
-                self._scales_buy_more(self.I_SCA_PICTURE_BOOK, buy_res_number)
+                ok = self._scales_buy_more(self.I_SCA_PICTURE_BOOK, batch)
             else:
-                self._scales_buy_sea_more(self.I_SCA_PICTURE_BOOK, buy_res_number)
+                ok = self._scales_buy_sea_more(self.I_SCA_PICTURE_BOOK, batch)
+            if not ok:
+                logger.warning('Scales sea buy failed, stop')
+                return
+            bought += batch
             time.sleep(0.5)
+        logger.info(f'Scales sea finished, bought {bought}')
 
 
 if __name__ == '__main__':
