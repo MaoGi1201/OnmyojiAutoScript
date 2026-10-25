@@ -98,6 +98,13 @@ class GuildStore(BaseModel):
     skin_ticket: int = Field(title='Skin Ticket', default=0, description='skin_ticket_help')
 
 
+class SavedParams(BaseModel):
+    # 参数保存的日期，用于判断是不是当天的数据
+    save_date: str = Field(default='', description='save_date_help')
+    # 已完成的购买段，分号分隔
+    done: str = Field(default='', description='已完成(仅供显示禁止操作)')
+
+
 class RichMan(ConfigBase):
     scheduler: Scheduler = Field(default_factory=Scheduler)
     special_room: SpecialRoom = Field(default_factory=SpecialRoom)
@@ -111,3 +118,7 @@ class RichMan(ConfigBase):
     bondlings: Bondlings = Field(default_factory=Bondlings)
     shrine: Shrine = Field(default_factory=Shrine)
     guild_store: GuildStore = Field(default_factory=GuildStore)
+
+    # 购买进度（断点续跑），配置页隐藏
+    saved_params: SavedParams = Field(default_factory=SavedParams)
+    hide_fields = dynamic_hide('saved_params')

@@ -21,14 +21,16 @@ class ScriptTask(Mall, Guild, ThousandThings, Shrine):
     def run(self):
         con: RichMan = self.config.rich_man
         # 千物宝箱
-        self.execute_tt(con.thousand_things)
+        self.run_step('tt', lambda: self.execute_tt(con.thousand_things))
         # 神龛
-        self.execute_shrine(con.shrine)
+        self.run_step('shrine', lambda: self.execute_shrine(con.shrine))
         # 功勋商店
-        self.execute_guild(con.guild_store)
+        self.run_step('guild', lambda: self.execute_guild(con.guild_store))
         # 商店
-        self.execute_mall()
+        self.run_step('mall', self.execute_mall)
 
+        # 全部跑完，清空本周进度，下次重新开始
+        self.progress_clear()
         self.set_next_run(task='RichMan', success=True, finish=False)
         raise TaskEnd('RichMan')
 
