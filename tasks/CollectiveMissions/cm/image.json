@@ -11,7 +11,7 @@
   {
     "itemName": "cm_cm",
     "imageName": "cm_cm_cm.png",
-    "roiFront": "157,169,210,161",
+    "roiFront": "157,179,207,151",
     "roiBack": "137,131,246,235",
     "method": "Template matching",
     "threshold": 0.8,

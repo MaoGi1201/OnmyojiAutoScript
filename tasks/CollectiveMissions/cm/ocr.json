@@ -10,8 +10,8 @@
   },
   {
     "itemName": "cm_2",
-    "roiFront": "333,135,92,44",
-    "roiBack": "333,135,92,44",
+    "roiFront": "326,132,120,42",
+    "roiBack": "326,132,120,42",
     "mode": "Single",
     "method": "Default",
     "keyword": "",
@@ -55,8 +55,8 @@
   },
   {
     "itemName": "cm_number",
-    "roiFront": "1105,564,60,28",
-    "roiBack": "1105,564,60,28",
+    "roiFront": "1106,564,60,28",
+    "roiBack": "1106,564,60,28",
     "mode": "DigitCounter",
     "method": "Default",
     "keyword": "",
