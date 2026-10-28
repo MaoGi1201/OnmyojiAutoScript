@@ -385,8 +385,11 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, AreaBossAssets):
         """
             判断该鬼王是否已经获取到小组排名
         """
+        # 点挑战后详情页要一会儿才把排名区域画出来，加载中看不到 I_AB_GROUP_RANK_NONE，
+        # 直接判断会被误判成"已挑战"而跳过，所以先等它出现（最多 3 秒）再判断
+        self.wait_until_appear(self.I_AB_GROUP_RANK_NONE, wait_time=3)
+        self.screenshot()
         return not self.appear(self.I_AB_GROUP_RANK_NONE)
-        pass
 
     def open_filter(self):
         """打开筛选界面"""
