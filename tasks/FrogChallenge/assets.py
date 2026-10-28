@@ -35,6 +35,3 @@ class FrogChallengeAssets:
 	I_FREE = RuleImage(roi_front=(1148,644,84,38), roi_back=(1090,610,190,110), threshold=0.8, method="Template matching", file="./tasks/FrogChallenge/res/fc_free.png")
 
 
-	# Ocr Rule Assets
-
-
