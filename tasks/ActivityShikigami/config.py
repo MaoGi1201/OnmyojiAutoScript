@@ -14,12 +14,13 @@ from typing import Optional
 
 class GeneralClimb(ConfigBase):
     limit_time: Time = Field(default=Time(hour=1, minute=30), description='总限制时间')
-    pass_limit: int = Field(default=50)
+    # 原默认：pass_limit=50、run_sequence='pass,ap,ap100,boss'，恢复时改回。
+    pass_limit: int = Field(default=0)
     ap_limit: int = Field(default=300)
     # boss 与 100 体默认关闭（limit=0 的类型会被 run_sequence_v 过滤掉，不进入执行流程）。
     boss_limit: int = Field(default=0)
     ap100_limit: int = Field(default=0)
-    run_sequence: str = Field(default='pass,ap,ap100,boss',
+    run_sequence: str = Field(default='ap',
                               description='pass:门票,ap100:100体,boss:boss战,ap:体力\n'
                                           '逗号分隔,从左到右依次运行\n'
                                           '例:pass,ap100,boss,ap=门票->100体->boss战->体力')

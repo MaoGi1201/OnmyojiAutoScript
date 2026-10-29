@@ -1,0 +1,56 @@
+[
+  {
+    "itemName": "as_boss_fire",
+    "imageName": "as_as_boss_fire.png",
+    "roiFront": "1130,590,92,47",
+    "roiBack": "1080,530,192,190",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "boss挑战标志"
+  },
+  {
+    "itemName": "boss_lock",
+    "imageName": "as_boss_lock.png",
+    "roiFront": "897,653,27,26",
+    "roiBack": "686,610,313,92",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "boss爬塔阵容锁定"
+  },
+  {
+    "itemName": "boss_unlock",
+    "imageName": "as_boss_unlock.png",
+    "roiFront": "898,654,22,25",
+    "roiBack": "686,610,313,92",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "boss爬塔阵容解锁"
+  },
+  {
+    "itemName": "to_battle_boss",
+    "imageName": "as_to_battle_boss.png",
+    "roiFront": "1057,290,117,39",
+    "roiBack": "979,189,225,255",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "点击进入boss战斗页面"
+  },
+  {
+    "itemName": "check_battle_boss",
+    "imageName": "as_check_battle_boss.png",
+    "roiFront": "151,18,129,46",
+    "roiBack": "141,0,151,85",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "boss界面标志"
+  },
+  {
+    "itemName": "check_boss",
+    "imageName": "as_check_boss.png",
+    "roiFront": "151,18,129,46",
+    "roiBack": "141,0,151,85",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "boss爬塔页面标"
+  }
+]

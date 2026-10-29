@@ -1,0 +1,47 @@
+[
+  {
+    "itemName": "ap100_lock",
+    "imageName": "as_ap100_lock.png",
+    "roiFront": "749,651,27,26",
+    "roiBack": "686,610,313,92",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "100体爬塔阵容锁定"
+  },
+  {
+    "itemName": "ap100_unlock",
+    "imageName": "as_ap100_unlock.png",
+    "roiFront": "749,649,22,25",
+    "roiBack": "686,610,313,92",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "100体爬塔阵容解锁"
+  },
+  {
+    "itemName": "check_ap100",
+    "imageName": "as_check_ap100.png",
+    "roiFront": "151,18,129,46",
+    "roiBack": "141,0,151,85",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "100体爬塔页面标志"
+  },
+  {
+    "itemName": "to_battle_ap100",
+    "imageName": "as_to_battle_ap100.png",
+    "roiFront": "394,457,123,34",
+    "roiBack": "330,315,238,269",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "主页进入100体爬塔入口"
+  },
+  {
+    "itemName": "ap100_map_goto_battle",
+    "imageName": "as_ap100_map_goto_battle.png",
+    "roiFront": "71,331,97,36",
+    "roiBack": "71,331,97,36",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "ap100进入战斗"
+  }
+]

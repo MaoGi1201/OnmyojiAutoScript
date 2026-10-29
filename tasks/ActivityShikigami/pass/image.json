@@ -1,0 +1,56 @@
+[
+  {
+    "itemName": "climb_mode_pass",
+    "imageName": "as_climb_mode_pass.png",
+    "roiFront": "1141,544,21,21",
+    "roiBack": "1118,510,49,105",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "活动爬塔标志"
+  },
+  {
+    "itemName": "pass_lock",
+    "imageName": "as_pass_lock.png",
+    "roiFront": "896,653,27,26",
+    "roiBack": "686,610,313,92",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "门票爬塔阵容锁定"
+  },
+  {
+    "itemName": "pass_unlock",
+    "imageName": "as_pass_unlock.png",
+    "roiFront": "899,653,22,25",
+    "roiBack": "686,610,313,92",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "门票爬塔阵容解锁"
+  },
+  {
+    "itemName": "check_pass_map",
+    "imageName": "as_check_pass_map.png",
+    "roiFront": "595,0,129,46",
+    "roiBack": "583,0,151,85",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "门票地图页(map页)判定：活动页点 as_to_battle_pass 后抵达"
+  },
+  {
+    "itemName": "to_battle_pass",
+    "imageName": "as_to_battle_pass.png",
+    "roiFront": "810,456,135,40",
+    "roiBack": "758,305,238,269",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "主页进入门票爬塔入口"
+  },
+  {
+    "itemName": "pass_map_goto_battle",
+    "imageName": "as_pass_map_goto_battle.png",
+    "roiFront": "66,150,97,36",
+    "roiBack": "66,150,97,36",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "门票进入战斗"
+  }
+]
