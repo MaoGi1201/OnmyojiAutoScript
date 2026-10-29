@@ -2,8 +2,8 @@
   {
     "itemName": "g_accept",
     "imageName": "gg_g_accept.png",
-    "roiFront": "830,407,56,46",
-    "roiBack": "798,369,117,110",
+    "roiFront": "845,472,56,46",
+    "roiBack": "816,431,117,110",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "接受"
@@ -11,8 +11,8 @@
   {
     "itemName": "g_reject",
     "imageName": "gg_g_reject.png",
-    "roiFront": "832,508,53,51",
-    "roiBack": "808,480,108,101",
+    "roiFront": "844,562,53,51",
+    "roiBack": "809,534,108,101",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "拒绝"
@@ -47,8 +47,8 @@
   {
     "itemName": "g_ignore",
     "imageName": "gg_g_ignore.png",
-    "roiFront": "773,116,21,21",
-    "roiBack": "759,102,48,48",
+    "roiFront": "779,78,44,40",
+    "roiBack": "768,70,68,59",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "忽略"

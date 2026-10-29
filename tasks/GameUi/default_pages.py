@@ -71,7 +71,10 @@ page_main.add_enter_success_hooks(
 page_shikigami_records = Page(GameUiAssets.I_CHECK_RECORDS, category="global")
 page_shikigami_records.add_enter_failure_hooks(conditional_action(condition=GameUiAssets.I_CHECK_MAIN,
                                                                   action=RestartAssets.C_LOGIN_SCROLL_CLOSE_AREA))
-page_shikigami_records.add_enter_success_hooks(GlobalGameAssets.I_UI_CANCEL_SAMLL)
+# 进入式神录时有概率弹“音频资源下载”提示, 点击取消关闭
+page_shikigami_records.add_enter_success_hooks(GlobalGameAssets.I_UI_CANCEL, GlobalGameAssets.I_UI_CANCEL_SAMLL)
+# 弹窗晚于页面出现时会挡住离开式神录的点击, 跳转失败时兜底再关一次
+page_shikigami_records.add_leave_failure_hooks(GlobalGameAssets.I_UI_CANCEL, GlobalGameAssets.I_UI_CANCEL_SAMLL)
 page_shikigami_records.connect(page_main, GlobalGameAssets.I_UI_BACK_YELLOW, key="page_shikigami_records->page_main")
 page_main.connect(page_shikigami_records, GameUiAssets.I_MAIN_GOTO_SHIKIGAMI_RECORDS, key="page_main->page_shikigami_records")
 
@@ -100,7 +103,8 @@ page_main.connect(page_daily, GameUiAssets.I_MAIN_GOTO_DAILY, key="page_main->pa
 page_courtyard_affairs = Page(DailyTriflesAssets.I_CHECK_COURTYARD_AFFAIRS, category="global")
 page_main.connect(page_courtyard_affairs, DailyTriflesAssets.I_ENTER_COURTYARD_AFFAIRS, key="page_main->page_courtyard_affairs")
 page_courtyard_affairs.connect(page_main, GlobalGameAssets.I_UI_BACK_YELLOW, key="page_courtyard_affairs->page_main")
-page_courtyard_affairs.add_leave_failure_hooks(GlobalGameAssets.I_UI_CANCEL_SAMLL, GlobalGameAssets.I_UI_BACK_RED,
+page_courtyard_affairs.add_leave_failure_hooks(GlobalGameAssets.I_UI_CANCEL, GlobalGameAssets.I_UI_CANCEL_SAMLL,
+                                               GlobalGameAssets.I_UI_BACK_RED,
                                                ActivityShikigamiAssets.I_SKIP_BUTTON, GlobalGameAssets.I_UI_BACK_YELLOW)
 
 page_mall = Page(GameUiAssets.I_CHECK_MALL, category="global")

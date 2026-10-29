@@ -12,7 +12,7 @@
     "itemName": "ui_cancel",
     "imageName": "ui_ui_cancel.png",
     "roiFront": "437,409,177,62",
-    "roiBack": "406,370,322,122",
+    "roiBack": "376,370,352,195",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "长一点的取消"

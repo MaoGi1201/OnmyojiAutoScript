@@ -500,6 +500,18 @@ class ScriptTask(GameUi, Summon, DailyTriflesAssets):
             if self.appear_then_click(self.I_ENTER_DAILY, interval=1):
                 continue
         self.appear_then_click(self.I_ONE_COMPLETE, interval=1)
+        # 一键完成会连带跑每日免费召唤：先可能弹“下载召唤动画”提示(点取消),
+        # 取消后若抽到稀有式神还会弹“欧皇降临”(点右上角红叉), 两者都会挡住返回庭院的点击
+        limit = Timer(30).start()
+        quiet = Timer(6).start()
+        while not limit.reached() and not quiet.reached():
+            self.screenshot()
+            if self.appear_then_click(self.I_UI_CANCEL, interval=1):
+                quiet.reset()
+                continue
+            if self.appear_then_click(self.I_UI_BACK_RED, interval=1):
+                quiet.reset()
+                continue
         self.goto_page(page_main)
         self.config.daily_trifles.done_record.courtyard_affairs_dt = datetime.now()
 
