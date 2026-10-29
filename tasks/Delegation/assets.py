@@ -22,7 +22,7 @@ class DelegationAssets:
 	# description 
 	C_D_5 = RuleClick(roi_front=(695,491,100,178), roi_back=(695,491,100,178), name="d_5")
 	# 对话框：点屏幕中部推进剧情对话 
-	C_D_CHAT = RuleClick(roi_front=(597,296,59,100), roi_back=(597,296,59,100), name="d_chat")
+	C_D_CHAT = RuleClick(roi_front=(522,611,80,97), roi_back=(522,611,80,97), name="d_chat")
 
 
 	# Image Rule Assets
