@@ -100,6 +100,15 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
             self.click(self.O_WQ_TEXT_ALL, interval=1.2)
         return False
 
+    def cancel_wq(self):
+        """取消当前悬赏: 先关掉追踪开关, 再点红叉关掉悬赏面板回到探索页.
+
+        面板不关的话会一直盖在探索页上, 下一轮 find_wq 在左侧列表什么都找不到,
+        只能靠 error_count 撞满退出.
+        """
+        self.ui_click(self.I_TRACE_TRUE, self.I_TRACE_FALSE)
+        self.ui_click_until_disappear(self.I_UI_BACK_RED)
+
     def next_run(self):
         before_end: time = self.get_config().before_end
         if before_end == time(hour=0, minute=0, second=0):
@@ -158,7 +167,14 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
                 self.all_cooperation_invite()
             else:
                 self.invite_five()
-        self.ui_click_until_disappear(self.I_UI_BACK_RED)
+        # 一键追踪之后右下角会多出「前往探索」, 点它直接进探索;
+        # 没这个按钮(没追踪到任何任务等)就还走老路线: 关掉悬赏面板, 再从庭院点探索进去
+        self.screenshot()
+        if self.appear_then_click(self.I_GOTO_EXPLORATION, interval=1):
+            logger.info('Click goto exploration, enter exploration directly')
+            self.wait_until_appear(self.I_CHECK_EXPLORATION, wait_time=5)
+        else:
+            self.ui_click_until_disappear(self.I_UI_BACK_RED)
         self.goto_page(page_exploration)
         return True
 
@@ -233,19 +249,19 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         if not self.appear(self.I_GOTO_1):
             # 如果没有出现 '前往'按钮， 那就是这个可能是神秘任务但是没有解锁
             logger.info('This is a secret mission but not unlock')
-            self.ui_click(self.I_TRACE_TRUE, self.I_TRACE_FALSE)
+            self.cancel_wq()
             return False
         # 跳过不想打的
         monster_name = self.O_WQ_MONSTER_TYPE.detect_text(self.device.image)
         if monster_name in self.unwanted_boss_name_list:
             logger.warning(f'unwanted {monster_name}')
-            self.ui_click(self.I_TRACE_TRUE, self.I_TRACE_FALSE)
+            self.cancel_wq()
             return False
         # 获取排序后的悬赏信息列表
         ordered_wq_infos = self.get_ordered_wq_infos(num_want)
         if not ordered_wq_infos:
             logger.info('Current wanted quest skipped all, cancel it')
-            self.ui_click(self.I_TRACE_TRUE, self.I_TRACE_FALSE)
+            self.cancel_wq()
             return False
         wq_call_dict: dict[WQType, Callable] = {
             WQType.CHALLENGE: self.challenge,
@@ -256,7 +272,7 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         wq_info = self.get_need_exec_wq(ordered_wq_infos)
         if not wq_info:
             logger.info('Current wanted quests can not be executed')
-            self.ui_click(self.I_TRACE_TRUE, self.I_TRACE_FALSE)
+            self.cancel_wq()
             return False
         try:
             logger.info(f'Choose wq: {wq_info}')
@@ -325,7 +341,7 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         wq_info_txt = info_rule.ocr(self.device.image)
         wq_info_txt = wq_info_txt.replace('：', ':').replace('（', '(').replace('）', ')')
         import re
-        match = re.search(r"(.+?)\s*\(?[数教]量[:：]\s*(\d+)", wq_info_txt)
+        match = re.search(r"(.+?)\s*\(?[数教敬]量[:：]\s*(\d+)", wq_info_txt)
         if not match:
             logger.warning(f'Unknown wq info: {wq_info_txt}')
             return None
