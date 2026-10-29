@@ -1,16 +1,4 @@
-"""爬塔活动的通用 Act：主页入口 / 到达跳转 / 查票 / 锁容全部由类常量配置。
-
-入口形态只改 `ENTRY_GROUPS`：
-    (该组类型, 从活动页依次点的按钮, 组内切换按钮)
-  - 一个类型一组 => 各类型独立入口，互不相关；
-  - 多个类型一组 => 共用入口（一个或多个），组内靠第三个元素的切换按钮互切；
-  - 按钮写两项以上 => 中间跳走 `page_act_map` 中转页。
-
-当前配置为「四入口」形态：每个类型独占一个按钮。
-若下期改成 ap / pass 同界面靠模式标签切换，整组换成下面这一行即可：
-
-    ENTRY_GROUPS = ((('ap', 'pass'), ('I_TO_BATTLE_PASS',), 'I_CLIMB_MODE_SWITCH'),)
-"""
+"""爬塔活动的通用 Act：主页入口 / 到达跳转 / 查票 / 锁容全部由类常量配置。"""
 from module.logger import logger
 from tasks.ActivityShikigami.base_act import BaseAct
 from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
@@ -24,24 +12,37 @@ class NormalClimbAct(BaseAct):
     # 主页额外判据，一般留空。
     HOME_MARKERS: tuple[str, ...] = ()
 
-    # 入口分组：每个类型独占一个入口，一步到位，不需要切换。
+    # 本次活动开放的爬塔模式
+    SUPPORTED_CLIMB_TYPES: tuple[str, ...] = ('ap',)
+    # 三入口形态（ap100 / boss 各自独立，ap 与 pass 共用 pass 入口）长这样：
+    #   ENTRY_GROUPS = (
+    #       (('ap100',), ('I_TO_BATTLE_AP100',), None),
+    #       (('boss',), ('I_TO_BATTLE_BOSS',), None),
+    #       (('ap', 'pass'), ('I_TO_BATTLE_PASS',), 'I_CLIMB_MODE_SWITCH'),
+    #   )
+    # 启用时记得把 'pass' 加进 SUPPORTED_CLIMB_TYPES 和 PAGE_CHECKS。
     ENTRY_GROUPS: tuple[tuple[tuple[str, ...], tuple[str, ...], str | None], ...] = (
-        (('ap100',), ('I_TO_BATTLE_AP100',), None),
+        # (('ap100',), ('I_TO_BATTLE_AP100',), None),
         (('ap',), ('I_TO_BATTLE_AP',), None),
-        (('pass',), ('I_TO_BATTLE_PASS',), None),
-        (('boss',), ('I_TO_BATTLE_BOSS',), None),
+        # (('pass',), ('I_TO_BATTLE_PASS',), None),
+        # (('boss',), ('I_TO_BATTLE_BOSS',), None),
+        # (('ap', 'pass'), ('I_TO_BATTLE_PASS',), 'I_CLIMB_MODE_SWITCH'),
+
     )
 
-    # 四入口形态下不存在中转页，摘掉 page.py 静态注册的中转页边。
+    # （页面图里只有 page_act_pass_map 一个地图页节点，page_act_map 仅是 flag=True 时的别名）。
     DETACH_MAP_ROUTES: bool = True
+
+    # 跳转后等待目标页出现的上限（秒）
+    page_arrive_timeout: float = 2.0
 
     # 四个爬塔页各自的「上锁图 / 未上锁图」，判定顺序在通用图之后。
     # 某项 asset 未配置时 `_own_lock_names()` 返回 None，该轮跳过。
     LOCK_RULES: dict[str, tuple[str, str]] = {
-        'ap100': ('I_AP100_LOCK', 'I_AP100_UNLOCK'),
-        'ap': ('I_AP_LOCK', 'I_AP_UNLOCK'),
-        'pass': ('I_PASS_LOCK', 'I_PASS_UNLOCK'),
-        'boss': ('I_BOSS_LOCK', 'I_BOSS_UNLOCK'),
+        # 'ap100': ('I_AP100_LOCK', 'I_AP100_UNLOCK'),
+        #'ap': ('I_AP_LOCK', 'I_AP_UNLOCK'),
+        # 'pass': ('I_PASS_LOCK', 'I_PASS_UNLOCK'),
+        # 'boss': ('I_BOSS_LOCK', 'I_BOSS_UNLOCK'),
     }
 
     # 通用的那一对锁图，判定优先用它，失败后再退到各页专属的那一对。
@@ -52,28 +53,28 @@ class NormalClimbAct(BaseAct):
     LOCK_CLICK_TIMEOUT: float = 5.0
 
     # 到达层：哪些类型的目标页只是地图页，还要再点一次才到真正的战斗页。
+    # 本期体力页进页即战斗页，不需要二次点击；原门票规则注释保留，恢复时取消注释。
     BATTLE_PAGE_ENTER: dict[str, tuple[str, str]] = {
-        'pass': ('I_PASS_MAP_GOTO_BATTLE', 'I_CHECK_PASS_BATTLE'),
+        # 'pass': ('I_PASS_MAP_GOTO_BATTLE', 'I_CLIMB_MODE_PASS'),
     }
 
-    # 地图页上各类型的进入按钮：pass 先跑时，切到 ap / ap100 只要退回地图页点一下
+    # 地图页上各类型的进入按钮：pass 先跑时，切到 ap / ap100 只要退回地图页点一下。
+    # 本期没有地图页；恢复时取消注释。
     MAP_GOTO_BATTLE: dict[str, str] = {
-        'pass': 'I_PASS_MAP_GOTO_BATTLE',
-        'ap': 'I_AP_MAP_GOTO_BATTLE',
-        'ap100': 'I_AP100_MAP_GOTO_BATTLE',
+        # 'pass': 'I_PASS_MAP_GOTO_BATTLE',
+        # 'ap': 'I_AP_MAP_GOTO_BATTLE',
+        # 'ap100': 'I_AP100_MAP_GOTO_BATTLE',
     }
 
     # 四个爬塔页各自的进入后 check 图。
     PAGE_CHECKS: dict[str, str] = {
-        'ap100': 'I_CHECK_AP100',
-        'ap': 'I_CHECK_AP',
-        'pass': 'I_CHECK_PASS_BATTLE',
-        'boss': 'I_CHECK_BOSS',
+        # 'ap100': 'I_CHECK_AP100',
+         #'ap': 'I_CLIMB_MODE_AP',
+        # 'pass': 'I_CLIMB_MODE_PASS',
+        # 'boss': 'I_CHECK_BOSS',
     }
 
     # 同一爬塔类型存在多个页面时，主 check 图之外的补充判据。
-    # 门票已拆成两个页面：`page_act_pass_map`（map 页，判 as_check_pass_map）与
-    # `page_act_pass`（战斗页，判 as_check_pass_battle），各用一张判定图，
     PAGE_EXTRA_CHECKS: dict[str, tuple[str, ...]] = {}
 
     # check 图与旧识别器的合并策略：
@@ -82,20 +83,18 @@ class NormalClimbAct(BaseAct):
     PAGE_CHECK_MODE: str = 'extend'
 
     # 各爬塔类型的「余量读取规则」：OCR asset + 取值方式。
-    #   digit   -> ocr_digit()          单纯一个数字
-    #   counter -> ocr_digit_counter()  "当前/总" 形式，取中间那个
     TICKET_OCR_RULES: dict[str, tuple[str, str]] = {
-        'ap100': ('O_REMAIN_AP100', 'digit'),
-        'ap': ('O_REMAIN_AP', 'digit'),
-        'pass': ('O_REMAIN_PASS', 'digit'),
-        'boss': ('O_REMAIN_BOSS', 'counter'),
+        # 'ap100': ('O_REMAIN_AP100', 'digit'),
+         #'ap': ('O_REMAIN_AP', 'digit'),
+        # 'pass': ('O_REMAIN_PASS', 'digit'),
+        # 'boss': ('O_REMAIN_BOSS', 'counter'),
     }
 
     # 逻辑复用：把某个类型的余量读取委派给另一个类型。
     # 置空 dict 则四个类型各自读各自的。
     REUSE_SOURCE: dict[str, str] = {}
 
-    # 单次挑战消耗的体力。右上角 `O_CHECK_AP_NUM`（如 2.0 万）低于它就打不了，
+    # 单次挑战消耗的体力。右上角 `O_CHECK_AP_NUM`低于100就不打了
     # 直接结束该类型。只对配置了的类型生效，未配置的不检测。
     AP_COST: dict[str, int] = {
         'ap': 100,
@@ -129,8 +128,7 @@ class NormalClimbAct(BaseAct):
         page_act.recognizer = pages.any_of(*markers, page_act.recognizer)
 
     def _patch_page_recognizers(self) -> None:
-        """给四个爬塔页补各自的 check 图。
-        一个类型可能有多个页面（主 check + `PAGE_EXTRA_CHECKS`），任一命中都算它。"""
+        """给四个爬塔页补各自的 check 图。"""
 
         for climb_type, asset_name in self.PAGE_CHECKS.items():
             page = self.navigator.resolve_page(getattr(pages, f'page_act_{climb_type}', None))
@@ -157,8 +155,7 @@ class NormalClimbAct(BaseAct):
             page.recognizer = pages.any_of(*markers, page.recognizer)
 
     def check_tickets_enough(self) -> bool:
-        """判断当前爬塔门票是否足够。
-        让 UI 相同的类型能共用一套读数；计次与战斗配置仍各自独立。"""
+        """判断当前爬塔门票是否足够。"""
 
         logger.hr(f'Check {self.climb_type} tickets')
         source = self._ticket_source()
@@ -171,7 +168,8 @@ class NormalClimbAct(BaseAct):
 
         rule = self.TICKET_OCR_RULES.get(source)
         if rule is None:
-            logger.warning(f'Climb: no ticket ocr rule for {source}, skip check')
+            #  ap 的剩余次数不参与判断，未登记规则是正常配置。
+            logger.info(f'Climb: {source} ticket check disabled, skip')
             return True
         asset_name, mode = rule
         ocr = getattr(self, asset_name, None)
@@ -193,10 +191,7 @@ class NormalClimbAct(BaseAct):
         return remain_times > 0
 
     def check_ap_enough(self) -> bool:
-        """右上角体力是否够打一次（`AP_COST` 里没配的类型不检测）。
-
-        体力是全局资源，跟各类型的门票是两码事：门票读 `TICKET_OCR_RULES`，体力读最右边那个数。
-        """
+        """右上角体力是否够打一次（`AP_COST` 里没配的类型不检测）。 """
 
         cost = self.AP_COST.get(self.climb_type, 0)
         if cost <= 0:

@@ -120,11 +120,15 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
 
     ENTRY_GROUPS: tuple[tuple[tuple[str, ...], tuple[str, ...], str | None], ...] = ()
 
+    # 本次活动开放的爬塔模式；None = 不检查（基类默认）。
+    # 配置里若还留着没开放的入口（例如本次活动只有 ap），run() 会提示“本次活动没有 xx 模式”，并直接结束任务；
+    SUPPORTED_CLIMB_TYPES: tuple[str, ...] | None = None
+
     # 仅组里多于一个类型时才用到：进错模式时靠它识别出来再点切换。
     MODE_ICONS: dict[str, str] = {
         'ap': 'I_CLIMB_MODE_AP',
         'pass': 'I_CLIMB_MODE_PASS',
-        'ap100': 'I_CLIMB_MODE_AP100',
+        'ap100': 'I_CHECK_AP100',
     }
 
     DETACH_MAP_ROUTES: bool = False
@@ -412,7 +416,33 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
             ),
         }
 
+    def _check_supported_types(self) -> None:
+        """配置里写了本次活动没有开放的爬塔模式时，直接结束任务。
+
+        只按配置原文 `run_sequence`（含 limit=0 的类型）判断：报错即退出，
+        避免后续 goto_page 到没有入边的页面再抛 GamePageUnknownError。
+        """
+
+        supported = self.SUPPORTED_CLIMB_TYPES
+        if supported is None:
+            return
+
+        declared = [
+            climb_type.strip()
+            for climb_type in self.conf.general_climb.run_sequence.split(',')
+            if climb_type.strip()
+        ]
+        unsupported = tuple(t for t in declared if t not in supported)
+        if not unsupported:
+            return
+
+        modes = '、'.join(unsupported)
+        logger.warning(f"Climb: 本次活动没有 {modes} 模式，请重新配置运行顺序")
+        self.set_next_run(task="ActivityShikigami", success=True)
+        raise TaskEnd
+
     def run(self):
+        self._check_supported_types()
         self.before_run()
         for climb_type in self.conf.general_climb.run_sequence_v:
             logger.hr(f"Start run {self.climb_type}", 1)

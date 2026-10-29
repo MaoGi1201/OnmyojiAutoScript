@@ -1,0 +1,47 @@
+[
+  {
+    "itemName": "climb_mode_ap",
+    "imageName": "as_climb_mode_ap.png",
+    "roiFront": "1091,543,24,25",
+    "roiBack": "1055,495,202,219",
+    "method": "Template matching",
+    "threshold": 0.7,
+    "description": "体力爬塔标志"
+  },
+  {
+    "itemName": "ap_unlock",
+    "imageName": "as_ap_unlock.png",
+    "roiFront": "806,653,22,25",
+    "roiBack": "686,610,313,92",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "体力爬塔阵容解锁"
+  },
+  {
+    "itemName": "ap_lock",
+    "imageName": "as_ap_lock.png",
+    "roiFront": "801,656,27,26",
+    "roiBack": "686,610,313,92",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "体力爬塔阵容锁定"
+  },
+  {
+    "itemName": "to_battle_ap",
+    "imageName": "as_to_battle_ap.png",
+    "roiFront": "216,251,106,39",
+    "roiBack": "177,199,185,140",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "活动主界面进入体力爬塔标志"
+  },
+  {
+    "itemName": "ap_map_goto_battle",
+    "imageName": "as_ap_map_goto_battle.png",
+    "roiFront": "73,242,97,36",
+    "roiBack": "73,242,97,36",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "体力进入战斗"
+  }
+]

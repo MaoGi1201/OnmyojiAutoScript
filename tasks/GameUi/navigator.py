@@ -476,17 +476,23 @@ class GameUi(ChessBattleNavigationMixin, BaseTask, GameUiAssets):
             context="goto_page",
         )
 
-    def _wait_for_destination(self, destination: Page, timeout: float = 4.0) -> bool:
+    # 单条边执行完、等待目标页稳定出现的默认上限（秒）。
+    # 任务可覆写同名属性收紧，例如共用入口在两种模式间来回切时不必等满。
+    page_arrive_timeout: float = 4.0
+
+    def _wait_for_destination(self, destination: Page, timeout: float | None = None) -> bool:
         """等待下一页面稳定出现。
 
         Args:
             destination: 目标页面。
-            timeout: 等待超时时间。
+            timeout: 等待超时时间；为空时取 `page_arrive_timeout`。
 
         Returns:
             是否在超时前稳定识别到目标页面。
         """
 
+        if timeout is None:
+            timeout = getattr(self, "page_arrive_timeout", 4.0)
         timer = Timer(timeout).start()
         while not timer.reached():
             if self.confirm_page(destination, skip_first_screenshot=False):
