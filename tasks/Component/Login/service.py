@@ -41,7 +41,6 @@ class LoginService(
         confirm_timer = Timer(1.5, count=2).start()
         orientation_timer = Timer(10)
         skip_login_animation = True
-        skip_click_mx_cnt = 5
         login_success = False
         # 每次登录重新计数, 避免上一次的兜底次数残留
         self.enter_game_fallback_count = 0
@@ -149,14 +148,16 @@ class LoginService(
                 logger.info('Cancel switch from early server to normal server')
                 continue
 
-            # 进入登录页面后或点击超过一定次数不再处理登录动画逻辑
-            if self.appear(self.I_LOGIN_8, interval=0.6) or skip_click_mx_cnt <= 0:
+            # 进入登录页面后不再处理登录动画逻辑
+            if self.appear(self.I_LOGIN_8, interval=0.6):
                 skip_login_animation = False
             if skip_login_animation:
                 if self.ocr_appear_click(self.O_LOGIN_ANIMATION_SKIP, interval=2.5):  # 点击跳过登录动画
                     continue
+                # 日服这段动画没有跳过按钮, 一直点屏幕中央推进, 直到出现登录选区(I_LOGIN_8)才停
                 if self.click(self.C_LOGIN_ANIMATION_CENTER, interval=5):  # 点击屏幕中央触发跳过显示
-                    skip_click_mx_cnt -= 1
+                    if self.device.click_record.count(self.C_LOGIN_ANIMATION_CENTER.name) >= 8:
+                        self.device.click_record_clear()  # 防止单按钮 10 次守卫
 
             if self.login_enter_game():
                 skip_login_animation = False  # 进入登录页面后不再处理登录动画逻辑
