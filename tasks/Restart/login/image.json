@@ -47,8 +47,8 @@
   {
     "itemName": "login_8",
     "imageName": "login_login_8.png",
-    "roiFront": "50,609,98,75",
-    "roiBack": "50,609,98,75",
+    "roiFront": "1203,81,47,34",
+    "roiBack": "1203,81,47,34",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "用于判断是否出现登录选区的"
