@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import time
+
+from module.base.timer import Timer
+from module.logger import logger
 from tasks.ActivityShikigami.assets import ActivityShikigamiAssets
 from tasks.Component.GeneralInvite.assets import GeneralInviteAssets
 from tasks.Component.SwitchAccount.assets import SwitchAccountAssets
@@ -56,6 +60,36 @@ def handle_login_page(task) -> bool:
     return LoginService(config=task.config, device=task.device).app_handle_login()
 
 
+# 式神录 / 町中 弹窗取消图：小取消(上层小弹窗) → 大取消(音频资源包弹窗)
+POPUP_CANCEL_RULES: tuple = (GlobalGameAssets.I_UI_CANCEL_SAMLL, GlobalGameAssets.I_UI_CANCEL)
+
+
+def clear_page_popups(task, timeout: float = 6.0, interval: float = 0.6) -> bool:
+    """循环点击取消，直到两张取消图都不出现或超时。
+
+    Args:
+        task: 当前任务实例（hook 注入）。
+        timeout: 最长清理时长，秒。
+        interval: 两次点击之间的间隔，秒。
+
+    Returns:
+        是否至少点过一次取消。
+    """
+
+    timer = Timer(timeout).start()
+    clicked = False
+    while not timer.reached():
+        task.screenshot()
+        hit = next((rule for rule in POPUP_CANCEL_RULES if task.appear(rule)), None)
+        if hit is None:
+            return clicked                      # 两张都不在 => 清干净了
+        if task.appear_then_click(hit, interval=interval):
+            clicked = True
+            time.sleep(interval)                # 等关闭动画、让下层弹窗露出来
+    logger.warning(f'Clear page popups timeout ({timeout}s)')
+    return clicked
+
+
 # 登录页。
 page_login = Page(SwitchAccountAssets.I_CHECK_LOGIN_FORM, category="global")
 page_login.add_enter_success_hooks(handle_login_page)
@@ -72,9 +106,12 @@ page_shikigami_records = Page(GameUiAssets.I_CHECK_RECORDS, category="global")
 page_shikigami_records.add_enter_failure_hooks(conditional_action(condition=GameUiAssets.I_CHECK_MAIN,
                                                                   action=RestartAssets.C_LOGIN_SCROLL_CLOSE_AREA))
 # 进入式神录时有概率弹“音频资源下载”提示, 点击取消关闭
-page_shikigami_records.add_enter_success_hooks(GlobalGameAssets.I_UI_CANCEL, GlobalGameAssets.I_UI_CANCEL_SAMLL)
-# 弹窗晚于页面出现时会挡住离开式神录的点击, 跳转失败时兜底再关一次
-page_shikigami_records.add_leave_failure_hooks(GlobalGameAssets.I_UI_CANCEL, GlobalGameAssets.I_UI_CANCEL_SAMLL)
+# 循环点到两张取消图都消失为止（原写法为按图各点一次: 先 I_UI_CANCEL_SAMLL 再 I_UI_CANCEL）
+# page_shikigami_records.add_enter_success_hooks(GlobalGameAssets.I_UI_CANCEL_SAMLL, GlobalGameAssets.I_UI_CANCEL)
+page_shikigami_records.add_enter_success_hooks(clear_page_popups)
+# 弹窗晚于页面出现时会挡住离开式神录的点击, 跳转失败时兜底再清一遍
+# page_shikigami_records.add_leave_failure_hooks(GlobalGameAssets.I_UI_CANCEL_SAMLL, GlobalGameAssets.I_UI_CANCEL)
+page_shikigami_records.add_leave_failure_hooks(clear_page_popups)
 page_shikigami_records.connect(page_main, GlobalGameAssets.I_UI_BACK_YELLOW, key="page_shikigami_records->page_main")
 page_main.connect(page_shikigami_records, GameUiAssets.I_MAIN_GOTO_SHIKIGAMI_RECORDS, key="page_main->page_shikigami_records")
 
