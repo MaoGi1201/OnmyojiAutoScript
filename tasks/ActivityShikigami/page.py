@@ -4,7 +4,7 @@ from tasks.ActivityShikigami.assets import ActivityShikigamiAssets
 from tasks.Component.GeneralBattle.assets import GeneralBattleAssets
 from tasks.Component.RightActivity.assets import RightActivityAssets
 from tasks.GameUi.action import conditional_action
-from tasks.GameUi.default_pages import random_click
+from tasks.GameUi.default_pages import random_click, page_shikigami_records
 from tasks.GameUi.page import (
     Page,
     page_main,

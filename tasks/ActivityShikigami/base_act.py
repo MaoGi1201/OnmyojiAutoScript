@@ -22,6 +22,7 @@ from tasks.ActivityShikigami.assets import ActivityShikigamiAssets
 from tasks.ActivityShikigami.config import GeneralBattleConfig, ActivityShikigami
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
 from tasks.GameUi.game_ui import GameUi
+from tasks.GameUi.default_pages import clear_page_popups
 import tasks.ActivityShikigami.page as pages
 from typing import Optional, Callable
 
@@ -395,6 +396,36 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
         for map_page in map_pages:
             self._wire_map_goto_battles(map_page)
 
+    def _wire_records_back(self) -> None:
+       #补「式神录 -> 该类型战斗页」的直达回程边。
+
+        records = self.navigator.resolve_page(
+            getattr(pages, "page_shikigami_records", None)
+        )
+        if records is None:
+            logger.warning("Climb: page_shikigami_records not registered, skip")
+            return
+        back_action = self._resolve_back_action()
+        if back_action is None:
+            return
+        switch_conf = self.conf.switch_soul_config
+        for climb_type in self.conf.general_climb.run_sequence_v:
+            enabled = getattr(
+                switch_conf, f"enable_switch_{climb_type}", False
+            ) or getattr(switch_conf, f"enable_switch_{climb_type}_by_name", False)
+            if not enabled:
+                continue
+            target = self._page_of(climb_type)
+            if target is None:
+                logger.warning(
+                    f"Climb: page_act_{climb_type} not registered, skip records back"
+                )
+                continue
+            records.connect(
+                target, back_action, key=f"page_shikigami_records->{target.key}"
+            )
+            logger.info(f"Climb: wire page_shikigami_records -> {target.key}")
+
     @property
     def act_page_handle_dict(self) -> dict[pages.Page, Callable]:
         """活动页面和处理器的映射"""
@@ -419,8 +450,7 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
     def _check_supported_types(self) -> None:
         """配置里写了本次活动没有开放的爬塔模式时，直接结束任务。
 
-        只按配置原文 `run_sequence`（含 limit=0 的类型）判断：报错即退出，
-        避免后续 goto_page 到没有入边的页面再抛 GamePageUnknownError。
+        只按配置原文 `run_sequence`（含 limit=0 的类型）判断：报错即退出
         """
 
         supported = self.SUPPORTED_CLIMB_TYPES
@@ -589,6 +619,8 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
         logger.hr("Start switch soul", 2)
         conf.validate_switch_soul()
         self.ui_click(enter_button, stop=self.I_CHECK_RECORDS, interval=1)
+        # 式神录有概率弹出"音频资源下载"等模态弹窗, 会拦截后面的预设点击
+        clear_page_popups(self)
         if enable_by_name:
             group, team = getattr(conf, f"{self.climb_type}_group_team_name").split(",")
             self.run_switch_soul_by_name(group, team)
