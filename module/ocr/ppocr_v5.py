@@ -19,10 +19,14 @@ ch_PP-OCRv5_rec_mobile  16.6 MB   文本识别（输出 18385 类）
 ppocrv5_dict.txt          74 KB   字典 18383 字
 ======================  ========  ==================================
 
-onnx 原始文件是 IR version 10，项目锁定的 onnxruntime 1.16.3 最高只支持
-IR 9，所以仓库里的 onnx 已把 ModelProto.ir_version 从 10 降到 9
-（文件头 ``08 0a`` -> ``08 09``）。日后若升级 onnxruntime 到 1.18+，
-可以直接换回官方原件，用法不变。
+仓库里的 onnx 是 IR version 9。官方原件是 IR 10，当初为了让 onnxruntime
+1.16.3（最高只支持 IR 9）能加载，把 ModelProto.ir_version 从 10 降到了 9
+（文件头 ``08 0a`` -> ``08 09``）。
+
+现在 requirements 已升到 onnxruntime 1.20.1，IR 9 / IR 10 都能直接加载，
+降级也就不再是必需的了；保留 IR 9 版本纯粹是为了让 1.16.3 环境仍能跑，
+回滚 ORT 时不必连模型一起换。要换回官方原件，直接替换这两个文件即可，
+推理结果与用法都不变。
 """
 
 import math
