@@ -2,10 +2,14 @@
 """OCR 后端：RapidOCR(onnxruntime) + PP-OCRv6，单模型同时支持简中、繁中、英文、日文。"""
 from typing import List, Optional, Tuple
 
+import cv2
 import numpy as np
 from rapidocr import RapidOCR
 
 from module.ocr.boxed_result import BoxedResult
+
+# 检测前把过小的图放大到短边 128：PP-OCRv6 检测对 ~14px 的小字
+DET_MIN_SHORT_SIDE = 128
 
 
 class TextSystem:
@@ -20,7 +24,7 @@ class TextSystem:
             'Global.log_level': 'error',
             # 竖排补边会把宽扁的 ROI 放大，游戏界面用不上
             'Global.use_vertical_padding': False,
-            # 与 ppocr-onnx 保持一致：最长边超过 960 才缩小，小图不放大
+            # 最长边超过 960 才缩小；过小的图由 _det_scale 放大到短边 128
             'Det.limit_side_len': 960,
             'Det.limit_type': 'max',
             'Det.box_thresh': box_thresh,
@@ -46,8 +50,32 @@ class TextSystem:
     ) -> List[BoxedResult]:
         if image is None or image.size == 0:
             return []
+        scale = self._det_scale(image)
+        if scale > 1.0:
+            image = cv2.resize(image, None, fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR)
         if vertical:
-            return self._detect_and_ocr_vertical(image, drop_score, unclip_ratio, box_thresh)
+            results = self._detect_and_ocr_vertical(image, drop_score, unclip_ratio, box_thresh)
+        else:
+            results = self._detect_and_ocr_horizontal(image, drop_score, unclip_ratio, box_thresh)
+        if scale > 1.0:
+            for item in results:
+                item.box = (item.box / scale).astype(np.int32)
+        return results
+
+    @staticmethod
+    def _det_scale(image: np.ndarray) -> float:
+        short_side = min(image.shape[:2])
+        if short_side >= DET_MIN_SHORT_SIDE:
+            return 1.0
+        return DET_MIN_SHORT_SIDE / short_side
+
+    def _detect_and_ocr_horizontal(
+            self,
+            image: np.ndarray,
+            drop_score: float,
+            unclip_ratio: Optional[float],
+            box_thresh: Optional[float],
+    ) -> List[BoxedResult]:
         result = self._engine(
             image,
             use_det=True,
