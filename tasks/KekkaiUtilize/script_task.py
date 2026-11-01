@@ -1208,7 +1208,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         # logger.info(f'OCR原始结果: {raw_text}')
 
         # 判断结界卡类型
-        if any(c in raw_text for c in ['体', 'カ', '力','夕']):
+        if any(c in raw_text for c in ['体', 'カ', '力','夕','スタミナ']):
             card_type = '斗鱼'
         elif any(c in raw_text for c in ['勾', '玉']):
             card_type = '太鼓'
