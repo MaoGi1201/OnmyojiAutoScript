@@ -169,5 +169,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "取消返回百鬼棋局，进入棋局结算流程"
+  },
+  {
+    "itemName": "login_update_cancel",
+    "imageName": "login_login_update_cancel.png",
+    "roiFront": "495,409,130,39",
+    "roiBack": "484,401,159,56",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "登录界面 引擎更新弹窗 暂不更新"
   }
 ]

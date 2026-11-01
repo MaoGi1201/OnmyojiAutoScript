@@ -103,6 +103,9 @@ class LoginService(
             if self.appear_then_click(self.I_LOGIN_LOAD_DOWN, interval=1):
                 logger.info('Download inbetweening')
                 continue
+            if self.appear_then_click(self.I_LOGIN_UPDATE_CANCEL, interval=1):
+                logger.info('Close engine update prompt')
+                continue
             if self.appear_then_click(self.I_WATCH_VIDEO_CANCEL, interval=0.6):
                 logger.info('Close video')
                 continue
