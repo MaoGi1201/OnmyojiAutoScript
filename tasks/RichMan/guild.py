@@ -120,9 +120,9 @@ class Guild(Buy, GameUi, RichManAssets):
         self.screenshot()
         result = self.O_GUILD_REMAIN.ocr(self.device.image)
         logger.warning(result)
-        result = result.replace('？', '2').replace('?', '2').replace(':', '；')
+        result = result.replace('？', '2').replace('?', '2').replace(':', '：')
         try:
-            result = re.findall(r'今调残）：(\d+)', result)[0]
+            result = re.findall(r'今週残り：(\d+)', result)[0]
             result = int(result)
         except:
             result = 0
