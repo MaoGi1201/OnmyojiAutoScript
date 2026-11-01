@@ -28,8 +28,8 @@
   },
   {
     "itemName": "store_refresh_time",
-    "roiFront": "580,660,77,27",
-    "roiBack": "580,660,77,27",
+    "roiFront": "580,660,75,27",
+    "roiBack": "580,660,75,27",
     "mode": "Single",
     "method": "Default",
     "keyword": "",

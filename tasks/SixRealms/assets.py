@@ -173,7 +173,7 @@ class SixRealmsAssets:
 	# 获取的额外钱币数量 
 	O_EXTRA_COIN_NUM = RuleOcr(roi=(645,395,38,25), area=(645,395,38,25), mode="Digit", method="Default", keyword="", name="extra_coin_num")
 	# 商店刷新次数 
-	O_STORE_REFRESH_TIME = RuleOcr(roi=(580,660,77,27), area=(580,660,77,27), mode="Single", method="Default", keyword="", name="store_refresh_time")
+	O_STORE_REFRESH_TIME = RuleOcr(roi=(580,660,75,27), area=(580,660,75,27), mode="Single", method="Default", keyword="", name="store_refresh_time")
 
 
 	# Image Rule Assets
