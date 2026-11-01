@@ -55,8 +55,8 @@
   },
   {
     "itemName": "cm_number",
-    "roiFront": "1106,564,60,28",
-    "roiBack": "1106,564,60,28",
+    "roiFront": "1106,563,71,29",
+    "roiBack": "1106,563,71,29",
     "mode": "DigitCounter",
     "method": "Default",
     "keyword": "",

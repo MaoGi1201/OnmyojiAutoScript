@@ -62,7 +62,7 @@ class CollectiveMissionsAssets:
 	# Ocr-description 
 	O_CM_6 = RuleOcr(roi=(1002,133,91,42), area=(1002,133,91,42), mode="Single", method="Default", keyword="", name="cm_6")
 	# 记录已完成的数量 
-	O_CM_NUMBER = RuleOcr(roi=(1106,564,60,28), area=(1106,564,60,28), mode="DigitCounter", method="Default", keyword="", name="cm_number")
+	O_CM_NUMBER = RuleOcr(roi=(1106,563,71,29), area=(1106,563,71,29), mode="DigitCounter", method="Default", keyword="", name="cm_number")
 	# 材料的数量 
 	O_CM_1_MATTER = RuleOcr(roi=(427,172,100,27), area=(427,172,100,27), mode="DigitCounter", method="Default", keyword="", name="cm_1_matter")
 	# Ocr-description 
