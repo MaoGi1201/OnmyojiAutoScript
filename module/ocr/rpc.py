@@ -18,7 +18,9 @@ import zerorpc
 
 from module.exception import ScriptError
 from module.logger import logger
-from module.ocr.ppocr import TextSystem
+# PP-OCRv5 mobile；要回到 ppocronnx 的 v2/v3 组合，把这行换回
+# `from module.ocr.ppocr import TextSystem` 即可，两个实现的接口完全一致。
+from module.ocr.ppocr_v5 import TextSystem
 
 # OCR 服务始终通过全新解释器启动，避免继承父进程中已初始化的 RPC 运行时状态。
 _OCR_SERVER_CONTEXT = multiprocessing.get_context("spawn")
