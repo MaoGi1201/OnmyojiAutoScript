@@ -11,6 +11,7 @@ from tasks.Component.RightActivity.right_activity import RightActivity
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
 from tasks.FrogChallenge.assets import FrogChallengeAssets
 from tasks.GameUi.page import page_main
+from tasks.GameUi.default_pages import clear_page_popups
 
 
 class ScriptTask(RightActivity, GeneralBattle, SwitchSoul, Buy, FrogChallengeAssets):
@@ -82,6 +83,8 @@ class ScriptTask(RightActivity, GeneralBattle, SwitchSoul, Buy, FrogChallengeAss
         if not self.ui_click_until_appear_or_timeout(
                 self.I_SHIKIGAMI_RECORDS, self.I_CHECK_RECORDS, interval=2, timeout=15):
             return False
+        # 直点入口进式神录(不经过导航器, 页面 hook 不触发), 需要自己清一遍弹窗
+        clear_page_popups(self)
         if config.enable:
             self.run_switch_soul(config.switch_group_team)
         if config.enable_switch_by_name:

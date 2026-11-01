@@ -22,7 +22,7 @@ from tasks.Component.QuickLoadout.quick_loadout import QuickLoadout
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
 from tasks.GameUi.game_ui import GameUi
 import tasks.MartialTournament.page as pages
-from tasks.GameUi.default_pages import random_click
+from tasks.GameUi.default_pages import random_click, clear_page_popups
 from typing import Optional, Callable
 
 
@@ -402,6 +402,8 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, QuickLoadout, BaseActivity, 
                 return
         logger.hr(f'Start switch soul ({boss_type})', 2)
         self.ui_click(enter_button, stop=self.I_CHECK_RECORDS, interval=1)
+        # 直点入口进式神录(不经过导航器, 页面 hook 不触发), 需要自己清一遍弹窗
+        clear_page_popups(self)
         if boss_type == 'single':
             if conf.enable_switch_single_by_name:
                 group, team = conf.single_group_team_name.split(",")
