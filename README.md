@@ -60,7 +60,7 @@ OAS 基于碧蓝航线脚本 [AzurLaneAutoScript](https://github.com/LmeSzinc/Az
 OAS 在其基础上进行了如下优化：
 - **调整设计架构**: 将前后端拆离出来更加灵活，方便后续的维护和扩展；优化代码架构使其减少同游戏耦合，更加通用。
 - **搭建新的GUI**: 原先的方案过于臃肿，选用 [flutter](https://flutter.cn) 搭建一个全平台的界面端，界面更加舒适简洁
-- **新的OCR库**: 跟随 [LmeSzinc](https://github.com/LmeSzinc) 的步伐， [ppocr-onnx](https://github.com/triwinds/ppocr-onnx) 更加简易使用，精度更高速度更快 
+- **新的OCR库**: 使用 [RapidOCR](https://github.com/RapidAI/RapidOCR) 承载 PaddleOCR 的 PP-OCRv6 模型，单个识别模型即可覆盖简中、繁中、英文、日文混排
 - **新的Assets管理**: 构建了一个新的Assets管理系统，更加方便的管理游戏资源如图片，文字，点击等等
 - **配置文件 [pydantic](https://github.com/pydantic/pydantic) 化**: pydantic 可以更加优雅的管理用户配置
 
@@ -74,7 +74,7 @@ OAS 在其基础上进行了如下优化：
 - [MAA](https://github.com/MaaAssistantArknights/MaaAssistantArknights): 明日方舟小助手，全日常一键长草
 - [FGO-py](https://github.com/hgjazhgj/FGO-py): 全自动免配置跨平台开箱即用的Fate/Grand Order助手
 - [OAS-website](https://github.com/runhey/OnmyojiAutoScript-website): OAS 的文档网站，使用 [docusaurus](https://docusaurus.io/) 构建
-- [ppocr-onnx](https://github.com/triwinds/ppocr-onnx): OCR 库，基于 onnxruntime 和 PaddleOCR
+- [RapidOCR](https://github.com/RapidAI/RapidOCR): OCR 库，基于 onnxruntime 和 PaddleOCR 的 PP-OCRv6 模型
 - [gurs](https://github.com/2833844911/gurs): 基于赛贝尔曲线模拟滑动轨迹, 引入其轨迹模拟人手滑动
 
 ## 联系/加入我们 Contact/Join Us

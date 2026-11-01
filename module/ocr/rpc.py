@@ -18,6 +18,7 @@ import zerorpc
 
 from module.exception import ScriptError
 from module.logger import logger
+from module.ocr.boxed_result import BoxedResult
 from module.ocr.ppocr import TextSystem
 
 # OCR 服务始终通过全新解释器启动，避免继承父进程中已初始化的 RPC 运行时状态。
@@ -174,15 +175,6 @@ class OcrRuntime:
             raise TypeError("OCR payload must be numpy.ndarray")
         return image
 
-    @staticmethod
-    def _rotate_vertical(image: np.ndarray) -> np.ndarray:
-        height, width = image.shape[0:2]
-        if width == 0:
-            return image
-        if height * 1.0 / width >= 1.5:
-            return np.rot90(image)
-        return image
-
     def _get_model(self) -> TextSystem:
         model = getattr(self._thread_local, "model", None)
         if model is None:
@@ -208,50 +200,17 @@ class OcrRuntime:
         vertical: bool = False,
     ) -> List[Dict[str, Any]]:
         model = self._get_model()
-        if vertical:
-            results = self._detect_and_ocr_vertical(
-                model,
-                image,
-                drop_score=drop_score,
-                unclip_ratio=unclip_ratio,
-                box_thresh=box_thresh,
-            )
-        else:
-            results = model.detect_and_ocr(
-                image,
-                drop_score=drop_score,
-                unclip_ratio=unclip_ratio,
-                box_thresh=box_thresh,
-            )
+        results = model.detect_and_ocr(
+            image,
+            drop_score=drop_score,
+            unclip_ratio=unclip_ratio,
+            box_thresh=box_thresh,
+            vertical=vertical,
+        )
         return [
             {"box": item.box.tolist(), "ocr_text": item.ocr_text, "score": float(item.score)}
             for item in results
         ]
-
-    def _detect_and_ocr_vertical(
-        self,
-        model: TextSystem,
-        image: np.ndarray,
-        drop_score: float = 0.5,
-        unclip_ratio: Optional[float] = None,
-        box_thresh: Optional[float] = None,
-    ) -> list[Any]:
-        text_recognizer = model.text_recognizer
-
-        def vertical_text_recognizer(img_crop_list):
-            img_crop_list = [self._rotate_vertical(item) for item in img_crop_list]
-            return text_recognizer(img_crop_list)
-
-        model.text_recognizer = vertical_text_recognizer
-        try:
-            return model.detect_and_ocr(
-                image,
-                drop_score=drop_score,
-                unclip_ratio=unclip_ratio,
-                box_thresh=box_thresh,
-            )
-        finally:
-            model.text_recognizer = text_recognizer
 
 
 def _build_server_settings() -> dict[str, Any]:
@@ -386,7 +345,6 @@ class ModelProxy:
     ):
         payload = pickle.dumps(image, protocol=4)
         results = self.client.detect_and_ocr(payload, drop_score, unclip_ratio, box_thresh, vertical)
-        from ppocronnx.predict_system import BoxedResult
         return [
             BoxedResult(np.array(item["box"]), None, item["ocr_text"], item["score"])
             for item in results
