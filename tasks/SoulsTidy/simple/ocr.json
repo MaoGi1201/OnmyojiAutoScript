@@ -28,20 +28,20 @@
   },
   {
     "itemName": "st_sort_level_1",
-    "roiFront": "449,116,86,41",
-    "roiBack": "449,116,86,41",
+    "roiFront": "453,116,82,43",
+    "roiBack": "453,116,82,43",
     "mode": "Single",
     "method": "Default",
-    "keyword": "久",
+    "keyword": "ランク",
     "description": "等级/星级 最上边的"
   },
   {
     "itemName": "st_sort_level_2",
-    "roiFront": "425,294,86,36",
-    "roiBack": "425,294,86,36",
+    "roiFront": "472,295,83,34",
+    "roiBack": "472,295,83,34",
     "mode": "Single",
     "method": "Default",
-    "keyword": "/",
+    "keyword": "ランク",
     "description": "等级/星 下边的"
   },
   {

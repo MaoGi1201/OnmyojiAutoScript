@@ -77,9 +77,9 @@ class SoulsTidyAssets:
 	# 入手顺序 
 	O_ST_SORT_TIME = RuleOcr(roi=(387,118,110,42), area=(387,118,110,42), mode="Single", method="Default", keyword="入手顺", name="st_sort_time")
 	# 等级/星级 最上边的 
-	O_ST_SORT_LEVEL_1 = RuleOcr(roi=(449,116,86,41), area=(449,116,86,41), mode="Single", method="Default", keyword="久", name="st_sort_level_1")
+	O_ST_SORT_LEVEL_1 = RuleOcr(roi=(453,116,82,43), area=(453,116,82,43), mode="Single", method="Default", keyword="ランク", name="st_sort_level_1")
 	# 等级/星 下边的 
-	O_ST_SORT_LEVEL_2 = RuleOcr(roi=(425,294,86,36), area=(425,294,86,36), mode="Single", method="Default", keyword="/", name="st_sort_level_2")
+	O_ST_SORT_LEVEL_2 = RuleOcr(roi=(472,295,83,34), area=(472,295,83,34), mode="Single", method="Default", keyword="ランク", name="st_sort_level_2")
 	# 类型 
 	O_ST_SORT_TYPE = RuleOcr(roi=(414,118,64,43), area=(414,118,64,43), mode="Single", method="Default", keyword="種類", name="st_sort_type")
 	# 位置 
