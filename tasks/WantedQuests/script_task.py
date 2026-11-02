@@ -27,6 +27,22 @@ from tasks.WantedQuests.config import CooperationType, CooperationSelectMask, WQ
 from tasks.WantedQuests.explore import WQExplore, ExploreWantedBoss
 
 
+# 悬赏类型标签的文案 -> 枚举。日服是「挑戦/異聞/妖気」, 与枚举里的中文值不同名,
+# 不做映射的话 OCR 读出来了也对不上, 类型判定会一直落到颜色兜底。
+WQ_TYPE_ALIAS: dict[str, WQType] = {
+    # 国服
+    '挑战': WQType.CHALLENGE,
+    '探索': WQType.EXPLORE,
+    '秘闻': WQType.SECRET,
+    '妖气': WQType.YOKAI,
+    '御魂': WQType.SOUL,
+    # 式神碎片归到挑战
+    '式神': WQType.CHALLENGE,
+    '挑戦': WQType.CHALLENGE,
+    '異聞': WQType.SECRET,
+    '妖気': WQType.YOKAI,
+}
+
 WQ_TYPE_COLOR_REFERENCE: tuple[tuple[WQType, int], ...] = (
     (WQType.CHALLENGE, 8),    # 红 —— 式神欠片
     (WQType.EXPLORE, 102),    # 绿 —— 探索
@@ -379,17 +395,15 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         :param num_want: 想要攻击的数量
         :return: WQInfo
         """
-        wq_type_txt = type_rule.ocr(self.device.image)
-        # 适配老逻辑, 将式神碎片改为挑战
-        wq_type_txt = '挑战' if wq_type_txt == '式神' else wq_type_txt
-        if wq_type_txt == '' or not WQType.contains(wq_type_txt):
-            # 只在 OCR 失败时启用，能读出来的行行为完全不变。
+        wq_type_txt = type_rule.ocr(self.device.image).strip()
+        # 文案先过别名表(日服/国服/式神碎片), 命中就用 OCR 结果, 不再依赖颜色
+        wq_type = WQ_TYPE_ALIAS.get(wq_type_txt)
+        if wq_type is None:
+            # 只在 OCR 失败时启用, 能读出来的行行为完全不变。
             wq_type = self.wq_type_by_color(type_rule.roi)
             if wq_type is None:
                 logger.warning(f'Unknown wq type: {wq_type_txt}')
                 return None
-        else:
-            wq_type = WQType(wq_type_txt)
         type_ordered_list = self.get_config()._wq_type_ordered_list
         if wq_type not in type_ordered_list:
             logger.warning(f'{wq_type.value} is not in the order list')

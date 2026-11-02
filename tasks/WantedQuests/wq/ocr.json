@@ -10,8 +10,8 @@
   },
   {
     "itemName": "wq_type_1",
-    "roiFront": "544,248,55,36",
-    "roiBack": "544,248,55,36",
+    "roiFront": "540,251,60,32",
+    "roiBack": "540,251,60,32",
     "mode": "Single",
     "method": "Default",
     "keyword": "",
@@ -19,8 +19,8 @@
   },
   {
     "itemName": "wq_type_2",
-    "roiFront": "544,321,55,30",
-    "roiBack": "544,321,55,30",
+    "roiFront": "540,321,60,32",
+    "roiBack": "540,321,60,32",
     "mode": "Single",
     "method": "Default",
     "keyword": "",
@@ -28,8 +28,8 @@
   },
   {
     "itemName": "wq_type_3",
-    "roiFront": "544,392,54,30",
-    "roiBack": "544,392,54,30",
+    "roiFront": "544,392,60,32",
+    "roiBack": "544,392,60,32",
     "mode": "Single",
     "method": "Default",
     "keyword": "",
@@ -37,8 +37,8 @@
   },
   {
     "itemName": "wq_type_4",
-    "roiFront": "545,462,52,32",
-    "roiBack": "545,462,52,32",
+    "roiFront": "540,462,60,32",
+    "roiBack": "540,462,60,32",
     "mode": "Single",
     "method": "Default",
     "keyword": "",

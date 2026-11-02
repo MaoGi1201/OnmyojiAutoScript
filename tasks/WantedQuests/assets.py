@@ -141,13 +141,13 @@ class WantedQuestsAssets:
 	# 挑战券的数量 
 	O_WQ_NUMBER = RuleOcr(roi=(523,12,97,41), area=(523,12,97,41), mode="Digit", method="Default", keyword="", name="wq_number")
 	# Ocr-description 
-	O_WQ_TYPE_1 = RuleOcr(roi=(544,248,55,36), area=(544,248,55,36), mode="Single", method="Default", keyword="", name="wq_type_1")
+	O_WQ_TYPE_1 = RuleOcr(roi=(540,251,60,32), area=(540,251,60,32), mode="Single", method="Default", keyword="", name="wq_type_1")
 	# Ocr-description 
-	O_WQ_TYPE_2 = RuleOcr(roi=(544,321,55,30), area=(544,321,55,30), mode="Single", method="Default", keyword="", name="wq_type_2")
+	O_WQ_TYPE_2 = RuleOcr(roi=(540,321,60,32), area=(540,321,60,32), mode="Single", method="Default", keyword="", name="wq_type_2")
 	# Ocr-description 
-	O_WQ_TYPE_3 = RuleOcr(roi=(544,392,54,30), area=(544,392,54,30), mode="Single", method="Default", keyword="", name="wq_type_3")
+	O_WQ_TYPE_3 = RuleOcr(roi=(544,392,60,32), area=(544,392,60,32), mode="Single", method="Default", keyword="", name="wq_type_3")
 	# Ocr-description 
-	O_WQ_TYPE_4 = RuleOcr(roi=(545,462,52,32), area=(545,462,52,32), mode="Single", method="Default", keyword="", name="wq_type_4")
+	O_WQ_TYPE_4 = RuleOcr(roi=(540,462,60,32), area=(540,462,60,32), mode="Single", method="Default", keyword="", name="wq_type_4")
 	# Ocr-description 
 	O_WQ_INFO_1 = RuleOcr(roi=(609,246,309,45), area=(609,246,309,45), mode="Single", method="Default", keyword="", name="wq_info_1")
 	# Ocr-description 
