@@ -242,7 +242,7 @@ class ScriptTask(KU, KekkaiActivationAssets):
             check_card = "勾玉"
         elif rule == CardType.FISH:
             min_card_num = self.config.kekkai_activation.activation_config.min_fish_num
-            check_card = "夕"
+            check_card = "スタミナ"
         else:
             logger.error('Unknown utilize rule')
             raise ValueError('Unknown utilize rule')
@@ -255,6 +255,8 @@ class ScriptTask(KU, KekkaiActivationAssets):
             # 第一步：筛选出包含 "体力或者勾玉" 的结果
             filtered_results = [result for result in results if check_card in result.ocr_text]
             logger.info(f"识别到卡: {[result.ocr_text for result in filtered_results]}")
+            if not filtered_results:
+                logger.info(f"全部识别结果: {[result.ocr_text for result in results]}")
 
             # 第二步：提取数字并按数字排序
             numeric_results = []
