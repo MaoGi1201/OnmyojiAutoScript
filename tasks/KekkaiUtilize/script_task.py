@@ -483,7 +483,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         """
         logger.info('Scroll friend list back to top (until I_U_TOP appears)')
         for index in range(max_swipes):
-            # 已经到达顶部：出现顶部标识即停止
+            # 已经到达顶部：搜索框展开露出顶部标识即停止
             self.screenshot()
             if self.appear(self.I_U_TOP):
                 logger.info(f'Friend list top reached (after {index} swipe(s))')
@@ -491,11 +491,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
                 time.sleep(0.3)
                 return True
 
-            # 手指自上而下滑动：p1 在屏幕偏上，p2 拖到屏幕偏下
-            x = random.randint(400, 600)
-            p1 = (x, 220)
-            p2 = (x, 660)
-            self.device.swipe_adb(p1, p2, duration=0.5)
+            self.swipe(self.S_U_TOP)
             self.device.click_record_clear()
             time.sleep(0.4)
 
@@ -668,16 +664,19 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
             return self._record_utilize_failure(
                 f'进入好友结界失败: {type(error).__name__}'
             )
-        # 判断好友的有两个位置还是一个坑位
-        time.sleep(3)
+
         stop_image = None
-        self.screenshot()
-        if self.appear(self.I_U_ADD_1):  # 右侧第一个有（无论左侧有没有）
-            logger.info('Right side has one')
-            stop_image = self.I_U_ADD_1
-        elif self.appear(self.I_U_ADD_2) and not self.appear(self.I_U_ADD_1):  # 右侧第二个有 但是最左边的没有，这表示只留有一个坑位
-            logger.info('Right side has two')
-            stop_image = self.I_U_ADD_2
+        timer = Timer(10).start()
+        while not timer.reached():
+            self.screenshot()
+            if self.appear(self.I_U_ADD_1):
+                logger.info('Utilize slot available: right 1')
+                stop_image = self.I_U_ADD_1
+                break
+            if self.appear(self.I_U_ADD_2):
+                logger.info('Utilize slot available: right 2')
+                stop_image = self.I_U_ADD_2
+                break
         if not stop_image:
             # 没有坑位可能是其他人的手速太快了抢占了
             self.save_image(content='没有坑位了', wait_time=0, push_flag=False, image_type='png')
@@ -689,7 +688,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         try:
             # 切换式神的类型
             self.switch_shikigami_class(shikigami_class)
-            # 上式神
+            # 上式神, stop_image 是实际空着的那枚菱形, 寄养完成后会被式神头像替换
             self.set_shikigami(shikigami_order, stop_image)
         except (GamePageUnknownError, GameStuckError) as error:
             return self._record_utilize_failure(

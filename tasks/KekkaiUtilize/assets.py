@@ -181,5 +181,7 @@ class KekkaiUtilizeAssets:
 	S_U_UP = RuleSwipe(roi_front=(247,520,100,1), roi_back=(247,104,100,1), mode="default", name="u_up")
 	# 滑动到底部 
 	S_U_END = RuleSwipe(roi_front=(175,179,26,26), roi_back=(164,518,49,102), mode="default", name="u_end")
+	# 好友列表滑回顶部, 快速下滑靠惯性一次跨多屏
+	S_U_TOP = RuleSwipe(roi_front=(600,210,20,20), roi_back=(600,640,20,20), mode="default", name="u_top")
 
 
