@@ -49,7 +49,8 @@ omegaconf==2.4.0          # via rapidocr
 onepush==1.3.0            # via -r requirements-in.txt
 onnxruntime==1.19.2       # via -r requirements-in.txt, rapidocr
 opencv-python==4.7.0.72   # via -r requirements-in.txt
-# opencv-python-headless 由 rapidocr 声明，功能为 opencv-python 的子集，不重复安装
+# opencv-python-headless is declared by rapidocr but is a subset of opencv-python, not installed
+# NOTE: keep this file ASCII-only, pip reads it with the system locale (GBK) on Chinese Windows
 packaging==20.9           # via deprecation, onnxruntime, uiautomator2
 paho-mqtt==1.6.1          # via -r requirements-in.txt
 pillow==10.2.0            # via rapidocr, uiautomator2
