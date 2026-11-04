@@ -51,4 +51,7 @@ class PipManager(DeployConfig):
 
         logger.hr('Update Dependencies', 1)
         arg = ' ' + ' '.join(arg) if arg else ''
-        self.execute(f'{self.pip} install -r {self.requirements_file}{arg}')
+        # requirements.txt 是 pip-compile 出的全量锁定清单，用 --no-deps 安装：
+        # 否则传递依赖会反过来污染环境，例如 rapidocr 声明 opencv-python-headless，
+        # 会直接顶掉项目用的 opencv-python，并把 numpy 拉到 2.x 导致 cv2 4.7 无法导入
+        self.execute(f'{self.pip} install -r {self.requirements_file} --no-deps{arg}')
