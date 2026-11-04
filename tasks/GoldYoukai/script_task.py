@@ -48,7 +48,7 @@ class ScriptTask(GameUi, GeneralBattle, GeneralRoom, GeneralInvite, SwitchSoul, 
         count = 0
         while count < 2:
             self.goto_page(page_team)
-            self.check_zones('钱货妖怪')
+            self.check_zones('銭貨妖怪')
             # 开始
             if not self.create_room():
                 self.gold_exit(con)

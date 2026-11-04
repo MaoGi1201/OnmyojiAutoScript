@@ -48,7 +48,7 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, GeneralRoom, GeneralInvite, 
 
         # 进入
         self.goto_page(page_team)
-        self.check_zones('年')
+        self.check_zones('年獣')
         cd = self.check_cd()
         if cd:
             cd_exit(cd)

@@ -10,23 +10,23 @@
       "roiFront": "138,237,222,59"
     },
     {
-      "itemName": "探索 (困)",
+      "itemName": "探索 (困難)",
       "roiFront": "145,305,216,53"
     },
     {
-      "itemName": "觉醒業火の輪",
+      "itemName": "覚醒業火の輪",
       "roiFront": "141,301,224,63"
     },
     {
-      "itemName": "觉醒風耘の札",
+      "itemName": "覚醒風耘の札",
       "roiFront": "146,302,214,65"
     },
     {
-      "itemName": "觉醒水靈の鲤",
+      "itemName": "覚醒水靈の鲤",
       "roiFront": "145,304,215,55"
     },
     {
-      "itemName": "觉醒天雷の鼓",
+      "itemName": "覚醒天雷の鼓",
       "roiFront": "145,302,216,67"
     },
     {
@@ -34,7 +34,7 @@
       "roiFront": "148,306,211,61"
     },
     {
-      "itemName": "日輪の陨",
+      "itemName": "日輪の隕",
       "roiFront": "145,302,213,63"
     },
     {
@@ -50,15 +50,15 @@
       "roiFront": "145,303,218,60"
     },
     {
-      "itemName": "经值妖怪",
+      "itemName": "経験值妖怪",
       "roiFront": "148,306,214,62"
     },
     {
-      "itemName": "钱货妖怪",
+      "itemName": "銭貨妖怪",
       "roiFront": "145,232,218,60"
     },
     {
-      "itemName": "年",
+      "itemName": "年獣",
       "roiFront": "143,231,219,58"
     },
     {
@@ -74,7 +74,7 @@
       "roiFront": "143,230,214,60"
     },
     {
-      "itemName": "真·才口千",
+      "itemName": "真オ口チ",
       "roiFront": "147,230,215,63"
     },
     {
@@ -90,7 +90,7 @@
       "roiFront": "145,155,219,64"
     },
     {
-      "itemName": "契の境",
+      "itemName": "契靈の境",
       "roiFront": "145,229,215,63"
     }
   ]

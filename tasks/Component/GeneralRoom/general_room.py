@@ -142,8 +142,10 @@ class GeneralRoom(BaseTask, GeneralRoomAssets):
         if name in ('石距', '石距の怒'):
             name = '石距の怒'
         self.O_GR_ZONES_NAME.keyword = name
+        key_chars = set(name)
         click_timer = Timer(1.1)
         click_timer.start()
+        click_count = 0
         while 1:
             self.screenshot()
 
@@ -152,14 +154,20 @@ class GeneralRoom(BaseTask, GeneralRoomAssets):
             # https://github.com/runhey/OnmyojiAutoScript/issues/488
             # 只能说朴实无华
             text_ocr = self.O_GR_ZONES_NAME.ocr(self.device.image)
-            if name == '石距の怒' and '石距' in text_ocr:
-                break
-            if name == '钱货妖怪' and '钱货' in text_ocr:
-                break
-            if name == '经值妖怪' and '经值' in text_ocr:
-                break
+            # 日服字形（銭/錢、値/值）会让全等判断失败，按「只差一个字」兜底；
+            # 不能放宽到两个字的容错，否则「銭貨妖怪」会被「経驗值妖怪」命中。
+            # 另外「石距の怒」的标题可能只显示「石距」，单独按の前后缀处理。
+            if text_ocr:
+                if len(text_ocr) >= 2 and name.startswith(text_ocr + 'の'):
+                    break
+                if len(key_chars & set(text_ocr)) >= max(2, len(key_chars) - 1):
+                    break
             if click_timer.reached():
                 click_timer.reset()
+                click_count += 1
+                if click_count > 5:
+                    logger.warning(f'Zones {name} not confirmed, last ocr: {text_ocr}')
+                    return False
                 self.device.click(x=pos[0] + randint(-5, 5), y=pos[1] + randint(-5, 5))
 
         return True
