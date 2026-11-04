@@ -71,10 +71,12 @@ class GeneralBuff(BaseTask, GeneralBuffAssets):
             logger.warning(f'Buff [{buff.name}] not matched by {keyword!r}, ocr: '
                            f'{[r.ocr_text for r in result_list]}')
             return None
-        # 开始的x坐标就是文字的右边
-        start_x = area[0] + area[2] + 10  # 10是文字和开关之间的间隔
+        # 日服「獲得銭貨UP100%」文字右端 x=608, 开关块在 x=773, 差了 165px,
+        # 按 "文字右边+10" 算出来的区域整块落在空白处(实测两枚模板 0.09 / 0.10)。
+        # 只取行高度由 OCR 决定, x 固定到开关列。
+        start_x = buff.roi[0] + buff.roi[2] - 10
         start_y = area[1] - 10
-        width = 80  # 开关的宽度 80够了
+        width = 130
         height = 45
         return int(start_x), int(start_y), int(width), int(height)
 

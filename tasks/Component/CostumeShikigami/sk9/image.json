@@ -65,8 +65,8 @@
   {
     "itemName": "sou_switch_sure_9",
     "imageName": "sk9_sou_switch_sure_9.png",
-    "roiFront": "669,401,175,59",
-    "roiBack": "669,401,176,60",
+    "roiFront": "665,409,178,61",
+    "roiBack": "665,409,178,61",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "确认切换"
