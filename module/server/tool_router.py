@@ -107,7 +107,8 @@ async def tool_annotator_page():
     page = annotator_manager.index_file()
     if not page.exists():
         raise HTTPException(status_code=404, detail={"code": "page_not_found", "message": "标注页面不存在"})
-    return FileResponse(page)
+    # 不缓存入口页，否则改了前端脚本后页面还在用旧版本
+    return FileResponse(page, headers={"Cache-Control": "no-store"})
 
 
 @tool_app.post('/annotator/api/session')

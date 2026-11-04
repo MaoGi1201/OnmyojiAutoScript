@@ -2023,7 +2023,9 @@
         state.sourceDirs = preferredDirs.slice(0, depth);
         state.currentDirPath = joinPath(state.sourceDirs);
         state.sourceLeafHasDirs = dirs.length > 0 && !selectedDir;
-        state.sourceLeafJsonFiles = state.sourceLeafHasDirs ? [] : (Array.isArray(data.json_files) ? data.json_files : []);
+        // 目录下同时存在子目录和 json 时要两个下拉都给：只保留子目录会让
+        // Component/GeneralRoom 这类「有 gr/ 又有 list.json」的目录选不到 json
+        state.sourceLeafJsonFiles = Array.isArray(data.json_files) ? data.json_files : [];
         break;
       }
 
@@ -2033,7 +2035,7 @@
       depth += 1;
     }
 
-    if (!state.sourceLeafHasDirs) {
+    if (!state.sourceLeafHasDirs || state.sourceLeafJsonFiles.length > 0) {
       if (state.sourceDirs.length > 0) {
         const sep = document.createElement("span");
         sep.className = "breadcrumb-sep";

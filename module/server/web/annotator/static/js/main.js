@@ -36,7 +36,8 @@
   function loadScript(path) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = path;
+      // 加时间戳，避免改了前端脚本后浏览器还在用缓存里的旧版本
+      script.src = `${path}${path.includes("?") ? "&" : "?"}v=${Date.now()}`;
       script.async = false;
       script.onload = () => resolve();
       script.onerror = () => reject(new Error(`脚本加载失败: ${path}`));
