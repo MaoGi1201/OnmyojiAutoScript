@@ -11,7 +11,7 @@
   {
     "itemName": "check_act",
     "imageName": "iba_check_act.png",
-    "roiFront": "88,24,136,44",
+    "roiFront": "88,24,151,38",
     "roiBack": "60,10,190,70",
     "method": "Template matching",
     "threshold": 0.8,
@@ -47,7 +47,7 @@
   {
     "itemName": "skip",
     "imageName": "iba_skip.png",
-    "roiFront": "808,416,70,44",
+    "roiFront": "804,416,82,40",
     "roiBack": "740,380,240,110",
     "method": "Template matching",
     "threshold": 0.75,
