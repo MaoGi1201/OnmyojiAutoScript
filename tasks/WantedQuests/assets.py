@@ -159,7 +159,8 @@ class WantedQuestsAssets:
 	# 怪物名称,如酒吞，阎魔等 
 	O_WQ_MONSTER_TYPE = RuleOcr(roi=(165,215,45,175), area=(165,215,45,175), mode="Full", method="Default", keyword="", name="wq_monster_type")
 	#  
-	O_WQ_TEXT_ALL = RuleOcr(roi=(11,114,96,403), area=(11,114,96,403), mode="Full", method="Default", keyword="", name="wq_text_all")
+	# roi 与 O_WQ_LIST_CHECK 对齐：96 宽时 "3/5" 会被 det 切成 "3" "5" 两框
+	O_WQ_TEXT_ALL = RuleOcr(roi=(11,114,92,388), area=(11,114,92,388), mode="Full", method="Default", keyword="", name="wq_text_all")
 	# 是否有悬赏封印检查 
 	O_WQ_LIST_CHECK = RuleOcr(roi=(11,114,92,388), area=(11,114,92,388), mode="Full", method="Default", keyword="封印", name="wq_list_check")
 
