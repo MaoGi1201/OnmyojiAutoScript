@@ -59,6 +59,7 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
             raise TaskEnd('WantedQuests')
 
         error_count = 0
+        open_fail_count = 0
         while 1:
             self.screenshot()
             if not self.is_wq_remained():
@@ -84,7 +85,13 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
                 continue
             error_count = 0
             if not self.open_wq_info():
+                # 连续打不开详情(例: 神秘妖怪卷轴被误点开又关掉), 别无限重试
+                open_fail_count += 1
+                if open_fail_count > 3:
+                    logger.warning('open wq info failed too many times, exit')
+                    break
                 continue
+            open_fail_count = 0
             self.execute_mission(total - cu)
             sleep(1.5)
         self.next_run()
@@ -97,8 +104,35 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
             self.screenshot()
             if self.appear(self.I_TRACE_TRUE):
                 return True
+            # 神秘妖怪卷轴页: 有红叉且竖排名字是"神秘妖怪", 但没有追踪按钮(游戏已移除),
+            # 点红叉关闭并跳过; 若游戏后期补回追踪按钮, 走不到这里, 仍由 cancel_wq 旧路径处理
+            if self.appear(self.I_UI_BACK_RED) and not self.appear(self.I_TRACE_FALSE):
+                monster_name = self.O_WQ_MONSTER_TYPE.detect_text(self.device.image).replace(' ', '')
+                if '神秘妖怪' in monster_name:
+                    logger.info('Mystery quest scroll without trace button, close it and skip')
+                    self.ui_click_until_disappear(self.I_UI_BACK_RED)
+                    return False
             self.click(self.O_WQ_TEXT_ALL, interval=1.2)
         return False
+
+    def is_mystery_quest(self, img, xywh) -> bool:
+        """检查候选进度文本正上方是否为神秘妖怪的问号图标.
+
+        左侧列表条目结构固定: 图标在上, 进度数字紧贴图标下沿, 条目间距约 120px.
+        所以数字文本框上方约 75px 高的横条就是该条目的图标区, 在其中匹配问号模板.
+        """
+        x, y, w, h = xywh
+        band_top = y - 75
+        if band_top < 0:
+            return False
+        band = [self.O_WQ_TEXT_ALL.roi[0], band_top, self.O_WQ_TEXT_ALL.roi[2], 75]
+        rule = self.I_WQ_MYSTERY_ICON
+        old_roi = rule.roi_back
+        try:
+            matches = rule.match_all(img, roi=band, frame_id=self.device.image_frame_id)
+        finally:
+            rule.roi_back = old_roi
+        return len(matches) > 0
 
     def cancel_wq(self):
         """取消当前悬赏: 先关掉追踪开关, 再点红叉关掉悬赏面板回到探索页.
@@ -651,7 +685,10 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         reg_time = re.compile(r'^D?([01]?[0-9]|2[0-3]):([0-5]?[0-9]):?([0-5]?[0-9])?$')
         reg_fengyin = re.compile(r'.*[封|野]印.*')
         # 由于斜杠'/'经常被误识别为'7',且悬赏封印悬赏怪物总数没有与‘7’相关的数字
-        reg_progress = re.compile(r'^(\d+)([7/])(\d+)$')
+        # 原写法（严格整行匹配，OCR 结果带尾随噪声时整条丢弃）：
+        # reg_progress = re.compile(r'^(\d+)([7/])(\d+)$')
+        # 容错版：不要求匹配到行尾，允许 "1/2 " 这类尾随字符
+        reg_progress = re.compile(r'^(\d+)([7/])(\d+)')
         # 没有检测到斜杠，符合格式：前N位与后N位相同,表示已完成
         reg_XX = re.compile(r'^(\d+)\1$')
         # 过滤掉协或者未知悬赏等其他无用字符
@@ -664,9 +701,10 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
             if reg_other.match(res.ocr_text) is not None:
                 continue
             if match := reg_progress.match(res.ocr_text):
-                spliter_index = match.start(2)
                 xywh = calc_xywh(res.box)
-                cu, re, total = int(res.ocr_text[:spliter_index]), 1, int(res.ocr_text[spliter_index + 1:])
+                # 用分组取值而不再切整行：正则放开了行尾后，
+                # 直接切 ocr_text 会把尾随噪声带进 int() 里抛 ValueError
+                cu, re, total = int(match.group(1)), 1, int(match.group(3))
                 # 识别结果规范性检查
                 if total > 14:
                     logger.warning("Total number of wanted quests is greater than 14")
@@ -676,6 +714,10 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
                     cu = cu % 10
                 if cu == total:
                     # 该任务已完成，一般是悬赏任务，邀请人没有做导致的
+                    continue
+                # 神秘妖怪条目: 数字上方是问号图标, 详情页没有前往/取消追踪按钮, 无法执行, 跳过
+                if self.is_mystery_quest(img, xywh):
+                    logger.info(f'mystery quest {res.ocr_text} @ {xywh}, skip')
                     continue
                 logger.info(f'find wq {res.ocr_text} @ {xywh}')
                 return cu, re, total, xywh

@@ -20,8 +20,8 @@
   {
     "itemName": "trace_enable",
     "imageName": "wq_trace_enable.png",
-    "roiFront": "1140,594,90,90",
-    "roiBack": "1140,594,90,90",
+    "roiFront": "1146,595,90,90",
+    "roiBack": "1128,583,127,125",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "一键追踪"
@@ -29,8 +29,8 @@
   {
     "itemName": "trace_disable",
     "imageName": "wq_trace_disable.png",
-    "roiFront": "1140,594,90,90",
-    "roiBack": "1140,594,90,90",
+    "roiFront": "1149,595,90,90",
+    "roiBack": "1129,584,137,127",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "取消追踪"
@@ -101,8 +101,8 @@
   {
     "itemName": "goto_exploration",
     "imageName": "wq_goto_exploration.png",
-    "roiFront": "1044,638,51,47",
-    "roiBack": "1044,638,51,47",
+    "roiFront": "1051,638,51,47",
+    "roiBack": "1035,626,88,79",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "悬赏封印界面 一键追踪后右下角的前往探索按钮"
@@ -119,8 +119,8 @@
   {
     "itemName": "wq_trace_one_enable",
     "imageName": "wq_trace_one_enable.png",
-    "roiFront": "160,175,120,60",
-    "roiBack": "160,175,120,60",
+    "roiFront": "1148,559,90,90",
+    "roiBack": "1148,559,90,90",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "庭院悬赏任务界面 单个任务点开后 左上角是否追踪"
@@ -128,8 +128,8 @@
   {
     "itemName": "wq_trace_one_disable",
     "imageName": "wq_trace_one_disable.png",
-    "roiFront": "160,175,120,60",
-    "roiBack": "160,175,120,60",
+    "roiFront": "1148,559,90,90",
+    "roiBack": "1148,559,90,90",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "庭院悬赏任务界面 单个任务点开后 左上角是否追踪"
@@ -137,8 +137,8 @@
   {
     "itemName": "wq_trace_one_check_opened",
     "imageName": "wq_trace_one_check_opened.png",
-    "roiFront": "510,175,210,60",
-    "roiBack": "510,175,210,60",
+    "roiFront": "1066,198,82,37",
+    "roiBack": "1066,198,82,37",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "庭院悬赏任务界面 单个任务点开后的界面 是否打开的 标志"
@@ -146,11 +146,20 @@
   {
     "itemName": "wq_trace_one_realworld",
     "imageName": "wq_trace_one_realworld.png",
-    "roiFront": "850,470,180,180",
-    "roiBack": "850,470,180,180",
+    "roiFront": "1150,576,89,76",
+    "roiBack": "1094,513,180,180",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "庭院悬赏任务界面 单个任务点开后的界面 是否为现世任务标志"
+  },
+  {
+    "itemName": "wq_mystery_icon",
+    "imageName": "wq_wq_mystery_icon.png",
+    "roiFront": "32,125,50,55",
+    "roiBack": "11,114,96,403",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "探索界面左侧列表 神秘妖怪条目的问号图标, 用于在find_wq阶段跳过神秘妖怪悬赏"
   },
   {
     "itemName": "wq_list_top_bottom_check",
