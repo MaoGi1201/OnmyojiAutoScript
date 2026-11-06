@@ -1,10 +1,6 @@
 # This Python file uses the following encoding: utf-8
 """PP-OCRv5 mobile 文本检测 + 识别实现。
 
-替代 ``module/ocr/ppocr.py`` 里 ppocronnx 的「v2 识别 + v3 检测」组合。
-对外接口与 ``ppocronnx.predict_system.TextSystem`` 完全一致，因此
-``module/ocr/rpc.py`` 和 tasks 下的 RuleOcr 都不需要改动：
-
 - ``ocr_single_line(img) -> (text, score) | None``
 - ``ocr_lines(img_list) -> list[tuple[str, float]]``
 - ``detect_and_ocr(img, drop_score, unclip_ratio, box_thresh) -> list[BoxedResult]``
@@ -18,14 +14,6 @@ ch_PP-OCRv5_det_mobile   4.8 MB   文本检测
 ch_PP-OCRv5_rec_mobile  16.6 MB   文本识别（输出 18385 类）
 ppocrv5_dict.txt          74 KB   字典 18383 字
 ======================  ========  ==================================
-
-仓库里的 onnx 是 IR version 9。官方原件是 IR 10，当初为了让 onnxruntime
-1.16.3（最高只支持 IR 9）能加载，把 ModelProto.ir_version 从 10 降到了 9
-（文件头 ``08 0a`` -> ``08 09``）。
-
-现在 requirements 已升到 onnxruntime 1.20.1，IR 9 / IR 10 都能直接加载，
-降级也就不再是必需的了；保留 IR 9 版本纯粹是为了让 1.16.3 环境仍能跑，
-回滚 ORT 时不必连模型一起换。要换回官方原件，直接替换这两个文件即可，
 推理结果与用法都不变。
 """
 
@@ -56,11 +44,8 @@ DET_MODEL_NAME = 'ch_PP-OCRv5_det_mobile.onnx'
 REC_MODEL_NAME = 'ch_PP-OCRv5_rec_mobile.onnx'
 DICT_NAME = 'ppocrv5_dict.txt'
 
-# 检测模型的输入缩放。与 RapidOCR 的 PP-OCRv5 配置一致：短边补到 736。
-# 注意 ppocronnx 的模块级 preprocess_op 把参数名写成 det_limit_type，
-# 而 DetResizeForTest 读的是 limit_type，导致它永远退化成 min + 960，
-# 小 ROI 会被放大到 960x960 白跑。这里显式传 limit_type，绕开那个坑。
-DET_LIMIT_SIDE_LEN = 736
+# 检测模型的输入缩放：短边补到 960。
+DET_LIMIT_SIDE_LEN = 960
 DET_LIMIT_TYPE = 'min'
 
 # v5 识别模型输入高固定 48（v2/v3 是 32），宽度随长宽比动态。
