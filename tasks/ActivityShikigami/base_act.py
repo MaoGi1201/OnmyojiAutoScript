@@ -396,35 +396,32 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
         for map_page in map_pages:
             self._wire_map_goto_battles(map_page)
 
-    def _wire_records_back(self) -> None:
-       #补「式神录 -> 该类型战斗页」的直达回程边。
+    def _leave_records(self) -> bool:
+        """换完御魂后从式神录点一次返回，直接确认回到战斗页。
+        """
 
-        records = self.navigator.resolve_page(
-            getattr(pages, "page_shikigami_records", None)
-        )
-        if records is None:
-            logger.warning("Climb: page_shikigami_records not registered, skip")
-            return
-        back_action = self._resolve_back_action()
-        if back_action is None:
-            return
-        switch_conf = self.conf.switch_soul_config
-        for climb_type in self.conf.general_climb.run_sequence_v:
-            enabled = getattr(
-                switch_conf, f"enable_switch_{climb_type}", False
-            ) or getattr(switch_conf, f"enable_switch_{climb_type}_by_name", False)
-            if not enabled:
+        target = self._page_of(self.climb_type)
+        if target is None:
+            return False
+        self.screenshot()
+        if not self.appear(self.I_CHECK_RECORDS):
+            return False
+        for name in self.BACK_BUTTONS:
+            back = getattr(self, name, None)
+            if back is None:
                 continue
-            target = self._page_of(climb_type)
-            if target is None:
-                logger.warning(
-                    f"Climb: page_act_{climb_type} not registered, skip records back"
-                )
+            if not self.appear_then_click(back, interval=1.0):
                 continue
-            records.connect(
-                target, back_action, key=f"page_shikigami_records->{target.key}"
-            )
-            logger.info(f"Climb: wire page_shikigami_records -> {target.key}")
+            deadline = time.time() + self.page_arrive_timeout
+            while time.time() < deadline:
+                self.screenshot()
+                if target.recognizer.evaluate(self):
+                    logger.info(f"Climb: back to {target.key} from records")
+                    return True
+                time.sleep(0.3)
+            return False
+        logger.warning("Climb: no back button configured")
+        return False
 
     @property
     def act_page_handle_dict(self) -> dict[pages.Page, Callable]:
@@ -627,7 +624,9 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
         elif enable_switch:
             group_team = getattr(conf, f"{self.climb_type}_group_team")
             self.run_switch_soul(group_team)
-        self.goto_page(getattr(pages, f"page_act_{self.climb_type}"))
+        # 识别不到再退回原路径。
+        if not self._leave_records():
+            self.goto_page(getattr(pages, f"page_act_{self.climb_type}"))
 
     def lock_team(self, battle_conf: GeneralBattleConfig):
         """按配置执行上锁或解锁。"""

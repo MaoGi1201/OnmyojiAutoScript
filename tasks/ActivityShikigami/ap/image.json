@@ -2,7 +2,7 @@
   {
     "itemName": "climb_mode_ap",
     "imageName": "as_climb_mode_ap.png",
-    "roiFront": "1091,543,24,25",
+    "roiFront": "1151,637,20,22",
     "roiBack": "1055,495,202,219",
     "method": "Template matching",
     "threshold": 0.7,
@@ -29,8 +29,8 @@
   {
     "itemName": "to_battle_ap",
     "imageName": "as_to_battle_ap.png",
-    "roiFront": "216,251,106,39",
-    "roiBack": "177,199,185,140",
+    "roiFront": "851,287,48,140",
+    "roiBack": "800,240,165,235",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "活动主界面进入体力爬塔标志"

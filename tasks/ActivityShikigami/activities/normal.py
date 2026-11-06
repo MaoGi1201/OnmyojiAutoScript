@@ -116,7 +116,6 @@ class NormalClimbAct(BaseAct):
         self._patch_page_recognizers()
         self._detach_map_routes(page_act)
         self._wire_entries(page_act)
-        self._wire_records_back()
 
     def _patch_home_recognizer(self, page_act) -> None:
         """活动页识别器 = 各组入口按钮的第一跳 + `HOME_MARKERS`。
