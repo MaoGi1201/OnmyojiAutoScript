@@ -3,7 +3,7 @@
     "itemName": "luck_msg",
     "roiFront": "15,27,68,61",
     "roiBack": "0,8,100,100",
-    "mode": "Full",
+    "mode": "Single",
     "method": "Default",
     "keyword": "吉闻",
     "description": ""

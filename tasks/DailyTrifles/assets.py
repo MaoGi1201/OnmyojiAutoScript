@@ -129,7 +129,7 @@ class DailyTriflesAssets:
 
 	# Ocr Rule Assets
 	#  
-	O_LUCK_MSG = RuleOcr(roi=(15,27,68,61), area=(0,8,100,100), mode="Full", method="Default", keyword="吉闻", name="luck_msg")
+	O_LUCK_MSG = RuleOcr(roi=(15,27,68,61), area=(0,8,100,100), mode="Single", method="Default", keyword="吉闻", name="luck_msg")
 
 
 	# Image Rule Assets
