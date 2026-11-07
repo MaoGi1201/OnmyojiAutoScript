@@ -326,5 +326,9 @@
   "bondling_search_enable":"是否开启探查",
   "limit_num":"契忆数量限制",
   "check_enable":"是否检查契忆数量",
-  "search_switch":"探查御魂装配分组"
+  "search_switch":"探查御魂装配分组",
+  "MetaDemon":"超鬼王",
+  "MetaDemonTicket":"鬼王门票",
+  "assistance_config":"鬼王协助",
+  "meta_demon_config":"超鬼王配置"
 }

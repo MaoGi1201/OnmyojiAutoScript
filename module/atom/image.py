@@ -3,31 +3,60 @@
 # github https://github.com/runhey
 import cv2
 import numpy as np
+from contextlib import contextmanager
+from contextvars import ContextVar
 
 from numpy import float32, int32, uint8, fromfile
 from pathlib import Path
 
+from module.atom.click import RuleClick
 from module.base.decorator import cached_property
 from module.image.rpc import get_image_client
 from module.logger import logger
 from module.base.utils import is_approx_rectangle
-from module.base.utils.utils import random_normal_distribution_int
+
+# 模板匹配容差：随规则下发给图像服务，服务端把 roi_back 四边各外扩该像素数，
+# 用于吸收非原生渲染环境相对模板截图环境的整体相位差（桌面客户端受 DPI 缩放
+# 重采样，约 1px）。仓库里约 1/3 的模板 roi_back 与模板等宽，此时 matchTemplate
+# 结果只剩 1 列、横向一格都平移不了，1px 相位差就足以把「元素存在」判成「不存在」。
+# 桌面模式由 Device 置为 2，模拟器保持 0、行为逐位不变。
+ROI_MATCH_PAD = ContextVar('image_roi_padding', default=0)
+DESKTOP_ROI_MATCH_PAD = 2
+
+
+@contextmanager
+def roi_match_padding(pad: int):
+    """请求级容差，退出时复位；不同设备/线程互不污染。"""
+    token = ROI_MATCH_PAD.set(max(0, int(pad)))
+    try:
+        yield
+    finally:
+        ROI_MATCH_PAD.reset(token)
 
 
 class RuleImage:
     debug_mode: bool = False
     METHOD_TEMPLATE_MATCH = "Template matching"
+    METHOD_MASKED_TEMPLATE_MATCH = "Masked template matching"
     METHOD_MULTI_SCALE_TEMPLATE_MATCH = "Multi-scale template matching"
     METHOD_SIFT_FLANN = "Sift Flann"
     DEFAULT_MULTI_SCALE_RANGE = (0.6, 1.2)
     DEFAULT_MULTI_SCALE_STEP = 0.1
 
-    def __init__(self, roi_front: tuple, roi_back: tuple, method: str, threshold: float, file: str) -> None:
+    def __init__(
+        self,
+        roi_front: tuple,
+        roi_back: tuple,
+        method: str,
+        threshold: float,
+        file: str,
+        profile: str = "High",
+    ) -> None:
         """
         初始化
         :param roi_front: 前置roi
         :param roi_back: 后置roi 用于匹配的区域
-        :param method: 匹配方法 "Template matching" / "Multi-scale template matching" / "Sift Flann"
+        :param method: 匹配方法 "Template matching" / "Masked template matching" / "Multi-scale template matching" / "Sift Flann"
         :param threshold: 阈值  0.8
         :param file: 相对路径, 带后缀
         """
@@ -41,6 +70,7 @@ class RuleImage:
         self.roi_back = roi_back
         self.threshold = threshold
         self.file = file
+        self.profile = profile
         self.scale_range: tuple[float, float] | tuple[float, float, float] | None = None
         self.scale_step: float = self.DEFAULT_MULTI_SCALE_STEP
 
@@ -107,6 +137,14 @@ class RuleImage:
         return self.method == self.METHOD_TEMPLATE_MATCH
 
     @property
+    def is_masked_template_match(self) -> bool:
+        """
+        是否是掩码模板匹配，掩码取自同目录下 `xxx_mask.png`
+        :return:
+        """
+        return self.method == self.METHOD_MASKED_TEMPLATE_MATCH
+
+    @property
     def is_multi_scale_template_match(self) -> bool:
         return self.method == self.METHOD_MULTI_SCALE_TEMPLATE_MATCH
 
@@ -171,8 +209,10 @@ class RuleImage:
             "threshold": float(self.threshold),
             "roi_front": list(self.roi_front),
             "roi_back": list(self.roi_back),
+            "roi_pad": ROI_MATCH_PAD.get(),
             "scale_range": scale_range,
             "scale_step": float(self.scale_step),
+            "grayscale": bool(getattr(self, 'grayscale', False)),
         }
 
     def _apply_match_result(self, result: dict) -> bool:
@@ -188,6 +228,10 @@ class RuleImage:
             threshold = self.threshold
         source = self.corp(image)
         mat = self.image
+
+        if getattr(self, 'grayscale', False):
+            source = cv2.cvtColor(source, cv2.COLOR_RGB2GRAY)
+            mat = cv2.cvtColor(mat, cv2.COLOR_RGB2GRAY)
 
         if self._template_image_invalid(mat):
             return True  # 如果模板图像无效，直接返回 True
@@ -231,12 +275,17 @@ class RuleImage:
         best_val = -1.0
         best_loc = None
         best_shape = None
-        cur_scale = min_scale
-        while cur_scale <= max_scale + 1e-8:
+        # 倍数按索引求值：`cur_scale += step` 会浮点向下漂（1.0 漂成 0.9999999999999999），
+        # 再经 int() 截断就少 1 像素，导致恰好原尺寸那一档永远测不到。
+        index = 0
+        while True:
+            cur_scale = min_scale + index * step
+            if cur_scale > max_scale + 1e-8:
+                break
+            index += 1
             scaled_w = max(1, int(mat.shape[1] * cur_scale))
             scaled_h = max(1, int(mat.shape[0] * cur_scale))
             if scaled_w > source.shape[1] or scaled_h > source.shape[0]:
-                cur_scale += step
                 continue
             scaled_mat = cv2.resize(mat, (scaled_w, scaled_h), interpolation=cv2.INTER_LINEAR)
             res = cv2.matchTemplate(source, scaled_mat, cv2.TM_CCOEFF_NORMED)
@@ -245,7 +294,6 @@ class RuleImage:
                 best_val = max_val
                 best_loc = max_loc
                 best_shape = (scaled_w, scaled_h)
-            cur_scale += step
         if self.debug_mode:
             logger.attr(self.name, f'multi-scale matching score {best_val:.5f}')
         if best_loc is not None and best_shape is not None and best_val > threshold:
@@ -311,19 +359,27 @@ class RuleImage:
 
     def coord(self) -> tuple:
         """
-        获取roi_front的随机的点击的坐标
+        通过 RuleClick 获取 roi_front 的点击坐标。
         :return:
         """
-        x, y, w, h = self.roi_front
-        return x + random_normal_distribution_int(0, w), y + random_normal_distribution_int(0, h)
+        return RuleClick(
+            roi_front=tuple(self.roi_front),
+            roi_back=tuple(self.roi_back),
+            name=self.name,
+            profile=self.profile,
+        ).coord()
 
     def coord_more(self) -> tuple:
         """
-         获取roi_back的随机的点击的坐标
+        通过 RuleClick 获取 roi_back 的点击坐标。
         :return:
         """
-        x, y, w, h = self.roi_back
-        return x + random_normal_distribution_int(0, w), y + random_normal_distribution_int(0, h)
+        return RuleClick(
+            roi_front=tuple(self.roi_front),
+            roi_back=tuple(self.roi_back),
+            name=self.name,
+            profile=self.profile,
+        ).coord_more()
 
     def front_center(self) -> tuple:
         """
@@ -336,6 +392,8 @@ class RuleImage:
     def test_match(self, image: np.array):
         self.debug_mode = True
         if self.is_template_match:
+            return self.match(image)
+        if self.is_masked_template_match:
             return self.match(image)
         if self.is_multi_scale_template_match:
             return self.match(image)
