@@ -58,6 +58,7 @@ from tasks.GuildActivityMonitor.config import GuildActivityMonitor
 from tasks.ActivityShikigami.config import ActivityShikigami
 from tasks.MartialTournament.config import MartialTournament
 from tasks.MetaDemon.config import MetaDemon
+from tasks.MetaDemonTicket.config import MetaDemonTicket, split_legacy_meta_demon
 from tasks.FrogBoss.config import FrogBoss
 from tasks.FrogChallenge.config import FrogChallenge
 from tasks.FloatParade.config import FloatParade
@@ -130,6 +131,7 @@ class ConfigModel(ConfigBase):
     activity_shikigami: ActivityShikigami = Field(default_factory=ActivityShikigami)
     martial_tournament: MartialTournament = Field(default_factory=MartialTournament)
     meta_demon: MetaDemon = Field(default_factory=MetaDemon)
+    meta_demon_ticket: MetaDemonTicket = Field(default_factory=MetaDemonTicket)
     frog_boss: FrogBoss = Field(default_factory=FrogBoss)
     frog_challenge: FrogChallenge = Field(default_factory=FrogChallenge)
     float_parade: FloatParade = Field(default_factory=FloatParade)
@@ -182,6 +184,7 @@ class ConfigModel(ConfigBase):
             super().__init__()
             return
         data = self.read_json(config_name)
+        data = split_legacy_meta_demon(data)  # 旧超鬼王刷票配置迁入独立任务 MetaDemonTicket
         data["config_name"] = config_name
         super().__init__(**data)
 

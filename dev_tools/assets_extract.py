@@ -14,7 +14,9 @@ ASSETS_FILE = 'assets.py'
 ASSETS_CLASS = '\nclass Assets: \n'
 IMPORT_EXP = """
 from module.atom.image import RuleImage
+from module.atom.frame import RuleFrame, Image, Ocr, Click
 from module.atom.click import RuleClick
+from module.atom.scatter import RuleScatter
 from module.atom.long_click import RuleLongClick
 from module.atom.swipe import RuleSwipe
 from module.atom.ocr import RuleOcr
@@ -66,13 +68,47 @@ class ImageExtractor:
         :return:
         """
         description: str = f'\t# {item["description"]} \n'
+        profile = str(item.get("profile", "High"))
+        profile_arg = f'profile="{profile}", ' if profile in ("Default", "High", "More") else ''
+        image_file = f'./{self.image_path}/{item["imageName"]}' if item.get('imageName') else ''
         name: str = f'\tI_{name_transform(item["itemName"])} = RuleImage(' \
                     f'roi_front=({item["roiFront"]}), ' \
                     f'roi_back=({item["roiBack"]}), ' \
                     f'threshold={item["threshold"]}, ' \
                     f'method="{item["method"]}", ' \
-                    f'file="./{self.image_path}/{item["imageName"]}")\n'
+                    f'{profile_arg}' \
+                    f'file="{image_file}")\n'
+        if not image_file:
+            name += f'\tI_{name_transform(item["itemName"])}.name = "{name_transform(item["itemName"])}"\n'
         return description + name
+
+
+class FrameExtractor(ImageExtractor):
+    def extract_item(self, item) -> str:
+        from module.atom.frame import normalize_operations
+        badges = item.get('badges') or [{'imageName': item['imageName'], 'roiBadge': item['roiBadge']}]
+        ranges = item['roiRange'] if isinstance(item['roiRange'], list) else [item['roiRange']]
+        operations = normalize_operations(item.get('rangeOperations'), len(ranges), allow_missing_image=True)
+        handlers = []
+        for spec in operations:
+            if spec['type'] == 'image':
+                # imageName remains a runframe preview; an explicit file embeds a runtime template.
+                spec.pop('imageName', None)
+            kind = spec.pop('type')
+            cls = {'image':'Image', 'ocr':'Ocr', 'click':'Click'}[kind]
+            handlers.append(cls + '(' + ', '.join(f'{k}={v!r}' for k,v in spec.items()) + ')')
+        parse = lambda text: tuple(float(v) if '.' in v else int(v) for v in text.split(','))
+        arguments = dict(
+            name=item['itemName'],
+            roi_badge=parse(item['roiBadge']),
+            roi_range=[parse(r) for r in ranges], roi_back=parse(item['roiBack']),
+            threshold=item['threshold'], method=item['method'], profile=item.get('profile', 'High'),
+            badgefile=[f"./{self.image_path}/{b['imageName']}" for b in badges])
+        name = name_transform(item['itemName'])
+        if item.get('badgeGrayscale', False):
+            arguments['badge_grayscale'] = True
+        return (f"\tF_{name} = RuleFrame(" + ', '.join(f'{k}={v!r}' for k,v in arguments.items()) +
+                ', range=[' + ', '.join(handlers) + '])\n')
 
 
 class ClickExtractor:
@@ -96,11 +132,42 @@ class ClickExtractor:
         :param item:
         :return:
         """
-        description: str = f'\t# {item["description"]} \n'
+        description: str = f'\t# {item["description"]}\n'
+        profile = str(item.get("profile", "Default"))
+        profile_arg = f'profile="{profile}", ' if profile in ("High", "More") else ''
         name: str = f'\tC_{name_transform(item["itemName"])} = RuleClick(' \
                     f'roi_front=({item["roiFront"]}), ' \
                     f'roi_back=({item["roiBack"]}), ' \
+                    f'{profile_arg}' \
                     f'name="{item["itemName"]}")\n'
+        return description + name
+
+
+class ScatterExtractor:
+
+    def __init__(self, file: str, data: list) -> None:
+        self._result = '\n\n\t# Scatter Rule Assets\n'
+        for item in data:
+            self._result += self.extract_item(item)
+
+    @property
+    def result(self) -> str:
+        return self._result
+
+    @staticmethod
+    def extract_item(item) -> str:
+        description = f'\t# {item["description"]} \n'
+        points = ", ".join(
+            f"({int(x)}, {int(y)})"
+            for x, y in item["polygon"]
+        )
+        name = f'\tC_{name_transform(item["itemName"])} = RuleScatter(' \
+               f'roi_front=({item["roiFront"]}), ' \
+               f'roi_back=({item["roiBack"]}), ' \
+               f'polygon=[{points}], ' \
+               f'focus_count={int(item["focusCount"])}, ' \
+               f'functional={bool(item.get("functional", False))}, ' \
+               f'name="{item["itemName"]}")\n'
         return description + name
 
 
@@ -273,7 +340,8 @@ class AssetsExtractor:
         获取所有json文件
         :return: json文件（带后缀）列表
         """
-        return [str(x) for x in self.task_path.rglob('*.json') if 'temp' not in str(x)]
+        return [str(x) for x in self.task_path.rglob('*.json')
+                if 'temp' not in str(x) and 'test_fixtures' not in x.parts]
 
     @classmethod
     def read_file(cls, file: str) -> list:
@@ -308,12 +376,22 @@ class AssetsExtractor:
     @classmethod
     def is_click_file(cls, data: list) -> bool:
         """
-        判断是不是clickrule 文件, 我这样的判断是有点不合规的
+        按 Click 的必要字段判断，允许 description/profile 等扩展字段。
         :param data: 解析后的json数据，是list
         :return:
         """
         item = data[0]
-        return len(item) == 4
+        return (
+            all(key in item for key in ('itemName', 'roiFront', 'roiBack'))
+            and not any(key in item for key in (
+                'imageName', 'polygon', 'duration', 'mode', 'keyword',
+            ))
+        )
+
+    @classmethod
+    def is_scatter_file(cls, data: list) -> bool:
+        item = data[0]
+        return 'polygon' in item
 
     @classmethod
     def is_long_click_file(cls, data: list) -> bool:
@@ -384,8 +462,16 @@ class AssetsExtractor:
             if self.is_list_file(data):
                 result += ListExtractor(file, data).result
                 continue
-            if self.is_image_file(data):
+            # Task directories also contain metadata such as card-library indexes.
+            # Only resource arrays can be dispatched to the rule extractors.
+            if not isinstance(data, list) or not isinstance(data[0], dict):
+                continue
+            if 'roiBadge' in data[0] and 'roiRange' in data[0]:
+                result += FrameExtractor(file, data).result
+            elif self.is_image_file(data):
                 result += ImageExtractor(file, data).result
+            elif self.is_scatter_file(data):
+                result += ScatterExtractor(file, data).result
             elif self.is_click_file(data):
                 result += ClickExtractor(file, data).result
             elif self.is_long_click_file(data):

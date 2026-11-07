@@ -35,6 +35,7 @@ from module.server.i18n import I18n
 from module.image.rpc import ensure_image_server_ready
 from module.ocr.rpc import ensure_ocr_server_ready
 from module.script import ScriptRuntimeController, ScriptRuntimeDecision
+from module.cooperation import Cooperation, BATTLE_TASKS, prepare_task_cooperation  # MetaDemon 鬼王协助所需
 from tasks.Restart.server_update import delay_pending_tasks_for_server_update, is_server_update_window
 from module.server.log_service import build_error_log_dir_name
 
@@ -441,12 +442,20 @@ class Script:
 
         self._reset_task_runtime_outcome()
         try:
+            # MetaDemon 鬼王协助：向任务注入本实例的协同运行时（无则注入 None）
+            cooperation = self.__dict__.get('_cooperation')
+            self.config.cooperation_runtime = cooperation
+            if command in BATTLE_TASKS and command not in ('MetaDemon', 'MetaDemonTicket'):
+                prepare_task_cooperation(self.config, command)
             self.device.screenshot()
             module_name = 'script_task'
             module_path = str(Path.cwd() / 'tasks' / command / (module_name + '.py'))
             logger.info(f'module_path: {module_path}, module_name: {module_name}')
             task_module = load_module(module_name, module_path)
-            task_module.ScriptTask(config=self.config, device=self.device).run()
+            task_runner = task_module.ScriptTask(config=self.config, device=self.device)
+            if command in BATTLE_TASKS:
+                task_runner._battle_cooperation_prepared = True
+            task_runner.run()
         except Exception as e:
             return self._handle_task_exception(e, command)
         return False
@@ -462,6 +471,9 @@ class Script:
         logger.info(f'Start scheduler loop: {self.config_name}')
         self.config.model.running_task = ''
         self.anti_ban_guard.reset()
+        # MetaDemon 鬼王协助：启动本实例的协同服务（供其他实例发现/读写）
+        self._cooperation = Cooperation(self.config_name)
+        self._cooperation.start()
 
         # Update GUI 防呆, 读取设置并立刻显示后台模拟器到前台
         if not self.config.script.device.run_background_only and IS_WINDOWS:
