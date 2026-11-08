@@ -2,7 +2,7 @@
   {
     "itemName": "guild_goto_tf",
     "imageName": "touch_fish_guild_goto_tf.png",
-    "roiFront": "30,433,88,30",
+    "roiFront": "33,249,88,30",
     "roiBack": "7,153,227,329",
     "method": "Template matching",
     "threshold": 0.8,

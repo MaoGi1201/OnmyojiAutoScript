@@ -87,7 +87,7 @@ class WeeklyTriflesAssets:
 
 	# Image Rule Assets
 	# 前往摸鱼页面 
-	I_GUILD_GOTO_TF = RuleImage(roi_front=(30,433,88,30), roi_back=(7,153,227,329), threshold=0.8, method="Template matching", file="./tasks/WeeklyTrifles/touch_fish/touch_fish_guild_goto_tf.png")
+	I_GUILD_GOTO_TF = RuleImage(roi_front=(33,249,88,30), roi_back=(7,153,227,329), threshold=0.8, method="Template matching", file="./tasks/WeeklyTrifles/touch_fish/touch_fish_guild_goto_tf.png")
 	# 关闭首次进入弹窗 
 	I_WT_HAPPY_GET = RuleImage(roi_front=(736,461,119,35), roi_back=(736,461,119,35), threshold=0.8, method="Template matching", file="./tasks/WeeklyTrifles/touch_fish/touch_fish_wt_happy_get.png")
 	# 全部保存本周次数 
