@@ -331,5 +331,23 @@
     "method": "Template matching",
     "threshold": 0.7,
     "description": "庭院主页右侧活动栏的超鬼王入口"
+  },
+  {
+    "itemName": "md_rental_limit_popup",
+    "imageName": "md_md_rental_limit_popup.png",
+    "roiFront": "432,283,359,34",
+    "roiBack": "403,229,470,264",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "队伍租借次数耗尽弹窗（今日租借队伍使用次数已耗尽）"
+  },
+  {
+    "itemName": "md_rental_limit_confirm",
+    "imageName": "md_md_rental_limit_confirm.png",
+    "roiFront": "665,408,179,58",
+    "roiBack": "600,390,300,100",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "队伍租借次数耗尽弹窗的确认按钮"
   }
 ]

@@ -97,6 +97,10 @@ class MetaDemonAssets:
 	I_CHECK_ACT_LIST_METADEMON_ACT = RuleImage(roi_front=(718,293,448,127), roi_back=(675,249,566,240), threshold=0.8, method="Template matching", profile="High", file="./tasks/MetaDemon/md/md_check_act_list_metademon_act.png")
 	# 庭院主页右侧活动栏的超鬼王入口 
 	I_MAIN_GOTO_METADEMON = RuleImage(roi_front=(1182,299,46,32), roi_back=(1164,134,83,393), threshold=0.7, method="Template matching", profile="High", file="./tasks/MetaDemon/md/md_main_goto_metademon.png")
+	# 队伍租借次数耗尽弹窗（今日租借队伍使用次数已耗尽） 
+	I_MD_RENTAL_LIMIT_POPUP = RuleImage(roi_front=(432,283,359,34), roi_back=(403,229,470,264), threshold=0.8, method="Template matching", profile="High", file="./tasks/MetaDemon/md/md_md_rental_limit_popup.png")
+	# 队伍租借次数耗尽弹窗的确认按钮 
+	I_MD_RENTAL_LIMIT_CONFIRM = RuleImage(roi_front=(665,408,179,58), roi_back=(600,390,300,100), threshold=0.8, method="Template matching", profile="High", file="./tasks/MetaDemon/md/md_md_rental_limit_confirm.png")
 
 
 	# Ocr Rule Assets

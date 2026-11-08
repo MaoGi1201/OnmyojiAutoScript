@@ -115,6 +115,12 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, GameUi, MetaDemonAsset
         last_challenge = time.monotonic()
         while within_limit is None or within_limit():
             self.screenshot()
+            # 队伍租借分组当日次数耗尽：点"挑战"后弹出提示框，确认后结束任务等待更换组队信息
+            if self.appear(self.I_MD_RENTAL_LIMIT_POPUP, interval=0.8):
+                logger.warning('租借次数抵达上限，需更换组队信息')
+                self.appear_then_click(self.I_MD_RENTAL_LIMIT_CONFIRM, interval=0.8)
+                self.set_next_run('MetaDemon', success=False)
+                self.finish_task()
             if self.is_in_battle(False):
                 self.total_count += 1
                 self._current_boss_attempts += 1
