@@ -2,6 +2,101 @@
   const API_PREFIX = "/tool/annotator";
   const AllowedRuleTypes = new Set();
 
+  // tasks/ 下的目录名 -> 中文名，仅用于下拉展示，不影响实际路径
+  const DIR_NAME_ZH = {
+    AbyssShadows: "狭间暗域",
+    ActivityShikigami: "当期爬塔",
+    AreaBoss: "地狱鬼王",
+    AutoCheckinBigGod: "大神签到",
+    BondlingFairyland: "契灵之境",
+    Chess: "百鬼棋局",
+    CollectiveMissions: "集体任务",
+    Component: "通用组件",
+    DailyTrifles: "每日琐事",
+    Delegation: "式神委派",
+    DemonEncounter: "封魔之时",
+    DemonMartialTrials: "逢魔演武",
+    DemonRetreat: "首领退治",
+    Dokan: "道馆",
+    Duel: "斗技",
+    DyeTrials: "灵染试炼",
+    EternitySea: "永生之海",
+    EvoZone: "觉醒副本",
+    ExperienceYoukai: "经验妖怪",
+    Exploration: "探索",
+    FallenSun: "日轮之城",
+    FindJade: "勾玉协作",
+    FloatParade: "花车巡游",
+    FrogBoss: "对弈竞猜",
+    FrogChallenge: "青蛙瓷器挑战赛",
+    GameUi: "游戏界面",
+    GlobalGame: "全局游戏设置",
+    GoldYoukai: "金币妖怪",
+    GoryouRealm: "御灵之境",
+    GotoMain: "回到庭院",
+    GuguArtStudio: "呱呱画室",
+    GuildActivityMonitor: "寮活动监控",
+    GuildBanquet: "寮宴会",
+    HeroTest: "英杰试炼",
+    Hunt: "狩猎战",
+    Hyakkiyakou: "百鬼夜行",
+    IbukiArena: "狭间幻境",
+    KekkaiActivation: "结界挂卡",
+    KekkaiUtilize: "结界蹭卡",
+    KittyShop: "猫咪商店",
+    MartialTournament: "武斗大会",
+    MemoryScrolls: "绘卷",
+    MetaDemon: "超鬼王",
+    MysteryShop: "神秘商店",
+    Nian: "年兽",
+    Orochi: "八岐大蛇",
+    OrochiMoans: "御魂悲鸣",
+    OtherWorldTwilight: "彼世逢魔",
+    Pets: "小猫咪",
+    Quiz: "答题",
+    RealmRaid: "个人突破",
+    Restart: "重启",
+    RichMan: "大富翁",
+    RyouToppa: "寮突破",
+    Script: "脚本",
+    Secret: "秘闻之境",
+    SixRealms: "六道之门",
+    Sougenbi: "业原火",
+    SoulsTidy: "御魂整理",
+    Tako: "石距",
+    TalismanPass: "花合战",
+    TrueOrochi: "真·八岐大蛇",
+    Utils: "工具",
+    WantedQuests: "悬赏封印",
+    WeeklyTrifles: "每周琐事",
+    // Component 子目录
+    BaseActivity: "活动基础",
+    Buy: "购买组件",
+    CooperativeBattle: "协战",
+    Costume: "庭院皮肤",
+    CostumeBattle: "战斗主题",
+    CostumeShikigami: "式神录皮肤",
+    CustomCourtyardAffair: "庭院事务",
+    GeneralBattle: "通用战斗",
+    GeneralBuff: "通用加成",
+    GeneralInvite: "通用邀请",
+    GeneralRoom: "通用房间",
+    Login: "登录",
+    LootStatistics: "掉落统计",
+    QuickLoadout: "快速预设",
+    ReplaceShikigami: "替换式神",
+    RightActivity: "右侧入口",
+    Summon: "召唤",
+    SwitchAccount: "切换账号",
+    SwitchOnmyoji: "切换阴阳师",
+    SwitchSoul: "切换御魂",
+  };
+
+  function dirLabel(name) {
+    const zh = DIR_NAME_ZH[name];
+    return zh ? `${name}（${zh}）` : name;
+  }
+
   const state = {
     sessionId: "",
     sourceMode: "local",
@@ -1955,12 +2050,12 @@
     el.deleteJsonBtn.classList.toggle("hidden", !canDelete);
   }
 
-  function createBreadcrumbSelect(values, selected, placeholder) {
+  function createBreadcrumbSelect(values, selected, placeholder, labelOf = null) {
     const select = document.createElement("select");
     select.className = "breadcrumb-select";
     createOption(select, "", placeholder);
     for (const name of values) {
-      createOption(select, name, name);
+      createOption(select, name, labelOf ? labelOf(name) : name);
     }
     if (selected && values.includes(selected)) {
       select.value = selected;
@@ -2002,7 +2097,7 @@
           el.dirSelectors.appendChild(sep);
         }
 
-        const dirSelect = createBreadcrumbSelect(dirs, selectedDir, "选择目录");
+        const dirSelect = createBreadcrumbSelect(dirs, selectedDir, "选择目录", dirLabel);
         dirSelect.dataset.depth = String(depth);
         dirSelect.addEventListener(
           "change",
@@ -2181,7 +2276,7 @@
     clearDirty();
     clearTestOverlay();
     clearSaveStatus();
-    showMessage(`已加载 ${state.taskName}/${state.jsonRelPath} (${state.ruleType})`, "ok");
+    showMessage(`已加载 ${dirLabel(state.taskName)}/${state.jsonRelPath} (${state.ruleType})`, "ok");
 
     await refreshActiveRuleImageExists();
   }
