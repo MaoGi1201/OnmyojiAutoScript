@@ -61,6 +61,8 @@ SECRET_CHAT_IDLE_SECONDS = 5
 WQ_TYPE_COLOR_MIN_VALUE = 80
 # 色相离所有参考值都超过这个度数就不判定（避免把背景误判成某个类型）
 WQ_TYPE_COLOR_MAX_DISTANCE = 60
+# 悬赏列表 CLAHE 路径的放大倍数
+WQ_TEXT_SCALE = 2.0
 
 
 class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
@@ -268,7 +270,8 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         :return:
         """
         logger.hr('Start wanted quests')
-        if not self.appear(self.I_GOTO_1):
+        # 详情页右侧「前往」比左上角追踪勾晚渲染, 单帧判断会把能打的悬赏误判成神秘任务未解锁
+        if not self.wait_until_appear(self.I_GOTO_1, wait_time=1.5):
             # 如果没有出现 '前往'按钮， 那就是这个可能是神秘任务但是没有解锁
             logger.info('This is a secret mission but not unlock')
             self.ui_click(self.I_TRACE_TRUE, self.I_TRACE_FALSE)
@@ -334,7 +337,8 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
             if not wq_info:
                 continue
             # 跳过高层秘闻（柒及以上：7/8/9/10 层和番外）
-            if wq_info.dest[-1] in {"柒", "捌", "玖", "拾", "番外"}:
+            # 日服第七层写作「漆」而不是「柒」, 捌/玖/拾 中日同形
+            if wq_info.dest[-1] in {"柒", "漆", "捌", "玖", "拾", "番外"}:
                 logger.warning('This secret layer is too high, skip')
                 continue
             # 跳过已经执行过的(例:都是探索第5层4只怪, 上次计算需要打2次但是这次还是打2次, 肯定出问题了也不需要执行了)
@@ -723,6 +727,31 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         ismatch = regex.match(res)
         return ismatch is not None
 
+    def detect_wq_list(self, img) -> list:
+        """原图直读悬赏列表区, 与 O_WQ_LIST_CHECK 走同一条路径"""
+        return self.O_WQ_TEXT_ALL.detect_and_ocr(img)
+
+    def detect_wq_list_clahe(self, img) -> list:
+        """列表区的兜底识别。
+        追踪中的那一条数字是金色描边 + 光晕, 对比度被拉平, 原图会把 "1/" 整段漏掉;
+        反过来普通白字经 CLAHE 后也会偶发漏检, 所以只在原图读不到数字时用。
+        """
+        x, y, w, h = self.O_WQ_TEXT_ALL.roi
+        patch = img[y:y + h, x:x + w]
+        gray = cv2.cvtColor(patch, cv2.COLOR_RGB2GRAY)
+        gray = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8)).apply(gray)
+        patch = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+        patch = cv2.resize(patch, None, fx=WQ_TEXT_SCALE, fy=WQ_TEXT_SCALE,
+                           interpolation=cv2.INTER_CUBIC)
+        results = []
+        for result in self.O_WQ_TEXT_ALL.model.detect_and_ocr(patch):
+            if result.score < self.O_WQ_TEXT_ALL.score:
+                continue
+            result.ocr_text = self.O_WQ_TEXT_ALL.after_process(result.ocr_text)
+            results.append(result)
+        logger.info(f'[WQ_TEXT_ALL clahe] {[r.ocr_text for r in results]}')
+        return results
+
     def find_wq(self, img) -> tuple[int, int, int, List[int]]:
         """
         在探索页面从悬赏列表中找到可以执行的任务, 自动过滤已完成的任务(根据下方数字判断, 例12/12)
@@ -731,16 +760,15 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         :return: (已完成数量, 剩余数量, 总数量, roi列表)
         """
 
-        def calc_xywh(box) -> List[int]:
+        def calc_xywh(box, scale: float = 1.0) -> List[int]:
             """计算最终ocr文本位于整张截图的roi(因为detect_and_ocr返回的位置是基于截取之后的图像的位置,所以需要拼接)"""
             rec_x, rec_y, rec_w, rec_h = box[0, 0], box[0, 1], box[1, 0] - box[0, 0], box[2, 1] - box[0, 1]
-            x = rec_x + self.O_WQ_TEXT_ALL.roi[0]
-            y = rec_y + self.O_WQ_TEXT_ALL.roi[1]
-            w = rec_w
-            h = rec_h
-            return [x, y, w, h]
+            x = rec_x / scale + self.O_WQ_TEXT_ALL.roi[0]
+            y = rec_y / scale + self.O_WQ_TEXT_ALL.roi[1]
+            w = rec_w / scale
+            h = rec_h / scale
+            return [int(x), int(y), int(w), int(h)]
 
-        res_list = self.O_WQ_TEXT_ALL.detect_and_ocr(img)
         import re
         reg_time = re.compile(r'^D?([01]?[0-9]|2[0-3]):([0-5]?[0-9]):?([0-5]?[0-9])?$')
         reg_fengyin = re.compile(r'.*[封|野]印.*')
@@ -750,32 +778,45 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
         reg_XX = re.compile(r'^(\d+)\1$')
         # 过滤掉协或者未知悬赏等其他无用字符
         reg_other = re.compile(r'[?？协边]')
-        for index, res in enumerate(res_list):
-            if reg_fengyin.match(res.ocr_text):
-                continue
-            if reg_time.match(res.ocr_text):
-                continue
-            if reg_other.match(res.ocr_text) is not None:
-                continue
-            if match := reg_progress.match(res.ocr_text):
-                spliter_index = match.start(2)
-                xywh = calc_xywh(res.box)
-                cu, re, total = int(res.ocr_text[:spliter_index]), 1, int(res.ocr_text[spliter_index + 1:])
-                # 识别结果规范性检查
-                if total > 14:
-                    logger.warning("Total number of wanted quests is greater than 14")
-                    total = total % 10
-                if cu > total:
-                    logger.warning('Current number of wanted quests is greater than total number')
-                    cu = cu % 10
-                if cu == total:
-                    # 该任务已完成，一般是悬赏任务，邀请人没有做导致的
+
+        def scan(res_list: list, scale: float = 1.0):
+            """返回 (命中的悬赏, 是否解析到了任何进度)。解析到了但都已完成也算读成功, 不必再兜底"""
+            parsed = False
+            for res in res_list:
+                if reg_fengyin.match(res.ocr_text):
                     continue
-                logger.info(f'find wq {res.ocr_text} @ {xywh}')
-                return cu, re, total, xywh
-            # 例如：1414 66 1212
-            if reg_XX.match(res.ocr_text):
-                continue
+                if reg_time.match(res.ocr_text):
+                    continue
+                if reg_other.match(res.ocr_text) is not None:
+                    continue
+                if match := reg_progress.match(res.ocr_text):
+                    parsed = True
+                    spliter_index = match.start(2)
+                    xywh = calc_xywh(res.box, scale)
+                    cu, re, total = int(res.ocr_text[:spliter_index]), 1, int(res.ocr_text[spliter_index + 1:])
+                    # 识别结果规范性检查
+                    if total > 14:
+                        logger.warning("Total number of wanted quests is greater than 14")
+                        total = total % 10
+                    if cu > total:
+                        logger.warning('Current number of wanted quests is greater than total number')
+                        cu = cu % 10
+                    if cu == total:
+                        # 该任务已完成，一般是悬赏任务，邀请人没有做导致的
+                        continue
+                    logger.info(f'find wq {res.ocr_text} @ {xywh}')
+                    return (cu, re, total, xywh), parsed
+                # 例如：1414 66 1212
+                if reg_XX.match(res.ocr_text):
+                    continue
+            return None, parsed
+
+        found, parsed = scan(self.detect_wq_list(img))
+        if found is None and not parsed:
+            logger.warning('WQ list not parsed, retry with clahe')
+            found, _ = scan(self.detect_wq_list_clahe(img), WQ_TEXT_SCALE)
+        if found is not None:
+            return found
         return -1, -1, -1, [0, 0, 0, 0]
 
     def is_wq_remained(self):
