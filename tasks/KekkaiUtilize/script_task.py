@@ -606,6 +606,40 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
         self.utilize_terminal_failure = True
         return False
 
+    def _wait_utilize_slot(self, timeout: float = 12, stable_time: float = 1, miss_time: float = 4):
+        """
+        等好友结界的画面稳定后再判空位
+        :param timeout: 最长等待时间
+        :param stable_time: 有坑位时结果需要保持的时间
+        :param miss_time: 没有坑位时结果需要保持的时间
+        :return: 空位牌匾素材，没有坑位返回 None
+        """
+        start = time.time()
+        timeout_timer = Timer(timeout).start()
+        last = None
+        last_change = start
+        while not timeout_timer.reached():
+            self.screenshot()
+            current = (self.appear(self.I_U_ADD_1), self.appear(self.I_U_ADD_2))
+            if current != last:
+                # 结果变了说明画面还在动，重新计时
+                last = current
+                last_change = time.time()
+                continue
+            need = stable_time if (current[0] or current[1]) else miss_time
+            if time.time() - last_change >= need:
+                logger.info(
+                    f'Utilize slot: right 1={current[0]}, right 2={current[1]} '
+                    f'(wait={time.time() - start:.1f}s)'
+                )
+                if current[0]:
+                    return self.I_U_ADD_1
+                if current[1]:
+                    return self.I_U_ADD_2
+                return None
+        logger.warning(f'等寄养页面稳定超时({timeout}s)')
+        return None
+
     def run_utilize(self, friend: SelectFriendList = SelectFriendList.SAME_SERVER,
                     shikigami_class: ShikigamiClass = ShikigamiClass.N,
                     shikigami_order: int = 7):
@@ -665,18 +699,7 @@ class ScriptTask(GameUi, ReplaceShikigami, KekkaiUtilizeAssets):
                 f'进入好友结界失败: {type(error).__name__}'
             )
 
-        stop_image = None
-        timer = Timer(10).start()
-        while not timer.reached():
-            self.screenshot()
-            if self.appear(self.I_U_ADD_1):
-                logger.info('Utilize slot available: right 1')
-                stop_image = self.I_U_ADD_1
-                break
-            if self.appear(self.I_U_ADD_2):
-                logger.info('Utilize slot available: right 2')
-                stop_image = self.I_U_ADD_2
-                break
+        stop_image = self._wait_utilize_slot()
         if not stop_image:
             # 没有坑位可能是其他人的手速太快了抢占了
             self.save_image(content='没有坑位了', wait_time=0, push_flag=False, image_type='png')
