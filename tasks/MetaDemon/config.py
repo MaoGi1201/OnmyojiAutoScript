@@ -3,6 +3,7 @@
 # github https://github.com/runhey
 from datetime import timedelta, time
 from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
+from tasks.Component.QuickLoadout.config import parse_named_presets
 
 from tasks.Component.config_base import ConfigBase, TimeDelta, Time, dynamic_hide
 from pydantic import Field, field_validator, model_validator
@@ -140,36 +141,7 @@ class MetaDemonQuickPresetConfig(ConfigBase):
         description='启用高星快速上阵时，选中预设后直接点击出战。')
 
     def named_presets(self) -> dict[str, tuple[str, str]]:
-        groups = {}
-        for row in self.preset_groups.split(';'):
-            if not row.strip():
-                continue
-            parts = [part.strip() for part in row.split(',')]
-            if len(parts) != 3 or not all(parts):
-                raise ValueError(f'预设组需填写：预设组名,御魂分组名,队伍名：{row}')
-            name, group, team = parts
-            if name in groups:
-                raise ValueError(f'预设组名重复：{name}')
-            groups[name] = (group, team)
-        presets = {}
-        for row in self.high_star_custom_preset.split(';'):
-            if not row.strip():
-                continue
-            name, separator, targets = row.partition(':')
-            name = name.strip()
-            if not separator or name not in groups:
-                raise ValueError(f'规则引用了不存在的预设组或缺少半角冒号：{row}')
-            for boss in targets.split(','):
-                boss = boss.strip()
-                if not boss:
-                    raise ValueError(f'首领名不能为空：{row}')
-                boss = 'ALL' if boss.upper() == 'ALL' else boss
-                if boss in presets:
-                    raise ValueError(f'首领规则重复：{boss}')
-                presets[boss] = groups[name]
-        if not presets:
-            raise ValueError('请填写至少一条上阵预设规则')
-        return presets
+        return parse_named_presets(self.preset_groups, self.high_star_custom_preset)
 
     @model_validator(mode='before')
     @classmethod

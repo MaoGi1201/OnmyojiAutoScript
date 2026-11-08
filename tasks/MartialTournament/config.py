@@ -6,7 +6,7 @@ from datetime import timedelta, time
 from pydantic import BaseModel, Field, validator
 
 from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
-from tasks.Component.QuickLoadout.config import NamedQuickLoadoutConfig
+from tasks.Component.QuickLoadout.config import parse_named_presets
 from tasks.Component.config_scheduler import Scheduler
 from tasks.Component.config_base import ConfigBase, Time
 
@@ -74,14 +74,33 @@ class SwitchSoulConfig(BaseModel):
     mt_ap_team_name: str = Field(default='')
 
 
+class MartialTournamentQuickPresetConfig(ConfigBase):
+    """按首领名称选择预设组的快速预设。"""
+    enable: bool = Field(default=False, title='启用快速预设',
+        description='按首领名称选择预设组并上阵；关闭时沿用御魂切换。')
+    preset_groups: str = Field(default='预设组1,默认分组,队伍1', title='预设组列表',
+        description='格式：预设组名,御魂分组名,队伍名；例如：预设组1,队伍租借,第4日单体通用阵容。不同预设组以半角分号分隔。')
+    custom_preset: str = Field(default='预设组1:ALL', title='自定义配置上阵预设',
+        description='示例：预设组1:月读,雪御前;预设组2:ALL。首领名以半角逗号分隔，规则以半角分号分隔；ALL 表示其他未指定的首领。')
+    skip_equip_soul: bool = Field(default=False, title='不装配御魂',
+        description='选中预设后直接点击出战，不再装配御魂。')
+
+    def named_presets(self) -> dict[str, tuple[str, str]]:
+        return parse_named_presets(self.preset_groups, self.custom_preset)
+
+
 class MartialTournament(ConfigBase):
     scheduler: Scheduler = Field(default_factory=Scheduler)
     general_climb: MartialTournamentConfig = Field(default_factory=MartialTournamentConfig)
     switch_soul_config: SwitchSoulConfig = Field(default_factory=SwitchSoulConfig)
-    # 首领战一键配置
-    boss_quick_loadout_config: NamedQuickLoadoutConfig = Field(
-        default_factory=NamedQuickLoadoutConfig
+    # 首领战快速预设
+    boss_quick_preset_config: MartialTournamentQuickPresetConfig = Field(
+        default_factory=MartialTournamentQuickPresetConfig
     )
+    # 首领战一键配置（已由快速预设取代，保留以备回退）
+    # boss_quick_loadout_config: NamedQuickLoadoutConfig = Field(
+    #     default_factory=NamedQuickLoadoutConfig
+    # )
     # 群体boss战斗配置
     group_battle_conf: GeneralBattleConfig = Field(
         default_factory=lambda: GeneralBattleConfig(battle_timeout=600)

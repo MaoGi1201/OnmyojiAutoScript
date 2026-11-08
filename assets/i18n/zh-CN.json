@@ -384,5 +384,6 @@
     "invite_config": "通用邀请",
     "quick_preset_config": "快速预设详情",
     "low_star_battle_conf": "低星鬼王战斗配置",
-    "high_star_battle_conf": "高星鬼王战斗配置"
+    "high_star_battle_conf": "高星鬼王战斗配置",
+    "boss_quick_preset_config": "首领战快速预设"
 }

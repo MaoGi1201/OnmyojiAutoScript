@@ -15,9 +15,14 @@ from module.logger import logger
 
 from tasks.base_task import BaseTask
 from tasks.MartialTournament.assets import MartialTournamentAssets
-from tasks.MartialTournament.config import MartialTournament, GeneralBattleConfig
+from tasks.MartialTournament.config import (
+    MartialTournament,
+    MartialTournamentQuickPresetConfig,
+    GeneralBattleConfig,
+)
 from tasks.Component.GeneralBattle.general_battle import GeneralBattle, ExitMatcher
 from tasks.Component.BaseActivity.base_activity import BaseActivity
+from tasks.Component.QuickLoadout.config import QuickLoadoutConfig
 from tasks.Component.QuickLoadout.quick_loadout import QuickLoadout
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
 from tasks.GameUi.game_ui import GameUi
@@ -203,16 +208,17 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, QuickLoadout, BaseActivity, 
                     not self.search_boss_with_ticket('pass_2', pass_2):
                 raise TicketsNotEnough
         boss_type = self.detect_boss_type()
-        quick_loadout_conf = self.conf.boss_quick_loadout_config
+        preset_conf = self.conf.boss_quick_preset_config
         if not self.boss_ap_enough():
             raise TicketsNotEnough
-        if quick_loadout_conf.enable:
+        if preset_conf.enable:
+            quick = self._resolve_boss_quick_preset(preset_conf)
+            if quick is None:
+                raise TicketsNotEnough
             if not self.run_quick_loadout(
-                quick_loadout_conf,
-                entry=self.I_MT_GOTO_QUICK_LOADOUT,
-                fight_anchor=self.I_MT_QUICK_LOADOUT_FIGHT,
-                dismiss=self.C_MT_QUICK_LOADOUT_CLOSE,
-                name_ocr=self.O_BOSS_NAME,
+                quick,
+                frame=self.F_MT_QUICK_LOADOUT_FRAME,
+                skip_equip_soul=preset_conf.skip_equip_soul,
             ):
                 raise TicketsNotEnough
         else:
@@ -220,17 +226,37 @@ class ScriptTask(GameUi, GeneralBattle, SwitchSoul, QuickLoadout, BaseActivity, 
         if self.conf.general_climb.random_sleep:
             random_sleep(probability=0.2)
         self.current_battle_conf = self.conf.single_battle_conf if boss_type == 'single' else self.conf.group_battle_conf
-        if quick_loadout_conf.enable and self.current_battle_conf.preset_enable:
-            logger.warning('Quick loadout enabled, disable legacy battle preset for this battle')
+        if preset_conf.enable and self.current_battle_conf.preset_enable:
+            logger.warning('Quick preset enabled, disable legacy battle preset for this battle')
             self.current_battle_conf = self.current_battle_conf.model_copy(
                 update={'preset_enable': False}
             )
-        # 首领战每轮确认锁定状态；一键配置不受页面锁定开关影响
+        # 首领战每轮确认锁定状态；快速预设不受页面锁定开关影响
         self.lock_team(self.current_battle_conf)
         self.team_locked = True
         if self.enter_battle():
             # current_count由run_general_battle内部递增, 不需要手动+1
             self.run_general_battle(self.current_battle_conf, battle_key=f'mt_{boss_type}')
+
+    def _resolve_boss_quick_preset(
+            self, config: MartialTournamentQuickPresetConfig) -> Optional[QuickLoadoutConfig]:
+        """按首领名称解析快速预设；识别不到名称时本轮不切换。"""
+        try:
+            presets = config.named_presets()
+        except ValueError as exc:
+            logger.error(f'快速预设配置错误: {exc}')
+            return None
+        boss_name = self._read_quick_loadout_stage_name(self.O_BOSS_NAME)
+        if not self._normalize_name(boss_name):
+            logger.warning('未识别到首领名称，本轮不切换预设')
+            return None
+        matched_name, target, score = self._match_custom_preset(boss_name, presets)
+        if target is None:
+            logger.error(f'首领 {boss_name} 无匹配预设，请配置对应名称或 ALL')
+            return None
+        group, preset = target
+        logger.info(f'快速预设 {boss_name} -> {matched_name}: ({group}, {preset}) [{score:.2f}]')
+        return QuickLoadoutConfig(enable=True, group_name=group, preset_name=preset)
 
     def _run_ap(self):
         """体力爬塔界面处理: 检查体力 -> 切换御魂 -> 锁定阵容 -> 挑战 -> 战斗"""

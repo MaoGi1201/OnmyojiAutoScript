@@ -1,0 +1,41 @@
+[
+  {
+    "itemName": "mt_quick_loadout_frame",
+    "imageName": "MT_mt_goto_quick_loadout.png",
+    "roiBack": "700,480,520,220",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "profile": "High",
+    "description": "首领挑战浮窗的快速预设面板；range1 面板矩形暂用超鬼王的 496,224,553,387，待按 MT 实际界面校准",
+    "roiBadge": "910,597,32,36",
+    "badgeSerial": 1,
+    "badgeGrayscale": false,
+    "roiRange": [
+      "496,224,553,387",
+      "809,518,119,42",
+      "491,595,189,73"
+    ],
+    "badges": [
+      {
+        "imageName": "MT_mt_goto_quick_loadout.png"
+      }
+    ],
+    "rangeOperations": [
+      {
+        "imageName": "",
+        "method": "Template matching",
+        "threshold": 0.8,
+        "type": "image"
+      },
+      {
+        "file": "./tasks/MartialTournament/MT/MT_mt_quick_loadout_fight.png",
+        "method": "Template matching",
+        "threshold": 0.8,
+        "type": "image"
+      },
+      {
+        "type": "click"
+      }
+    ]
+  }
+]
