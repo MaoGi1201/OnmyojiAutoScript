@@ -100,16 +100,18 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
     def open_wq_info(self) -> bool:
         """打开对应怪物悬赏详情界面"""
         timeout_timer = Timer(5).start()
+        # 神秘妖怪详情页的追踪按钮可能比红叉和竖排名字晚一点渲染, 给一段宽限时间再判定"没有追踪按钮"
+        grace_timer = Timer(2).start()
         while not timeout_timer.reached():
             self.screenshot()
             if self.appear(self.I_TRACE_TRUE):
                 return True
-            # 神秘妖怪卷轴页: 有红叉且竖排名字是"神秘妖怪", 但没有追踪按钮(游戏已移除),
-            # 点红叉关闭并跳过; 若游戏后期补回追踪按钮, 走不到这里, 仍由 cancel_wq 旧路径处理
-            if self.appear(self.I_UI_BACK_RED) and not self.appear(self.I_TRACE_FALSE):
+            # 神秘妖怪卷轴页: 竖排名字出现"神秘妖怪"四个字且 trace_true 未出现才需要取消,
+            # 点红叉关闭并跳过; trace_true 能检查到时说明可以正常前往, 走 execute_mission
+            if grace_timer.reached() and self.appear(self.I_UI_BACK_RED):
                 monster_name = self.O_WQ_MONSTER_TYPE.detect_text(self.device.image).replace(' ', '')
-                if '神秘妖怪' in monster_name:
-                    logger.info('Mystery quest scroll without trace button, close it and skip')
+                if '神秘妖怪' in monster_name and not self.appear(self.I_TRACE_TRUE):
+                    logger.info('Mystery quest scroll without trace_true, close it and skip')
                     self.ui_click_until_disappear(self.I_UI_BACK_RED)
                     return False
             self.click(self.O_WQ_TEXT_ALL, interval=1.2)
