@@ -316,13 +316,23 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, GameUi, MetaDemonAsset
                     settle_until = time.monotonic() + 1.5
                 continue
             if target_type is None:
+                # 召唤按钮可能先于门票卡片渲染出现，先等面板结算再判定
+                if time.monotonic() < settle_until:
+                    continue
                 available = [star for star in (self.conf.meta_demon_config.fire_sequence_v if sequence is None else sequence)
                              if star in tickets and self.ticket_matches_star(tickets[star], star)]
                 if not available:
-                    self.State.done = True
-                    logger.info('No remaining ticket in configured summon sequence')
-                    self.appear_then_click(self.I_MD_CLOSE_POPUP, interval=0.8)
-                    return False
+                    # 模板漏检不等于门票耗尽：只有其他星级被明确识别到时才结束
+                    visible = [star for star, ticket in tickets.items()
+                               if self.ticket_matches_star(ticket, star)]
+                    if visible:
+                        self.State.done = True
+                        logger.info(f'已识别门票星级 {[int(star) for star in visible]}，均不在召唤顺序中，结束任务')
+                        self.appear_then_click(self.I_MD_CLOSE_POPUP, interval=0.8)
+                        return False
+                    logger.warning('召唤面板尚未识别到有效门票，等待重新识别，不判定门票耗尽')
+                    settle_until = time.monotonic() + 1
+                    continue
                 target_type = available[0]
                 logger.info(f'Summon {target_type.name.lower()} boss')
             target = tickets[target_type]
