@@ -1,13 +1,11 @@
 from datetime import time, timedelta
 from enum import Enum
-from typing import ClassVar
 
 from pydantic import Field
 
 from module.config.multi_select import normalize_multi_select
 from tasks.Component.config_base import ConfigBase, Time
 from tasks.Component.config_scheduler import Scheduler
-from tasks.Component.config_settings_layout import SettingsLayoutConfig, settings_section
 from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
 from tasks.Component.GeneralInvite.config_invite import InviteConfig
 from tasks.Component.SwitchSoul.switch_soul_config import SwitchSoulConfig
@@ -48,15 +46,6 @@ class TicketGeneralConfig(ConfigBase):
 
 
 class MetaDemonTicket(ConfigBase):
-    settings_layout_config: SettingsLayoutConfig = Field(default_factory=SettingsLayoutConfig)
-    settings_layout: ClassVar[list[dict]] = [
-        settings_section('scheduler', '任务调度', groups=[{'name': 'scheduler'}]),
-        settings_section('general_config', '通用设置', groups=[{'name': 'general_config'}]),
-        settings_section('invite_config', '通用邀请', groups=[{'name': 'invite_config'}]),
-        settings_section('switch_soul_config', '切换御魂', groups=[{'name': 'switch_soul_config'}]),
-        settings_section('general_battle_config', '战斗配置', groups=[{'name': 'general_battle_config'}]),
-    ]
-
     scheduler: Scheduler = Field(default_factory=Scheduler)
     general_config: TicketGeneralConfig = Field(default_factory=TicketGeneralConfig)
     invite_config: InviteConfig = Field(default_factory=InviteConfig)
