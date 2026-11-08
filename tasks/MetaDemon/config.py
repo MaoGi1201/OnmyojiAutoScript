@@ -6,7 +6,6 @@ from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleCon
 
 from tasks.Component.config_base import ConfigBase, TimeDelta, Time, dynamic_hide
 from pydantic import Field, field_validator, model_validator
-from module.config.multi_select import normalize_multi_select
 from module.cooperation import instance_name
 from enum import IntEnum, Enum
 from tasks.Component.config_scheduler import Scheduler
@@ -27,17 +26,31 @@ class MetaDemonMode(str, Enum):
     BOSS_ASSIST = '鬼王协助'
 
 
+def mode_values(value) -> list[str]:
+    """兼容旧配置里的列表写法（["鬼王战斗"]），统一成取值列表。"""
+    if isinstance(value, str):
+        return [value]
+    return [getattr(item, 'value', item) for item in (value or [])]
+
+
 class MetaDemonConfig(ConfigBase):
-    mode: list[MetaDemonMode] = Field(default=[MetaDemonMode.BOSS_BATTLE], title='运行模式',
-        json_schema_extra={'ui_exclusive_groups': [['鬼王战斗', '鬼王协助']]})
+    mode: MetaDemonMode = Field(default=MetaDemonMode.BOSS_BATTLE,
+        description='鬼王协助：协同双方须启用鬼王协助，并分别配置上供和协助身份')
 
     @field_validator('mode', mode='before')
     @classmethod
-    def parse_modes(cls, value):
-        selected = list(dict.fromkeys(MetaDemonMode(item) for item in normalize_multi_select(value)))
-        if len(selected) > 1:
-            raise ValueError('鬼王战斗和鬼王协助至多选择一种')
-        return selected
+    def parse_mode(cls, value):
+        """运行模式为单选，兼容旧配置里的列表写法。"""
+        if isinstance(value, MetaDemonMode):
+            return value
+        if isinstance(value, (list, tuple, set)):
+            value = next(iter(value), None)
+            if isinstance(value, MetaDemonMode):
+                return value
+        text = '' if value is None else str(value).strip()
+        if text in ('', '[]'):
+            return MetaDemonMode.BOSS_BATTLE
+        return MetaDemonMode(text)
 
     limit_time: Time = Field(default=Time(minute=45), description='limit_time_help')
     limit_count: int = Field(default=50, description='limit_count_help')
