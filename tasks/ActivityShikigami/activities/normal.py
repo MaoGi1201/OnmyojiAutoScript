@@ -34,7 +34,8 @@ class NormalClimbAct(BaseAct):
     DETACH_MAP_ROUTES: bool = True
 
     # 跳转后等待目标页出现的上限（秒）
-    page_arrive_timeout: float = 2.0
+    # 实测从点活动入口到认出活动页要 4.7~6.0s，设小了会提前判失败、被返回键踢出活动
+    page_arrive_timeout: float = 6.0  # 原值 2.0，恢复时改回
 
     # 四个爬塔页各自的「上锁图 / 未上锁图」，判定顺序在通用图之后。
     # 某项 asset 未配置时 `_own_lock_names()` 返回 None，该轮跳过。

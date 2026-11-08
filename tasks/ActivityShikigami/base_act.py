@@ -153,6 +153,9 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
     
     # 点跳转按钮后等待确认图出现的上限（秒）。
     BATTLE_PAGE_ENTER_TIMEOUT: float = 5.0
+
+    # 从式神录返回目标页时，等待目标页被认出的上限（秒）。
+    page_arrive_timeout: float = 6.0
     
     # 进界面时统一清一遍的干扰元素：每项 = (要处理的图, 处理方式)。
     POPUP_CLEARS: tuple[tuple[tuple[str, ...], str], ...] = (
@@ -395,6 +398,32 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
         for map_page in map_pages:
             self._wire_map_goto_battles(map_page)
 
+    def _leave_records(self) -> bool:
+        """换完御魂后从式神录点一次返回，确认回到战斗页。"""
+
+        target = self._page_of(self.climb_type)
+        if target is None:
+            return False
+        self.screenshot()
+        if not self.appear(self.I_CHECK_RECORDS):
+            return False
+        for name in self.BACK_BUTTONS:
+            back = getattr(self, name, None)
+            if back is None:
+                continue
+            if not self.appear_then_click(back, interval=1.0):
+                continue
+            deadline = time.time() + self.page_arrive_timeout
+            while time.time() < deadline:
+                self.screenshot()
+                if target.recognizer.evaluate(self):
+                    logger.info(f"Climb: back to {target.key} from records")
+                    return True
+                time.sleep(0.3)
+            return False
+        logger.warning("Climb: no back button configured")
+        return False
+
     @property
     def act_page_handle_dict(self) -> dict[pages.Page, Callable]:
         """活动页面和处理器的映射"""
@@ -595,7 +624,9 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
         elif enable_switch:
             group_team = getattr(conf, f"{self.climb_type}_group_team")
             self.run_switch_soul(group_team)
-        self.goto_page(getattr(pages, f"page_act_{self.climb_type}"))
+        # 识别不到再退回原路径。
+        if not self._leave_records():
+            self.goto_page(getattr(pages, f"page_act_{self.climb_type}"))
 
     def lock_team(self, battle_conf: GeneralBattleConfig):
         """按配置执行上锁或解锁。"""
