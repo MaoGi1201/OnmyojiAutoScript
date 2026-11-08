@@ -1,5 +1,3 @@
-from typing import ClassVar
-from tasks.Component.config_settings_layout import SettingsLayoutConfig, settings_section
 # This Python file uses the following encoding: utf-8
 # @author runhey
 # github https://github.com/runhey
@@ -229,31 +227,6 @@ class MetaDemonScheduler(Scheduler):
 
 
 class MetaDemon(ConfigBase):
-    settings_layout_config: SettingsLayoutConfig = Field(default_factory=SettingsLayoutConfig)
-    settings_layout: ClassVar[list[dict]] = [
-        settings_section('scheduler', '任务调度', groups=[{'name': 'scheduler'}]),
-        settings_section('general_config', '通用设置', groups=[
-            {'name': 'meta_demon_config', 'fields': ['mode']},
-            {'name': 'assistance_config', 'fields': ['friend_names']},
-            {'name': 'meta_demon_config', 'fields': [key for key in MetaDemonConfig.model_fields if key != 'mode']},
-            {'name': 'general_config'},
-            {'name': 'assistance_config', 'fields': ['role']},
-        ]),
-        settings_section('switch_soul_config', '执行任务前切换御魂', variants=[
-            {'id': key, 'label': label, 'groups': [{'name': 'switch_soul_config',
-                'fields': [f'{key}_{suffix}' for suffix in ('enable', 'group_team', 'by_name', 'group_team_name')],
-                'labels': {f'{key}_enable': '启用', f'{key}_group_team': '御魂装配分组设置',
-                           f'{key}_by_name': '通过OCR来切换御魂预设', f'{key}_group_team_name': '分组名、预设名'}}]}
-            for key, label in (('low_star', '低星鬼王'), ('high_star', '高星鬼王'))]),
-        settings_section('battle_config', '战斗配置', variants=[
-            {'id': key, 'label': label, 'groups': [{'name': f'{key}_battle_conf'}]}
-            for key, label in (('low_star', '低星鬼王'), ('high_star', '高星鬼王'))]),
-        settings_section('quick_preset_config', '快速预设详情', groups=[{'name': 'quick_preset_config'}]),
-        settings_section('assistance_config', '鬼王协助', groups=[
-            {'name': 'assistance_config', 'fields': [key for key in MetaDemonAssistanceConfig.model_fields if key not in ('friend_names', 'role')]},
-        ]),
-    ]
-
     scheduler: MetaDemonScheduler = Field(default_factory=MetaDemonScheduler)
     meta_demon_config: MetaDemonConfig = Field(default_factory=MetaDemonConfig)
     general_config: MetaDemonGeneralConfig = Field(default_factory=MetaDemonGeneralConfig)
