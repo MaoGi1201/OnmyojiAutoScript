@@ -27,3 +27,37 @@ class NamedQuickLoadoutConfig(QuickLoadoutConfig):
         default='',
         description='quick_loadout_custom_preset_help',
     )
+
+
+def parse_named_presets(preset_groups: str, custom_preset: str) -> dict[str, tuple[str, str]]:
+    """解析「预设组名,御魂分组名,队伍名」与「预设组名:怪物名」两段配置。"""
+    groups = {}
+    for row in preset_groups.split(';'):
+        if not row.strip():
+            continue
+        parts = [part.strip() for part in row.split(',')]
+        if len(parts) != 3 or not all(parts):
+            raise ValueError(f'预设组需填写：预设组名,御魂分组名,队伍名：{row}')
+        name, group, team = parts
+        if name in groups:
+            raise ValueError(f'预设组名重复：{name}')
+        groups[name] = (group, team)
+    presets = {}
+    for row in custom_preset.split(';'):
+        if not row.strip():
+            continue
+        name, separator, targets = row.partition(':')
+        name = name.strip()
+        if not separator or name not in groups:
+            raise ValueError(f'规则引用了不存在的预设组或缺少半角冒号：{row}')
+        for boss in targets.split(','):
+            boss = boss.strip()
+            if not boss:
+                raise ValueError(f'首领名不能为空：{row}')
+            boss = 'ALL' if boss.upper() == 'ALL' else boss
+            if boss in presets:
+                raise ValueError(f'首领规则重复：{boss}')
+            presets[boss] = groups[name]
+    if not presets:
+        raise ValueError('请填写至少一条上阵预设规则')
+    return presets

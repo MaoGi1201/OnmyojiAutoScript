@@ -1,4 +1,5 @@
 from module.atom.image import RuleImage
+from module.atom.frame import RuleFrame, Image, Ocr, Click
 from module.atom.click import RuleClick
 from module.atom.long_click import RuleLongClick
 from module.atom.swipe import RuleSwipe
@@ -13,6 +14,10 @@ class MartialTournamentAssets:
 	# Click Rule Assets
 	# 一键配置面板外安全关闭区域 
 	C_MT_QUICK_LOADOUT_CLOSE = RuleClick(roi_front=(491,595,189,73), roi_back=(491,595,189,73), name="mt_quick_loadout_close")
+
+
+	# Image Rule Assets
+	F_MT_QUICK_LOADOUT_FRAME = RuleFrame(name='mt_quick_loadout_frame', roi_badge=(910, 597, 32, 36), roi_range=[(496, 224, 553, 387), (809, 518, 119, 42), (491, 595, 189, 73)], roi_back=(700, 480, 520, 220), threshold=0.8, method='Template matching', profile='High', badgefile=['./tasks/MartialTournament/MT/MT_mt_goto_quick_loadout.png'], range=[Image(method='Template matching', threshold=0.8), Image(file='./tasks/MartialTournament/MT/MT_mt_quick_loadout_fight.png', method='Template matching', threshold=0.8), Click()])
 
 
 	# Image Rule Assets
