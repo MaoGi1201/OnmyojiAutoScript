@@ -109,7 +109,7 @@ def split_legacy_meta_demon(data: dict) -> dict:
     })
     if ticket_modes:
         boss_modes = [mode for mode in modes if mode in ('鬼王战斗', '鬼王协助')]
-        boss['mode'] = boss_modes or ['鬼王战斗']
+        boss['mode'] = (boss_modes or ['鬼王战斗'])[0]
         if not boss_modes:
             old['scheduler'] = {**(old.get('scheduler') or {}), 'enable': False}
     old['meta_demon_config'] = boss

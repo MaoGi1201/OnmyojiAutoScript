@@ -14,7 +14,7 @@ from module.cooperation import Cooperation
 from module.exception import RequestHumanTakeover, ScriptError, TaskEnd
 from module.image.rpc import get_image_client
 from module.logger import logger
-from tasks.MetaDemon.config import AssistanceRole, BossType, MetaDemonMode
+from tasks.MetaDemon.config import AssistanceRole, BossType, MetaDemonMode, mode_values
 import tasks.MetaDemon.page as pages
 
 
@@ -46,7 +46,7 @@ class AssistanceLink:
             other = self.runtime.read(self.peer).get('meta_demon', {})
             other_settings = other.get('assistance_config', {})
             if (self.peer == self.runtime.name or other_settings.get('role') != other_role
-                    or MetaDemonMode.BOSS_ASSIST not in other.get('meta_demon_config', {}).get('mode', [])
+                    or MetaDemonMode.BOSS_ASSIST.value not in mode_values(other.get('meta_demon_config', {}).get('mode'))
                     or other_settings.get('cooperation_script', '') not in ('', self.runtime.name)):
                 raise ScriptError('鬼王协同脚本应为匹配的上供和协助实例')
 

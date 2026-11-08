@@ -215,12 +215,12 @@ class Cooperation:
             if not item.get('scheduler', {}).get('enable', False):
                 raise ScriptError(f'协同任务未启用：{name}/{task}')
         if task == 'MetaDemon':
-            from tasks.MetaDemon.config import AssistanceRole, MetaDemonMode
+            from tasks.MetaDemon.config import AssistanceRole, MetaDemonMode, mode_values
             pair = ((own, peer), (other, self.name))
             settings = [item.get('assistance_config', {}) for item, _ in pair]
             targets = [setting.get('cooperation_script', '').strip() for setting in settings]
             if ({setting.get('role') for setting in settings} != {AssistanceRole.OFFERING, AssistanceRole.ASSIST}
-                    or not all(MetaDemonMode.BOSS_ASSIST in item.get('meta_demon_config', {}).get('mode', [])
+                    or not all(MetaDemonMode.BOSS_ASSIST.value in mode_values(item.get('meta_demon_config', {}).get('mode'))
                                for item, _ in pair)
                     or not any(targets)
                     or any(target not in ('', name) for target, (_, name) in zip(targets, pair))):
