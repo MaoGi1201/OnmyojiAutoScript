@@ -322,5 +322,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "活动列表页超鬼王活动标志"
+  },
+  {
+    "itemName": "main_goto_metademon",
+    "imageName": "md_main_goto_metademon.png",
+    "roiFront": "1182,299,46,32",
+    "roiBack": "1164,134,83,393",
+    "method": "Template matching",
+    "threshold": 0.7,
+    "description": "庭院主页右侧活动栏的超鬼王入口"
   }
 ]
