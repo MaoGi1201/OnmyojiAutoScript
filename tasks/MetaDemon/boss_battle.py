@@ -11,7 +11,6 @@ from tasks.Component.GeneralBattle.general_battle import GeneralBattle
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
 from tasks.Component.QuickLoadout.quick_loadout import QuickLoadout
 from tasks.GameUi.assets import GameUiAssets
-from tasks.GameUi.default_pages import clear_page_popups
 from tasks.GameUi.game_ui import GameUi
 from tasks.MetaDemon.config import MetaDemon, BossType, loadout_group
 from tasks.MetaDemon.assets import MetaDemonAssets
@@ -375,9 +374,6 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, GameUi, MetaDemonAsset
 
         logger.hr('Enter shikigami records', 2)
         self.ui_click(self.I_MD_SHIKIGAMI, stop=GameUiAssets.I_CHECK_RECORDS, interval=1)
-        # 走导航进式神录时，页面的 enter_success hook 会清弹窗；手工进不会触发，
-        # 这里补一次（AS 的 switch_soul 同样在进式神录后调用），免得"音频资源下载"挡住后续点击
-        clear_page_popups(self)
         return True
 
     def _leave_records(self) -> bool:
