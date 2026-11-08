@@ -47,6 +47,7 @@
     MartialTournament: "武斗大会",
     MemoryScrolls: "绘卷",
     MetaDemon: "超鬼王",
+    MetaDemonTicket: "鬼王门票",
     MysteryShop: "神秘商店",
     Nian: "年兽",
     Orochi: "八岐大蛇",
