@@ -10,6 +10,8 @@ from module.atom.image import RuleImage
 from tasks.Component.GeneralBattle.general_battle import GeneralBattle
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
 from tasks.Component.QuickLoadout.quick_loadout import QuickLoadout
+from tasks.GameUi.assets import GameUiAssets
+from tasks.GameUi.default_pages import clear_page_popups
 from tasks.GameUi.game_ui import GameUi
 from tasks.MetaDemon.config import MetaDemon, BossType, loadout_group
 from tasks.MetaDemon.assets import MetaDemonAssets
@@ -64,25 +66,6 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, GameUi, MetaDemonAsset
         self.conf = self.config.meta_demon
         self.limit_time = self.conf.meta_demon_config.limit_time_v
         self.limit_count = self.conf.meta_demon_config.limit_count
-        page_shikigami_records = self.navigator.resolve_page(ipages.page_shikigami_records)
-        page_meta_demon_boss = self.navigator.resolve_page(ipages.page_meta_demon_boss)
-        page_main = self.navigator.resolve_page(ipages.page_main)
-        if page_shikigami_records is None or page_meta_demon_boss is None or page_main is None:
-            raise RuntimeError("MetaDemon 页面 session 初始化失败")
-
-        # 仅修改当前任务 session 内的跳转图，不污染全局页面定义
-        page_shikigami_records.clear_transitions()
-        page_shikigami_records.connect(
-            page_meta_demon_boss,
-            self.I_UI_BACK_YELLOW,
-            key="page_shikigami_records->page_meta_demon_boss",
-        )
-        page_meta_demon_boss.connect(
-            page_shikigami_records,
-            MetaDemonAssets.I_MD_SHIKIGAMI,
-            key="page_meta_demon_boss->page_shikigami_records",
-        )
-        page_main.remove_transition(key="page_main->page_shikigami_records")
 
     def run(self):
         self.before_run()
@@ -386,6 +369,37 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, GameUi, MetaDemonAsset
         self.ui_click(click, stop, interval=0.6)
         return True
 
+    def _enter_records(self) -> bool:
+        """点鬼王页的"式神"按钮进式神录。
+        """
+
+        logger.hr('Enter shikigami records', 2)
+        self.ui_click(self.I_MD_SHIKIGAMI, stop=GameUiAssets.I_CHECK_RECORDS, interval=1)
+        # 走导航进式神录时，页面的 enter_success hook 会清弹窗；手工进不会触发，
+        # 这里补一次（AS 的 switch_soul 同样在进式神录后调用），免得"音频资源下载"挡住后续点击
+        clear_page_popups(self)
+        return True
+
+    def _leave_records(self) -> bool:
+        """换完御魂后从式神录点一次返回，确认回到鬼王页。
+        """
+
+        self.screenshot()
+        if not self.appear(GameUiAssets.I_CHECK_RECORDS):
+            return False
+        # 返回键可能出现较晚（式神录弹窗刚关掉时），最多点两次
+        for _ in range(2):
+            if not self.appear_then_click(self.I_UI_BACK_YELLOW, interval=1.0):
+                continue
+            deadline = time.time() + self.page_arrive_timeout
+            while time.time() < deadline:
+                self.screenshot()
+                if self.appear(self.I_CHECK_BOSS_PAGE):
+                    logger.info('MetaDemon: back to boss page from records')
+                    return True
+                time.sleep(0.3)
+        return False
+
     def check_and_switch_soul(self) -> bool:
         """按鬼王分类应用御魂；显式开启快速上阵时通过 frame 装魂并上阵。"""
         if self.cur_boss_type is None:
@@ -428,12 +442,13 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, GameUi, MetaDemonAsset
         else:
             soul = self.conf.switch_soul_config.switch_for(category)
             if soul.enable or soul.enable_switch_by_name:
-                self.goto_page(ipages.page_shikigami_records)
+                self._enter_records()
                 if soul.enable_switch_by_name:
                     self.run_switch_soul_by_name(soul.group_name, soul.team_name)
                 else:
                     self.run_switch_soul(soul.switch_group_team)
-                self.goto_page(ipages.page_meta_demon_boss)
+                if not self._leave_records():
+                    self.goto_page(ipages.page_meta_demon_boss)
         # 其他分类可能已改变阵容，切回时必须重新应用该分类的战斗预设。
         shared = getattr(self, '_battle_shared_state', None)
         if shared is not None:
@@ -442,5 +457,6 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, GameUi, MetaDemonAsset
         return True
 
     def finish_task(self):
-        self.finish_task_navigation()
+        # 收尾回主页，直接 goto_page(page_main)
+        self.goto_page(ipages.page_main)
         raise TaskEnd
