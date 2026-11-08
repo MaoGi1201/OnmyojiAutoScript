@@ -772,11 +772,6 @@ class GameUi(ChessBattleNavigationMixin, BaseTask, GameUiAssets):
         logger.attr(f'{time.time() - start_time:.1f}s', f"Page arrived {destination}")
         return True
 
-    def finish_task_navigation(self) -> bool:
-        """任务收尾：回到庭院主页，与其他任务的收尾方式保持一致。"""
-        from tasks.GameUi.default_pages import page_main
-        return self.goto_page(page_main)
-
     def goto_page(self, destination: Page, confirm_wait: float = 0, skip_first_screenshot: bool = True,
                   timeout: int = 30) -> bool | None:
         """导航到目标页面。
