@@ -215,6 +215,17 @@ class Config(ConfigState, ConfigManual, ConfigWatcher, ConfigMenu):
         self.pending_task = pending_task
         self.waiting_task = waiting_task
 
+        # 调度器缓存的「下一个任务」如果已经不在队列里（被取消/禁用），就要一起清掉。
+        # 否则 get_schedule_data() 的 running 槽会一直把已取消的任务报给前端，
+        # 而前端会把它当成待办展示（表现为「取消了还在列表里」「勾选摘不掉」）。
+        cached_task = self.task
+        if cached_task is not None:
+            queued_commands = {f.command for f in pending_task}
+            queued_commands.update(f.command for f in waiting_task)
+            if cached_task.command not in queued_commands:
+                logger.info(f'Cached task {cached_task.command} is no longer queued, cleared')
+                self.task = None
+
     def get_next(self) -> Function:
         """
         获取下一个要执行的任务
