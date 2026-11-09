@@ -8,6 +8,7 @@ import random
 from datetime import datetime, timedelta
 from module.atom.animate import RuleAnimate
 from module.atom.click import RuleClick
+from module.atom.frame import RuleFrame, FrameResult
 from module.atom.gif import RuleGif
 from module.atom.image import RuleImage
 from module.atom.list import RuleList
@@ -225,6 +226,15 @@ class BaseTask(GlobalGameAssets, CostumeBase):
             self.interval_timer[timer_key].reset()
 
         return appear
+
+    def runframe(self, target: RuleFrame, *range_results, interval=None, threshold=None) -> FrameResult:
+        """读取 frame.data（坐标、裁剪图、文字）；仅 Click 显式 True 点击，其余参数可选比对。"""
+        if not isinstance(target, RuleFrame):
+            raise ScriptError('runframe 的第一个参数必须是 RuleFrame')
+        try:
+            return target.run(self, *range_results, interval=interval, threshold=threshold)
+        except (TypeError, ValueError) as error:
+            raise ScriptError(f'runframe 配置或区域无效: {error}') from error
 
     def appear_then_click(self,
                           target: RuleImage | RuleGif | RuleOcr,
@@ -749,7 +759,7 @@ class BaseTask(GlobalGameAssets, CostumeBase):
             self.screenshot()
             if not self.appear(click):
                 break
-            elif self.appear_then_click(click, interval=interval):
+            if self.appear_then_click(click, interval=interval):
                 appear_and_clicked = True
         return appear_and_clicked
 

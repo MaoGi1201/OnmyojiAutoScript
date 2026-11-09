@@ -18,6 +18,10 @@ from tasks.Component.GeneralBattle.assets import GeneralBattleAssets
 from module.logger import logger
 
 
+FIRST_INVITE_RETRY_SECONDS = 20
+CONTINUE_INVITE_RETRY_SECONDS = 30
+
+
 class FriendList(str, Enum):
     RECENT_FRIEND = 'recent_friend'
     GUILD_FRIEND = 'guild_friend'
@@ -97,12 +101,12 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
             return False
         if is_first:
             _ = self.room_type
-            self.timer_invite = Timer(20)
+            self.timer_invite = Timer(FIRST_INVITE_RETRY_SECONDS)
             self.timer_invite.start()
             self.ensure_room_type(len(config.friend_list.split('\n')))
             self.invite_friends(config)
         else:
-            self.timer_invite = Timer(30)
+            self.timer_invite = Timer(CONTINUE_INVITE_RETRY_SECONDS)
             self.timer_invite.start()
             self.timer_emoji = Timer(20)
             self.timer_emoji.start()
@@ -684,7 +688,7 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
 
         return True
 
-    def check_then_accept(self) -> bool:
+    def check_then_accept(self, timeout: float | None = None, default_invite: bool = True) -> bool:
         """
         队员接受邀请
         :return:
@@ -692,7 +696,10 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
         if not self.appear_accept():
             return False
         logger.info('Click accept')
+        timer = Timer(timeout).start() if timeout is not None else None
         while True:
+            if timer is not None and timer.reached():
+                return False
             self.screenshot()
             if self.is_in_room():
                 return True
@@ -704,7 +711,7 @@ class GeneralInvite(BaseTask, GeneralInviteAssets):
                 continue
             if self.appear_then_click(self.I_GI_SURE, interval=1):
                 continue
-            if self.appear_then_click(self.I_I_ACCEPT_DEFAULT, interval=1):
+            if default_invite and self.appear_then_click(self.I_I_ACCEPT_DEFAULT, interval=1):
                 continue
             if self.appear_then_click(self.I_I_ACCEPT, interval=1) or \
                     self.appear_then_click(self.I_I_ACCEPT_APPRENTICE, interval=1):

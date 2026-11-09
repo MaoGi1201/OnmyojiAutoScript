@@ -225,6 +225,8 @@ class GameUiAssets:
 	I_CHECK_CHESS = RuleImage(roi_front=(1159,592,66,70), roi_back=(1159,592,66,70), threshold=0.8, method="Template matching", file="./tasks/GameUi/page/page_check_chess.png")
 	# 町中场景扩展包下载弹窗取消按钮 
 	I_TOWN_SCENE_PACK_CANCEL = RuleImage(roi_front=(413,438,146,64), roi_back=(350,400,320,140), threshold=0.8, method="Template matching", file="./tasks/GameUi/page/page_town_scene_pack_cancel.png")
+	# 协同对弈页面标题 
+	I_DRAFT_DUEL = RuleImage(roi_front=(146,8,123,40), roi_back=(48,0,339,76), threshold=0.8, method="Template matching", file="./tasks/GameUi/page/page_checks_draft_duel.png")
 
 
 	# List Rule Assets
