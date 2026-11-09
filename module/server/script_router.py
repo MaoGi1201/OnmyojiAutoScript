@@ -11,6 +11,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from datetime import datetime
 from module.config.utils import convert_to_underscore
 
+from module.exception import RequestHumanTakeover
 from module.logger import logger
 from module.server.api_logger import ApiLoggingRoute, log_ws_event
 from module.server.config_manager import (
@@ -29,6 +30,22 @@ from tasks.Component.config_base import TimeDelta
 
 
 script_app = APIRouter(route_class=ApiLoggingRoute)
+
+
+def _refresh_schedule(config, script_name: str) -> None:
+    """重算调度队列，但不让「没有可运行任务」把调用方打挂。
+
+    `config.get_next()` 在 pending/waiting 都为空时会抛 RequestHumanTakeover。
+    websocket 端点原来让这个异常冒到 except 分支，于是只要配置里一个启用任务
+    都不剩，连接刚建立就被断开：前端再也收不到 schedule，任务列表会永久停在
+    取消前的那一份数据。这里吞掉这个异常 —— 队列已经由 update_scheduler()
+    算成空的，get_schedule_data() 会如实返回空列表。
+    """
+    try:
+        config.get_next()
+    except RequestHumanTakeover:
+        log_ws_event(f"ws[{script_name}] no runnable task")
+
 
 
 @script_app.get('/test')
@@ -295,7 +312,13 @@ async def script_task(script_name: str, task: str, group: str, argument: str, ty
     except Exception as e:
         # 类型不正确
         raise HTTPException(status_code=400, detail=f'Argument type error: {e}')
-    return mm.config_cache(script_name).model.script_set_arg(task, group, argument, value)
+    config = mm.config_cache(script_name)
+    ret = config.model.script_set_arg(task, group, argument, value)
+    if group == 'scheduler':
+        # 启用/禁用任务、改 next_run 之后立刻重算队列：否则 get_schedule_data()
+        # 返回的还是上一轮快照，前端会以为「改了没反应」。
+        config.update_scheduler()
+    return ret
 
 
 @script_app.put('/{script_name}/{task}/sync_next_run')
@@ -306,7 +329,7 @@ async def sync_next_run(script_name: str, task: str, target_dt: str):
     target = datetime.strptime(target_dt, '%Y-%m-%d %H:%M:%S') if target_dt else None
     config.task_delay(task=task, success=True, target=target)
     script_process = mm.script_process[script_name]
-    config.get_next()
+    _refresh_schedule(config, script_name)
     await script_process.broadcast_state({"schedule": config.get_schedule_data()})
     return True
 
@@ -356,7 +379,7 @@ async def websocket_endpoint(websocket: WebSocket, script_name: str):
         await script_process.send_json(websocket, {"state": script_process.state})
         log_ws_event(f"ws[{script_name}] connect state: {script_process.state}")
         config = mm.config_cache(script_name)
-        config.get_next()
+        _refresh_schedule(config, script_name)
         schedule_data = config.get_schedule_data()
         await script_process.send_json(websocket, {"schedule": schedule_data})
         log_ws_event(f"ws[{script_name}] connect response: {schedule_data}")
@@ -369,7 +392,7 @@ async def websocket_endpoint(websocket: WebSocket, script_name: str):
                 log_ws_event(f"ws[{script_name}] response: {script_process.state}")
             elif data == 'get_schedule':
                 config = mm.config_cache(script_name)
-                config.get_next()
+                _refresh_schedule(config, script_name)
                 schedule_data = config.get_schedule_data()
                 await script_process.broadcast_state({"schedule": schedule_data})
                 log_ws_event(f"ws[{script_name}] response: {schedule_data}")
