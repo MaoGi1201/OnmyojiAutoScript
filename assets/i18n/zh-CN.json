@@ -1,6 +1,10 @@
 {
     "Chess": "百鬼棋局",
     "chess_config": "百鬼棋局配置",
+    "sixrealms_selection_enabled": "选择六道",
+    "hyakki_draft_enabled": "百鬼优先所需御魂",
+    "custom_lineup": "自定义阵容标识",
+    "custom_lineup_help": "在 chesslineup 工具中保存并应用的阵容标识",
     "lineup_bond": "选择阵容羁绊",
     "rank_protection": "保段位",
     "rank_protection_help": "上一局进入前四名后主动退出三局；主动退出的局数不计入执行次数",

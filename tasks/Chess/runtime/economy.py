@@ -10,31 +10,21 @@ import numpy as np
 
 from module.atom.click import RuleClick
 from module.atom.image import RuleImage
-from module.atom.ocr import RuleOcr
 from module.logger import logger
-from tasks.Chess.strategy.shikigami_catalog import (
-    KNOWN_BONDS,
-    NON_SHOP_SHIKIGAMI,
-    SHIKIGAMI_ENTRIES,
-    SHIKIGAMI_BY_ROMAJI,
-    STORE_SHIKIGAMI_BY_SIGNATURE,
-    bond_key,
-    normalize_bond_ocr_text,
-)
+from tasks.Chess.runtime.cache import economy_action_allowed, economy_scope, timed_action
+from tasks.Chess.strategy.shikigami_catalog import SHIKIGAMI_BY_ROMAJI
 
 
 class ChessEconomyMixin:
     """Internal mixin; use through ``ScriptTask`` only."""
 
+    def _economy_action_allowed(self) -> bool:
+        """Check fresh state and elapsed countdown before another economy action."""
+        return economy_action_allowed(self)
+
     def _shop_slots(self) -> list[tuple[int, RuleClick]]:
-        """返回商店五个卡面点击区；编号按原资源定义从右向左。"""
-        return [
-            (
-                index,
-                getattr(self, f'C_SHIKIGAMI_{index}'),
-            )
-            for index in range(1, 6)
-        ]
+        """返回商店 Frame range6 点击区；编号从右向左。"""
+        return self._frame_shop_slots()
 
     def _is_shop_open(self) -> bool:
         """使用刷新按钮判断商店是否展开；禁止在此读取价格 OCR。
@@ -65,6 +55,13 @@ class ChessEconomyMixin:
         return self._read_chess_mode() == '战' and self.appear(
             self.I_CHECK_MARKET
         )
+
+    def _shop_closed_in_image(self) -> bool:
+        """Confirm closure independently of the old assumed-open flag."""
+        if self._shop_refresh_marker_visible():
+            return False
+        # Battle effects may hide refresh while the card panel is still open.
+        return self._read_chess_mode() != '战' or not self._frame_card_scan('store')
 
     def _is_preparation_mode(self) -> bool:
         """只有无符咒弹窗的“备”可继续操作；弹窗出现立即中断。"""
@@ -187,7 +184,7 @@ class ChessEconomyMixin:
     def _can_afford_shop_shikigami(
         self,
         slot_index: int,
-        known_price: int | None = None,
+        known_price: int,
     ) -> bool:
         """判断购买能力；身份已确定时优先使用目录费用。"""
         if slot_index not in range(1, 6):
@@ -197,8 +194,6 @@ class ChessEconomyMixin:
         gold = self._read_shop_gold()
         raw_price = ''
         price = known_price
-        if price is None:
-            price, raw_price = self._read_shop_slot_price(slot_index)
         if gold is None or price is None:
             logger.warning(
                 'Skip Chess shop purchase because affordability OCR is '
@@ -215,53 +210,8 @@ class ChessEconomyMixin:
         )
         return affordable
 
-    def _read_shop_slot_price(self, slot_index: int) -> tuple[int | None, str]:
-        """定位金币图标并读取其右侧费用数字。"""
-        if slot_index not in range(1, 6):
-            return None, ''
-        price_rule = getattr(self, f'O_SHIKIGAMI_GOLD_{slot_index}')
-        price_roi = tuple(price_rule.roi)
-        matches = self.store_gold_rule.match_all_any(
-            self.device.image,
-            roi=list(price_roi),
-            threshold=self.SHOP_GOLD_ICON_THRESHOLD,
-            nms_threshold=0.3,
-            frame_id=self.device.image_frame_id,
-        )
-        if not matches:
-            logger.debug(
-                'Chess shop price icon unavailable: '
-                f'slot={slot_index}, roi={price_roi}'
-            )
-            return None, ''
 
-        _, icon_x, _, icon_width, _ = max(
-            matches,
-            key=lambda item: item[0],
-        )
-        roi_x, roi_y, roi_width, roi_height = price_roi
-        price_x = icon_x + icon_width
-        price_right = roi_x + roi_width
-        price_width = price_right - price_x
-        if price_width <= 0:
-            return None, ''
-
-        digit_rule = RuleOcr(
-            roi=(price_x, roi_y, price_width, roi_height),
-            area=(price_x, roi_y, price_width, roi_height),
-            mode='Digit',
-            method='Default',
-            keyword='',
-            name=f'shikigami_gold_value_{slot_index}',
-        )
-        price = digit_rule.ocr(self.device.image)
-        raw = str(price)
-        if not isinstance(price, int):
-            return None, raw
-        if price not in range(1, 6):
-            return None, raw
-        return price, raw
-
+    @timed_action
     def _ensure_shop_open(self) -> bool:
         """必要时点击商店图标，并等待刷新按钮确认商店已经展开。"""
         if not self._is_purchase_allowed():
@@ -284,13 +234,14 @@ class ChessEconomyMixin:
                 logger.debug('Stop opening Chess shop: Hyakki mode detected')
                 return False
             attempts += 1
+            if not self._economy_action_allowed():
+                return False
             self.click(self.I_MARKET)
             attempt_deadline = min(
                 deadline,
                 time.monotonic() + 2 * self.SLOW_POLL_INTERVAL,
             )
             while time.monotonic() < attempt_deadline:
-                time.sleep(self.SCREENSHOT_INTERVAL)
                 self.screenshot()
                 if not self._is_purchase_allowed():
                     logger.debug('Stop opening Chess shop: Hyakki mode detected')
@@ -323,15 +274,20 @@ class ChessEconomyMixin:
             'tracked internally'
         )
         self.device.click_record_remove(self.I_MARKET)
-        self.click(self.I_MARKET)
-        time.sleep(2 * self.SLOW_POLL_INTERVAL)
-        self.screenshot()
-        if self._read_chess_mode() != '战':
-            logger.debug('Battle mode ended while opening economy shop')
+        if not self._economy_action_allowed():
             return False
+        self.click(self.I_MARKET)
+        deadline = time.monotonic() + 2 * self.SLOW_POLL_INTERVAL
+        while time.monotonic() < deadline:
+            self.screenshot()
+            if self._read_chess_mode() != '战':
+                return False
+            if self._shop_open_confirm_marker_visible():
+                break
         self._shop_assumed_open = True
         return True
 
+    @timed_action
     def _ensure_shop_closed(
         self,
         allowed_modes: tuple[str, ...] = ('备',),
@@ -364,8 +320,8 @@ class ChessEconomyMixin:
             logger.debug('Clear stale Chess shop state in passive mode')
             return True
 
-        logger.debug('Chess shop is open, click market to close it')
-        self.device.click_record_remove(self.I_MARKET)
+        logger.debug('Chess shop is open, click safe details-close area to close it')
+        self.device.click_record_remove(self.C_CLICK_CLOSE_SPECIFICS_AREA)
         # 战斗中刷新按钮可能完全被技能遮挡。若商店仅由内部状态确认，
         # 固定点击一次即可关闭，禁止进入“看不见 -> 再点一次”的抖动。
         if (
@@ -373,12 +329,17 @@ class ChessEconomyMixin:
             and shop_assumed_open
             and not shop_visible
         ):
-            self.click(self.I_MARKET)
-            time.sleep(2 * self.SLOW_POLL_INTERVAL)
-            self.screenshot()
-            self._shop_assumed_open = False
-            logger.debug('Chess battle economy shop closed by one-shot toggle')
-            return True
+            self.click(self.C_CLICK_CLOSE_SPECIFICS_AREA)
+            # The safe close click cannot reopen the shop. Confirm card-panel
+            # disappearance as well as the possibly obscured refresh marker.
+            deadline = time.monotonic() + 2 * self.SLOW_POLL_INTERVAL
+            while time.monotonic() < deadline:
+                self.screenshot()
+                if self._shop_closed_in_image():
+                    self._shop_assumed_open = False
+                    return True
+            logger.warning('Chess battle shop close remains unconfirmed')
+            return False
 
         deadline = time.monotonic() + self.SHOP_CLOSE_TIMEOUT
         while time.monotonic() < deadline:
@@ -388,13 +349,12 @@ class ChessEconomyMixin:
                     f'{allowed_modes}'
                 )
                 return False
-            self.click(self.I_MARKET)
+            self.click(self.C_CLICK_CLOSE_SPECIFICS_AREA)
             attempt_deadline = min(
                 deadline,
                 time.monotonic() + 2 * self.SLOW_POLL_INTERVAL,
             )
             while time.monotonic() < attempt_deadline:
-                time.sleep(self.SCREENSHOT_INTERVAL)
                 self.screenshot()
                 if self._read_chess_mode() not in allowed_modes:
                     logger.debug(
@@ -402,7 +362,7 @@ class ChessEconomyMixin:
                         f'{allowed_modes}'
                     )
                     return False
-                if not self._is_shop_open():
+                if self._shop_closed_in_image():
                     logger.debug('Chess shop closed successfully')
                     self._shop_assumed_open = False
                     return True
@@ -420,237 +380,15 @@ class ChessEconomyMixin:
                 f'experience={removed_experience}, refresh={removed_refresh}'
             )
 
-    def _match_shop_shikigami_avatar(
-        self,
-        click_rule: RuleClick,
-        expected_name: str | None = None,
-        rules: list[tuple[str, RuleImage]] | None = None,
-    ) -> dict | None:
-        """只在一个商店点击框内匹配 ``*_m`` 式神头像。"""
-        best = None
-        rules = self.shikigami_shop_rules if rules is None else rules
-        for name, rule in rules:
-            if expected_name is not None and name != expected_name:
-                continue
-            matches = rule.match_all_any(
-                self.device.image,
-                roi=list(click_rule.roi_back),
-                threshold=rule.threshold,
-                nms_threshold=0.3,
-                frame_id=self.device.image_frame_id,
-            )
-            if not matches:
-                continue
-            score, x, y, width, height = max(matches, key=lambda item: item[0])
-            if best is None or score > best['score']:
-                best = {
-                    'name': name,
-                    'score': float(score),
-                    'position': (x + width // 2, y + height // 2),
-                }
-        if best is not None:
-            return best
-
-        fallback = self._match_shop_shikigami_avatar_glow_fallback(
-            click_rule,
-            expected_name=expected_name,
-            rules=rules,
-        )
-        if fallback is not None:
-            logger.debug(
-                'Chess shop avatar matched by glow fallback: '
-                f'name={fallback["name"]}, score={fallback["score"]:.3f}, '
-                f'threshold={self.SHOP_GLOW_TEMPLATE_THRESHOLD}'
-            )
-        return fallback
-
-    def _recognize_shop_shikigami_by_name(
-        self,
-        slot_index: int,
-        click_rule: RuleClick,
-    ) -> dict | None:
-        """以式神名字 OCR 作为商店身份识别的最高优先级。"""
-        if slot_index not in range(1, 6):
-            return None
-        name_rule = getattr(self, f'O_SHIKIGAMI_NAME_{slot_index}')
-        raw = self._normalize_ocr_text(name_rule.ocr(self.device.image))
-        if not raw:
-            return None
-
-        entries = tuple(
-            entry
-            for entry in SHIKIGAMI_ENTRIES
-            if entry.romaji not in NON_SHOP_SHIKIGAMI
-        )
-        exact = [
-            entry
-            for entry in entries
-            if entry.chinese_name in raw
-        ]
-        if exact:
-            entry = max(exact, key=lambda item: len(item.chinese_name))
-            score = 1.0
-        else:
-            candidates = []
-            for entry in entries:
-                matched, similarity, _ = self._fuzzy_text_match(
-                    entry.chinese_name,
-                    raw,
-                )
-                if matched:
-                    candidates.append((similarity, entry))
-            if not candidates:
-                logger.debug(
-                    'Chess shop name OCR unavailable: '
-                    f'slot={slot_index}, raw=[{raw}]'
-                )
-                return None
-            score, entry = max(candidates, key=lambda item: item[0])
-
-        x, y, width, height = click_rule.roi_back
-        logger.debug(
-            'Chess shop name identity: '
-            f'slot={slot_index}, raw=[{raw}], score={score:.3f} '
-            f'-> {entry.romaji}'
-        )
-        return {
-            'name': entry.romaji,
-            'score': float(score),
-            'position': (x + width // 2, y + height // 2),
-            'source': 'ocr_name',
-            'price': entry.cost,
-            'bonds': entry.bonds,
-            'raw_name': raw,
-        }
-
-    def _recognize_shop_shikigami_by_ocr(
-        self,
-        slot_index: int,
-        click_rule: RuleClick,
-    ) -> dict | None:
-        """羁绊优先；有歧义时读取费用，仍失败则由外层图片兜底。"""
-        if slot_index not in range(1, 6):
-            return None
-
-        skill_rule = getattr(self, f'O_SHIKIGAMI_SKILL_{slot_index}')
-        raw_skill = self._normalize_ocr_text(
-            skill_rule.ocr(self.device.image)
-        )
-        skill_text = normalize_bond_ocr_text(raw_skill)
-        if not skill_text:
-            logger.debug(
-                'Chess shop OCR identity unavailable: '
-                f'slot={slot_index}, bonds=[{raw_skill}]'
-            )
-            return None
-
-        observed_bonds = tuple(
-            bond
-            for bond in KNOWN_BONDS
-            if bond in skill_text
-        )
-        observed_key = bond_key(observed_bonds)
-        if not observed_key:
-            logger.debug(
-                'Chess shop bonds are unavailable; use image fallback: '
-                f'slot={slot_index}, raw=[{raw_skill}]'
-            )
-            return None
-
-        all_names = tuple(STORE_SHIKIGAMI_BY_SIGNATURE.values())
-        candidates = [
-            name
-            for name in all_names
-            if observed_key.issubset(
-                bond_key(SHIKIGAMI_BY_ROMAJI[name].bonds)
-            )
-        ]
-
-        price = None
-        raw_price = ''
-        source = 'ocr_bonds'
-        if len(candidates) != 1:
-            price, raw_price = self._read_shop_slot_price(slot_index)
-            if price is None:
-                logger.debug(
-                    'Chess shop bond candidates need price but price OCR '
-                    f'failed: slot={slot_index}, bonds={observed_bonds}, '
-                    f'candidates={candidates}, price_raw=[{raw_price}]'
-                )
-                return None
-            candidates = [
-                name
-                for name in candidates
-                if SHIKIGAMI_BY_ROMAJI[name].cost == price
-            ]
-            source = 'ocr_bonds_price'
-
-        if len(candidates) != 1:
-            logger.debug(
-                'Chess shop identity remains ambiguous; use image fallback: '
-                f'slot={slot_index}, bonds={observed_bonds}, price={price}, '
-                f'candidates={candidates}'
-            )
-            return None
-
-        name = candidates[0]
-        entry = SHIKIGAMI_BY_ROMAJI[name]
-        x, y, width, height = click_rule.roi_back
-        logger.debug(
-            'Chess shop bond identity: '
-            f'slot={slot_index}, bonds={observed_bonds}, '
-            f'price={price}, source={source} -> {name}'
-        )
-        return {
-            'name': name,
-            'score': 1.0,
-            'position': (x + width // 2, y + height // 2),
-            'source': source,
-            # 羁绊已唯一时直接采用目录费用，购买能力判断无需再次 OCR。
-            'price': entry.cost,
-            'bonds': entry.bonds,
-            'raw_bonds': raw_skill,
-        }
 
     def _recognize_shop_slot(
         self,
         slot_index: int,
         click_rule: RuleClick,
         expected_name: str | None = None,
-        fallback_rules: list[tuple[str, RuleImage]] | None = None,
     ) -> dict | None:
-        """商店统一识别入口：名字→羁绊及费用→图片兜底。"""
-        recognized = self._recognize_shop_shikigami_by_name(
-            slot_index,
-            click_rule,
-        )
-        if recognized is None:
-            recognized = self._recognize_shop_shikigami_by_ocr(
-                slot_index,
-                click_rule,
-            )
-        if recognized is not None:
-            if expected_name is None or recognized['name'] == expected_name:
-                return recognized
-            # 购买复检时若 OCR 突然识别成另一张卡，再用原目标头像复核
-            # 一次，避免单帧 OCR 误识别造成“已经购买成功”的假结论。
-            fallback = self._match_shop_shikigami_avatar(
-                click_rule,
-                expected_name=expected_name,
-                rules=fallback_rules,
-            )
-            if fallback is not None:
-                fallback['source'] = 'avatar_after_ocr_mismatch'
-            return fallback
-
-        fallback = self._match_shop_shikigami_avatar(
-            click_rule,
-            expected_name=expected_name,
-            rules=fallback_rules,
-        )
-        if fallback is not None:
-            fallback['source'] = 'avatar'
-        return fallback
+        """商店统一识别入口：金币定位，Frame 读取名字、特质及头像。"""
+        return self._frame_shop_in_slot(click_rule, expected_name=expected_name)
 
     @staticmethod
     def _template_gray(image: np.ndarray) -> np.ndarray:
@@ -660,57 +398,31 @@ class ChessEconomyMixin:
             return cv2.cvtColor(image, cv2.COLOR_BGRA2GRAY)
         return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    def _match_shop_shikigami_avatar_glow_fallback(
-        self,
-        click_rule: RuleClick,
-        expected_name: str | None = None,
-        rules: list[tuple[str, RuleImage]] | None = None,
-    ) -> dict | None:
-        """发光商店卡兜底：用灰度归一化匹配降低光效影响。"""
-        x, y, width, height = click_rule.roi_back
-        source = self.device.image[y:y + height, x:x + width]
-        if source.size == 0:
-            return None
-        source_gray = self._template_gray(source)
-        best = None
-        rules = self.shikigami_shop_rules if rules is None else rules
-        for name, rule in rules:
-            if expected_name is not None and name != expected_name:
-                continue
-            template = rule.image
-            if template is None or template.size == 0:
-                continue
-            if (
-                template.shape[0] > source.shape[0]
-                or template.shape[1] > source.shape[1]
-            ):
-                continue
-            template_gray = self._template_gray(template)
-            result = cv2.matchTemplate(
-                source_gray,
-                template_gray,
-                cv2.TM_CCOEFF_NORMED,
-            )
-            _, score, _, location = cv2.minMaxLoc(result)
-            if best is None or score > best['score']:
-                best = {
-                    'name': name,
-                    'score': float(score),
-                    'position': (
-                        x + location[0] + template.shape[1] // 2,
-                        y + location[1] + template.shape[0] // 2,
-                    ),
-                }
-        if best is None:
-            return None
-        if best['score'] < self.SHOP_GLOW_TEMPLATE_THRESHOLD:
-            logger.debug(
-                'Chess shop glow fallback best candidate below threshold: '
-                f'name={best["name"]}, score={best["score"]:.3f}, '
-                f'threshold={self.SHOP_GLOW_TEMPLATE_THRESHOLD}'
-            )
-            return None
-        return best
+
+    def _shop_purchase_badge(self, click_rule):
+        """以该卡牌 Frame 的点击框还原金币 badge 的局部搜索区。"""
+        frame = self.F_STORE_CARD
+        bx, by, bw, bh = frame.badge_references[0]
+        rx, ry, _, _ = frame.roi_ranges[5]
+        x, y, _, _ = click_rule.roi_back
+        area = (int(x + bx - rx - 3), int(y + by - ry - 3), bw + 6, bh + 6)
+        return RuleImage(roi_front=(0, 0, bw, bh), roi_back=area,
+                         method=frame.method, threshold=frame.threshold,
+                         file=frame.files[0], profile=frame.profile)
+
+    def _confirm_shop_purchase(self, slot_index, click_rule, matched_name, badge):
+        """点击前已确认金币 badge；点击后以同一位置 badge 消失确认。"""
+        deadline = time.monotonic() + self.ACTION_ICON_WAIT_TIMEOUT
+        while time.monotonic() < deadline:
+            self.screenshot()
+            if (not self._is_purchase_allowed() or self.appear(self.I_SELECT_GRIGRI)
+                    or not self._is_shop_open()):
+                return False
+            if not self.appear(badge):
+                logger.info(f'Chess purchase confirmed by gold badge disappearance: '
+                            f'slot={slot_index}, name={matched_name}')
+                return True
+        return False
 
     def _buy_shop_slot(
         self,
@@ -718,7 +430,7 @@ class ChessEconomyMixin:
         click_rule: RuleClick,
         matched_name: str,
     ) -> bool:
-        """持续点击目标商店格，直到原头像不再出现在该格。"""
+        """购买前确认金币 badge，购买后以该 badge 消失确认。"""
         known_price = SHIKIGAMI_BY_ROMAJI[matched_name].cost
         deadline = time.monotonic() + self.SHOP_BUY_TIMEOUT
         current_match = self._recognize_shop_slot(
@@ -726,11 +438,16 @@ class ChessEconomyMixin:
             click_rule,
             expected_name=matched_name,
         )
+        # A target missing before any click is not a confirmed purchase.
+        if current_match is None:
+            return False
         attempts = 0
         emergency_cleanup_done = False
         lineup_sale_done = False
 
         while current_match is not None and time.monotonic() < deadline:
+            if not self._economy_action_allowed():
+                return False
             if not self._is_purchase_allowed():
                 logger.debug(
                     f'Stop buying {matched_name}: Hyakki mode detected'
@@ -745,6 +462,23 @@ class ChessEconomyMixin:
                     f'shop slot {slot_index}'
                 )
                 return False
+            hand_count = self._hand_capacity_count()
+            if hand_count >= 10:
+                logger.info(f'Chess hand full before purchase: count={hand_count}/10; clear space first')
+                if emergency_cleanup_done and lineup_sale_done:
+                    logger.warning(f'Cancel Chess purchase {matched_name}: hand still full after cleanup')
+                    return False
+                sell_lineup = emergency_cleanup_done
+                recovery = self._free_one_hand_slot_for_purchase(sell_lineup=sell_lineup)
+                if recovery is None:
+                    return False
+                emergency_cleanup_done = True
+                if recovery.get('type') == 'lineup':
+                    lineup_sale_done = True
+                continue
+            badge = self._shop_purchase_badge(click_rule)
+            if not self.appear(badge):
+                return False
             attempts += 1
             logger.info(
                 f'Buy Chess card: '
@@ -753,14 +487,29 @@ class ChessEconomyMixin:
                 f'attempt={attempts}, source={current_match["source"]}, '
                 f'identity_score={current_match["score"]:.3f})'
             )
+            self.device.click_record_remove(click_rule)
+            if not self._economy_action_allowed():
+                return False
             self.click(click_rule)
-            time.sleep(self.SCREENSHOT_INTERVAL)
-            self.screenshot()
+            if self._confirm_shop_purchase(slot_index, click_rule, matched_name, badge):
+                self.device.click_record_remove(click_rule)
+                return True
+            if not self._is_purchase_allowed() or self.appear(self.I_SELECT_GRIGRI):
+                return False
             current_match = self._recognize_shop_slot(
                 slot_index,
                 click_rule,
                 expected_name=matched_name,
             )
+            if current_match is None:
+                # 未通过金币 badge 消失确认，不把身份识别丢失算作购买成功。
+                return False
+            if attempts >= 3:
+                logger.warning(
+                    f'Cancel Chess purchase {matched_name}: cumulative click limit '
+                    f'reached ({attempts}/3), slot={slot_index}'
+                )
+                return False
             if current_match is not None:
                 if not self._is_purchase_allowed():
                     logger.debug(
@@ -776,14 +525,19 @@ class ChessEconomyMixin:
                         f'for shop slot {slot_index}'
                     )
                     return False
-                logger.debug(
-                    f'Chess shop slot {slot_index} still matches '
-                    f'{matched_name} after click, free hand space and retry'
-                )
+                if not self._is_shop_open():
+                    return False
+                if self._hand_capacity_count() < 10:
+                    # Portrait and badge are still present: retry this target
+                    # without disturbing a hand that already has free space.
+                    continue
+                if not self._economy_action_allowed():
+                    return False
+                logger.debug(f'Chess purchase blocked by full hand: {matched_name}')
                 if emergency_cleanup_done and lineup_sale_done:
                     logger.warning(
                         f'Chess buy {matched_name} remains blocked after '
-                        'emergency cleanup and one lineup-card sale'
+                        'emergency cleanup and one lineup-card sale; cancel current purchase'
                     )
                     return False
                 sell_lineup = emergency_cleanup_done
@@ -796,7 +550,8 @@ class ChessEconomyMixin:
                         'no safe hand card can be cleared; block shop refresh'
                     )
                     return False
-                if sell_lineup:
+                if recovery.get('type') == 'lineup':
+                    emergency_cleanup_done = True
                     lineup_sale_done = True
                     logger.debug(
                         f'Retry Chess buy {matched_name} after selling one '
@@ -810,11 +565,7 @@ class ChessEconomyMixin:
                     )
 
         if current_match is None:
-            logger.debug(
-                'Chess shop purchase succeeded by identity disappearance: '
-                f'slot={slot_index}, name={matched_name}, attempts={attempts}'
-            )
-            return True
+            return False
 
         logger.warning(
             f'Chess shop purchase timed out: slot={slot_index}, '
@@ -823,7 +574,7 @@ class ChessEconomyMixin:
         return False
 
     def buy_lineup_shikigami_from_shop(self) -> list[str] | None:
-        """先以费用＋羁绊记录商店目标，再按记录购买所有阵容式神。"""
+        """整页识别一次记录目标，再逐格复核头像并购买。"""
         if not self._is_purchase_allowed():
             logger.debug('Stop Chess shop purchase: Hyakki mode detected')
             return None
@@ -904,10 +655,8 @@ class ChessEconomyMixin:
                 matched_name=target['matched_name'],
             ):
                 purchased.append(target['matched_name'])
-                # 第一张卡购买/升星动画会短暂覆盖其他商店格。等待稳定并
-                # 刷新截图后再处理目标列表中的下一格，重复卡也逐格购买。
-                time.sleep(self.ACTION_SETTLE_INTERVAL)
-                self.screenshot()
+                # Reuse the two-frame disappearance confirmation screenshot;
+                # the next target rechecks only its own portrait before clicking.
             elif not self._is_purchase_allowed():
                 return None
             elif not self._can_afford_shop_shikigami(
@@ -922,7 +671,7 @@ class ChessEconomyMixin:
                 continue
             else:
                 logger.warning(
-                    'Chess target purchase was not confirmed by avatar '
+                    'Chess target purchase was not confirmed by gold badge '
                     'disappearance; '
                     f'slot={target["slot_index"]}, '
                     f'name={target["matched_name"]}; '
@@ -933,6 +682,8 @@ class ChessEconomyMixin:
         logger.debug(f'Chess shop check complete, purchased={purchased}')
         return purchased
 
+    @economy_scope
+    @timed_action
     def purchase_lineup_cards_once(self) -> list[str] | None:
         """确保商店打开后扫描并购买，不负责关闭商店。"""
         return self.buy_lineup_shikigami_from_shop()
@@ -943,7 +694,6 @@ class ChessEconomyMixin:
         self._economy_step_state = 'idle'
         self._economy_sequence_level = None
         self._economy_sequence_index = 0
-        self._formation_pending = False
         self._economy_battle_mode = False
         self._shop_assumed_open = False
 
@@ -959,26 +709,13 @@ class ChessEconomyMixin:
         self._economy_step_state = 'ready'
         logger.debug('Schedule Chess economy upgrade/refresh cycle')
 
-    def _schedule_round_end_actions(self, round_no: int) -> None:
-        """登记回目结束任务；第四回目起额外登记系统站位整理。"""
-        if round_no > 3:
-            if not getattr(self, '_formation_pending', False):
-                logger.debug(
-                    f'Schedule Chess formation recovery after round {round_no}'
-                )
-            self._formation_pending = True
-        else:
-            logger.debug(
-                f'Chess round {round_no} uses alternate early layout; '
-                'skip formation recovery scheduling'
-            )
-        self._schedule_economy_cycle()
 
     def _finish_economy_cycle(self, reason: str) -> None:
         self._economy_pending = False
         self._economy_step_state = 'idle'
         logger.debug(f'Chess economy cycle complete: {reason}')
 
+    @timed_action
     def _click_economy_button_and_confirm_gold(
         self,
         button: RuleImage,
@@ -1000,11 +737,26 @@ class ChessEconomyMixin:
                 f'Chess {label}: fixed click attempt={attempt}, '
                 f'gold_before={gold_before}'
             )
+            level = self._read_level()
+            gold = self._read_shop_gold()
+            if (level is None or gold is None
+                    or not self._can_execute_economy_operation(level, gold, 'experience')):
+                return 'no_progress'
             self._clear_economy_click_history()
+            if not self._economy_action_allowed():
+                return 'no_progress'
             self.click(button)
-            time.sleep(self.ACTION_SETTLE_INTERVAL)
-            self.screenshot()
-            gold_after = self._read_shop_gold()
+            # Poll gold immediately; stop as soon as the change is observed.
+            deadline = time.monotonic() + self.ACTION_ICON_WAIT_TIMEOUT
+            gold_after = gold_before
+            while time.monotonic() < deadline:
+                self.screenshot()
+                gold_after = self._read_shop_gold()
+                if gold_after is None or gold_after <= gold_before - expected_cost:
+                    break
+                if not self._economy_action_allowed():
+                    return 'no_progress'
+
             if gold_after is None:
                 logger.warning(
                     f'Chess {label} was clicked but confirmation OCR is '
@@ -1024,16 +776,15 @@ class ChessEconomyMixin:
 
         return 'no_progress'
 
-    def _shop_slot_refresh_snapshot(self) -> dict[int, dict]:
+    def _shop_slot_refresh_snapshot(self, *, slots=None, recognize=True) -> dict[int, dict]:
         """保存五个商店槽位的身份和低分辨率图像，用于确认刷新。"""
         snapshot = {}
         image_height, image_width = self.device.image.shape[:2]
-        for slot_index, click_rule in self._shop_slots():
+        for slot_index, click_rule in (self._shop_slots() if slots is None else slots):
             matched = self._recognize_shop_slot(
                 slot_index,
                 click_rule,
-                fallback_rules=self.all_shikigami_shop_rules,
-            )
+            ) if recognize else None
             x, y, width, height = click_rule.roi_back
             x = max(0, int(x))
             y = max(0, int(y))
@@ -1088,26 +839,79 @@ class ChessEconomyMixin:
                 changed.append(slot_index)
         return changed, image_differences
 
+    @timed_action
     def _click_shop_refresh_and_confirm_slots(
         self,
         allow_hidden: bool,
     ) -> str:
         """点击刷新，以至少三个对应商店槽位变化确认成功。"""
+        if not self._battle_refresh_time_allowed():
+            return 'no_progress'
         if not allow_hidden and not self.appear(self.I_REFRESH):
             logger.warning('Cannot refresh Chess shop: button is missing')
             return 'no_progress'
 
-        before = self._shop_slot_refresh_snapshot()
+        slots = self._shop_slots()
+        before = self._shop_slot_refresh_snapshot(slots=slots)
         for attempt in range(1, self.ECONOMY_CONFIRM_RETRIES + 1):
+            level = self._read_level()
+            gold = self._read_shop_gold()
+            round_no = self._read_round_number()
+            if (level is None or gold is None or round_no is None
+                    or not self._can_execute_economy_operation(level, gold, 'refresh')):
+                return 'no_progress'
             self._clear_economy_click_history()
+            if not self._economy_action_allowed():
+                return 'no_progress'
+            gold_before = gold
+            if not self._battle_refresh_time_allowed():
+                return 'no_progress'
             self.click(self.I_REFRESH)
-            time.sleep(self.ACTION_SETTLE_INTERVAL)
-            self.screenshot()
-            after = self._shop_slot_refresh_snapshot()
-            changed, differences = self._shop_refresh_changed_slots(
-                before,
-                after,
-            )
+            # 按实际点击计数；确认失败也计入额度，避免重试超限。
+            counts = self.chess_state.economy_refresh_counts
+            counts[round_no] = counts.get(round_no, 0) + 1
+            deadline = time.monotonic() + self.ACTION_ICON_WAIT_TIMEOUT
+            previous = None
+            previous_identities = None
+            changed = []
+            while time.monotonic() < deadline:
+                self.screenshot()
+                if not self._economy_action_allowed():
+                    return 'no_progress'
+                after = self._shop_slot_refresh_snapshot(slots=slots, recognize=False)
+                changed, differences = self._shop_refresh_changed_slots(before, after)
+                stable = previous is not None and all(
+                    after[i]['image'] is not None and previous[i]['image'] is not None
+                    and float(np.mean(cv2.absdiff(after[i]['image'], previous[i]['image']))) < 2.5
+                    for i in range(1, 6)
+                )
+                if stable and len(changed) >= self.SHOP_REFRESH_CHANGED_SLOT_MINIMUM:
+                    break
+                if len(changed) >= self.SHOP_REFRESH_CHANGED_SLOT_MINIMUM:
+                    # Gold borders and active-card effects can keep animating
+                    # after the shop is ready. Two matching identity scans are
+                    # stronger evidence than requiring every pixel to settle.
+                    identities = self._shop_page_identities()
+                    identity_changes = (sum(
+                        before[i]['name'] is not None and before[i]['name'] != identities[i-1]
+                        for i in range(1, 6)
+                    ) if identities is not None else 0)
+                    if (identities is not None and identities == previous_identities
+                            and identity_changes >= self.SHOP_REFRESH_CHANGED_SLOT_MINIMUM):
+                        logger.info('Chess refresh confirmed by stable card identities despite animation')
+                        break
+                    previous_identities = identities
+                else:
+                    previous_identities = None
+                previous = after
+            else:
+                # Spending gold or a partially changed page is ambiguous progress.
+                # Do not spend another refresh to recover a confirmation failure.
+                gold_after = self._read_shop_gold()
+                if changed or gold_after is None or gold_after < gold_before:
+                    logger.warning('Chess refresh confirmation timed out; scan current targets before pausing refresh')
+                    return 'no_progress'
+                continue
             logger.info(
                 'Chess shop refresh slot comparison: '
                 f'attempt={attempt}, changed={changed}, '
@@ -1120,6 +924,9 @@ class ChessEconomyMixin:
                 f'{[round(differences[index], 2) for index in range(5, 0, -1)]}'
             )
             if len(changed) >= self.SHOP_REFRESH_CHANGED_SLOT_MINIMUM:
+                for slot_index, click_rule in self._shop_slots():
+                    if slot_index in changed:
+                        self.device.click_record_remove(click_rule)
                 return 'success'
             before = after
         logger.warning(
@@ -1128,26 +935,58 @@ class ChessEconomyMixin:
         )
         return 'no_progress'
 
+    def _battle_refresh_time_allowed(self) -> bool:
+        """战阶段最后五秒独立禁止刷新，覆盖经济循环外的调用和重试。"""
+        if self._read_chess_mode() != '战':
+            return True
+        remaining = self._read_remaining_time()
+        cache = getattr(self, '_detail_frame_cache', None)
+        age = max(0, time.monotonic() - cache[2]) if cache and len(cache) > 2 else 0
+        if remaining is not None and remaining - age <= 5:
+            logger.info('Skip Chess shop refresh: battle has at most 5 seconds remaining')
+            return False
+        return True
+
+    def _shop_page_identities(self):
+        """Return five unambiguous names in slot order, or no usable page."""
+        slots = {}
+        for card in self._frame_card_scan('store'):
+            if not card.get('name'):
+                continue
+            index = 5 - self._frame_shop_column(card['position'][0])
+            previous = slots.get(index)
+            if previous is None or card['badge_score'] > previous['badge_score']:
+                slots[index] = card
+        return tuple(slots[i]['name'] for i in range(1, 6)) if len(slots) == 5 else None
+
+    def _economy_emergency(self) -> bool:
+        health = self.chess_state.current_health
+        return health is not None and health < 20
+
+    def _economy_refresh_quota_available(self, level: int) -> bool:
+        if self._economy_emergency() or level >= self._lineup_final_level():
+            return True
+        round_no = self._read_round_number()
+        if round_no is None:
+            return False
+        used = self.chess_state.economy_refresh_counts.get(round_no, 0)
+        return used < max(0, level - 5)
+
     def _economy_sequence_for_level(self, level: int) -> tuple[str, ...]:
-        """返回当前阶数的原子操作序列。"""
-        if level >= self._lineup_final_level():
+        """保留原升级/刷新顺序；本回合无刷新额度时仅升级。"""
+        if self._economy_emergency() or level >= self._lineup_final_level():
             return ('refresh',)
-        if level <= 2:
+        if level <= 5 or not self._economy_refresh_quota_available(level):
             return ('experience',)
         if level <= 7:
             return ('experience', 'refresh')
         return ('experience', 'refresh', 'refresh')
 
     def _economy_reserve_for_level(self, level: int) -> int:
-        if level >= self._lineup_final_level():
+        if self._economy_emergency() or level >= self._lineup_final_level():
             return 0
-        if level <= 2:
-            return 0
-        elif level <= 5:
-            return 35
-        elif level <= 7:
-            return 23
-        return 10
+        health = self.chess_state.current_health
+        return 40 if health is not None and health < 60 else 50
 
     def _reset_economy_sequence_if_level_changed(self, level: int) -> None:
         if self._economy_sequence_level == level:
@@ -1189,14 +1028,15 @@ class ChessEconomyMixin:
         operation: str,
     ) -> bool:
         reserve = self._economy_reserve_for_level(level)
-        cost = (
-            self.EXPERIENCE_COST
-            if operation == 'experience'
-            else self.SHOP_REFRESH_COST
-        )
-        if level < self._lineup_final_level() and gold <= reserve:
+        if operation == 'experience':
+            return (not self._economy_emergency()
+                    and level < self._lineup_final_level()
+                    and gold > reserve + self.EXPERIENCE_COST)
+        if operation != 'refresh':
             return False
-        return gold >= reserve + cost
+        if reserve == 0:
+            return gold >= self.SHOP_REFRESH_COST
+        return gold > reserve + 6 and self._economy_refresh_quota_available(level)
 
     def _run_economy_atomic_batch(self, battle_mode: bool = False) -> str:
         """执行一个由计数器决定的升级/刷新原子动作。"""
@@ -1237,6 +1077,8 @@ class ChessEconomyMixin:
                 if result == 'no_progress':
                     return 'blocked'
                 self._advance_economy_operation_counter(level)
+                if self.purchase_lineup_cards_once() is None:
+                    return 'blocked'
             else:
                 # 只有刷新动作要求商店打开；购买经验不改变商店状态。
                 if not self._ensure_shop_open():
@@ -1245,13 +1087,16 @@ class ChessEconomyMixin:
                     allow_hidden=battle_mode,
                 )
                 if result == 'no_progress':
+                    # Do not refresh twice after ambiguous progress. Buying the
+                    # now visible targets is still safe: each card rechecks its
+                    # portrait, cost and gold badge before clicking.
+                    if self._economy_action_allowed() and self._is_shop_open():
+                        logger.info('Chess refresh unconfirmed: purchase current shop targets once')
+                        self.purchase_lineup_cards_once()
                     return 'blocked'
                 logger.info('Refresh Chess shop completed')
                 self._advance_economy_operation_counter(level)
-                # 槽位变化确认时商店已完成换牌；仍额外等待稳定帧，
-                # 再读取费用和羁绊，避免残余动画影响购买识别。
-                time.sleep(self.ACTION_SETTLE_INTERVAL)
-                self.screenshot()
+                # Refresh confirmation already returned a stable card panel.
                 purchased = self.purchase_lineup_cards_once()
                 if purchased is None:
                     logger.warning(

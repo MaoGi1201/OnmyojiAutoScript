@@ -5,7 +5,7 @@
 from time import sleep, time
 
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, time as clock_time, timedelta
 from module.atom.animate import RuleAnimate
 from module.atom.click import RuleClick
 from module.atom.frame import RuleFrame, FrameResult
@@ -648,6 +648,21 @@ class BaseTask(GlobalGameAssets, CostumeBase):
             start_time = self.start_time
         self.config.task_delay(task, start_time=start_time, success=success, server=server, target=target)
 
+    def set_next_run_next_monday(self, task: str, scheduler) -> None:
+        """周目标达成后改到下周一，保留显式配置的运行时刻。"""
+        finished_at = datetime.now().replace(microsecond=0)
+        configured_time = scheduler.server_update
+        run_time = (
+            finished_at.time()
+            if configured_time == clock_time(hour=9)
+            else configured_time
+        )
+        next_monday = finished_at.date() + timedelta(
+            days=7 - finished_at.weekday()
+        )
+        target = datetime.combine(next_monday, run_time)
+        self.set_next_run(task=task, server=False, target=target)
+
     def custom_next_run(self, task: str, custom_time: Time = None, time_delta: float = 1) -> None:
         """
         设置下次自定义运行时间
@@ -747,21 +762,40 @@ class BaseTask(GlobalGameAssets, CostumeBase):
                 elif isinstance(click, RuleOcr) and self.ocr_appear_click(click, interval=interval):
                     continue
 
-    def ui_click_until_disappear(self, click, interval: float = 1):
+    def ui_click_until_disappear(self, click, interval: float = 1, *,
+                                 click_target=None, visible=None, guard=None,
+                                 timeout: float | None = None, confirm_frames: int = 1,
+                                 max_clicks: int | None = None):
+        """点击直到目标消失；可独立指定点击区、可见性判定和有界多帧确认。
+
+        超时或 guard 不满足时返回 False；默认行为与旧调用一致。
         """
-        点击一个按钮直到消失
-        :param interval:
-        :param click:
-        :return: True:出现并点击过, False:没有出现过
-        """
+        from time import monotonic
         appear_and_clicked = False
-        while 1:
+        click_count = 0
+        missing = 0
+        deadline = monotonic() + timeout if timeout is not None else None
+        while deadline is None or monotonic() < deadline:
             self.screenshot()
-            if not self.appear(click):
-                break
-            if self.appear_then_click(click, interval=interval):
+            if guard is not None and not guard():
+                return False
+            present = visible() if visible is not None else self.appear(click)
+            if not present:
+                missing += 1
+                if missing >= confirm_frames:
+                    return appear_and_clicked
+                continue
+            missing = 0
+            if max_clicks is not None and click_count >= max_clicks:
+                return False
+            if click_target is not None:
+                if self.click(click_target, interval=interval):
+                    appear_and_clicked = True
+                    click_count += 1
+            elif self.appear_then_click(click, interval=interval):
                 appear_and_clicked = True
-        return appear_and_clicked
+                click_count += 1
+        return False
 
     def ui_click_until_appear_or_timeout(self, click, stop=None, interval: float = 1, timeout: float = 10) -> bool:
         """
