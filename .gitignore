@@ -282,3 +282,4 @@ oas.bat
 
 # 设备（账号）互斥锁的运行时文件
 config/.locks/
+data/cooperation/state.sqlite3
