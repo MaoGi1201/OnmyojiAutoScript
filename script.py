@@ -310,6 +310,9 @@ class Script:
 
             time.sleep(5)
 
+            cooperation = self.__dict__.get('_cooperation')
+            if cooperation is not None and cooperation.requested():
+                return False
             if self.config.should_reload():
                 return False
 
@@ -353,7 +356,11 @@ class Script:
         :return:
         """
         while True:
+            cooperation = self.__dict__.get('_cooperation')
+            wake_task = cooperation.wake_next(self.config) if cooperation is not None else None
             task = self.config.get_next()
+            if wake_task and task.command != 'Restart':
+                task = next(t for t in self.config.pending_task if t.command == wake_task)
             now = datetime.now()
             antiban_wake = self.anti_ban_guard.wake_time(now, self.config.script.anti_ban)
             if antiban_wake is not None:
@@ -545,11 +552,16 @@ class Script:
             self.device.click_record_clear()
             logger.hr(task, level=0)
             self.config.model.running_task = task
+            self._cooperation.publish(task)
             _task_start = datetime.now()
             try:
                 success = self.run(inflection.camelize(task))
             finally:
                 account_lock.release(self.config)
+                self._cooperation.publish('')
+                self._cooperation.finish(task)
+                peers = getattr(self.config, '_cooperation_peers', None) or {}
+                peers.pop(task, None)
             self.config.model.running_task = ''
             logger.info(f'Scheduler: End task `{task}`')
             self.is_first_task = False
@@ -588,6 +600,8 @@ class Script:
                 continue
             else:
                 break
+
+        self._cooperation.close()
 
     def _handle_task_exception(self, e: Exception, command: str) -> bool:
         """
