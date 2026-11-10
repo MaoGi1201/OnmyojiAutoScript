@@ -278,3 +278,4 @@ tasks/AutoCheckinBigGod/frida-server-17.6.2-android-x86_64
 oas.bat
 # WorkBuddy 工作记忆
 .workbuddy/
+data/cooperation/state.sqlite3
