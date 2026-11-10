@@ -22,6 +22,9 @@ _EQ_LINE_RE = re.compile(r"^═{15,}\s*$")
 _EQ_TITLE_LINE_RE = re.compile(r"^═{10,}\s+(?P<title>.*?)\s+═{10,}\s*$")
 _TITLE_LINE_RE = re.compile(r"^─{10,}\s*(?P<title>.*?)\s*─{10,}\s*$")
 _TASK_ENDED_RE = re.compile(r"^(?P<title>.+?)\s+task ended\b", re.IGNORECASE)
+# 调度器在任务收尾时打印，是任务真正结束的位置。之后到下一个任务横幅之间是
+# 空闲等待（期间只有 [Task] / Pending tasks 之类的调度前置日志），不应计入任务。
+_SCHEDULER_END_RE = re.compile(r"Scheduler:\s*End task\s")
 _BATTLE_TITLE = "GENERAL BATTLE START"
 _START_TITLE = "START"
 _SIX_REALMS_TITLE = "SIXREALMS"
@@ -281,6 +284,12 @@ class LogStatsParser:
         task_ended_title = self._extract_task_ended_title(line)
         if task_ended_title is not None:
             self._handle_task_ended(task_ended_title)
+
+        if _SCHEDULER_END_RE.search(line):
+            # 任务到此结束。若等到下一个任务横幅才闭合，中间那段空闲等待
+            # （尤其 task_delay 配置成几小时时）会整段算进这个任务的时长。
+            self._close_active_battle()
+            self._close_active_task()
 
     def _consume_runtime_timestamp(self, ts: datetime) -> None:
         runtime = self.runtime
