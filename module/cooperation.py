@@ -14,7 +14,7 @@ from module.config.utils import convert_to_underscore
 
 BATTLE_TASKS = frozenset(('Orochi', 'EvoZone', 'Exploration', 'FallenSun',
                          'EternitySea', 'BondlingFairyland', 'OtherWorldTwilight', 'DraftDuel',
-                         'MetaDemon', 'MetaDemonTicket'))
+                         'MetaDemon', 'MetaDemonTicket', 'DemonMartialTrials'))
 
 
 def instance_name(value):
@@ -233,6 +233,11 @@ class Cooperation:
                 if mode == '组队':
                     mode = settings.get('role', '队长')
                 return {'队长': 'leader', '队员': 'member', '单人': 'alone'}.get(mode)
+            if task == 'DemonMartialTrials':
+                # 逢魔演武没有 user_status，组队身份放在 dmt_config.mode（单刷/队长/队员）
+                mode = item.get('dmt_config', {}).get('mode', '单刷')
+                mode = getattr(mode, 'value', mode)
+                return {'队长': 'leader', '队员': 'member', '单刷': 'alone'}.get(mode)
             status = next((v.get('user_status') for v in item.values()
                            if isinstance(v, dict) and 'user_status' in v), None)
             if task == 'BondlingFairyland':
@@ -292,6 +297,11 @@ class Cooperation:
                 if skip_draft_duel_outside_hours(config, runtime=self):
                     self.ack(task)
                     continue
+            if task == 'DemonMartialTrials':
+                from tasks.DemonMartialTrials.config import DMTMode
+                if item.dmt_config.mode == DMTMode.SOLO:
+                    self.ack(task)
+                    continue
             settings_group = 'assistance_config' if task == 'MetaDemon' else 'invite_config'
             configured = getattr(getattr(item, settings_group, None), 'cooperation_script', '')
             if task == 'DraftDuel' and (not configured or item.draft_duel_config.match_mode == '单人'):
@@ -313,6 +323,13 @@ class Cooperation:
                     self.validate(task, source)
                 except ScriptError as exc:
                     logger.info(f'忽略超鬼王协同唤醒：{exc}')
+                    self.ack(task)
+                    continue
+            elif task == 'DemonMartialTrials':
+                try:
+                    self.validate(task, source)
+                except ScriptError as exc:
+                    logger.info(f'忽略逢魔演武协同唤醒：{exc}')
                     self.ack(task)
                     continue
             else:
@@ -417,6 +434,10 @@ def prepare_task_cooperation(config, task):
     if task == 'DraftDuel' and (item.draft_duel_config.match_mode == '单人'
                                 or not item.invite_config.cooperation_script):
         return
+    if task == 'DemonMartialTrials':
+        from tasks.DemonMartialTrials.config import DMTMode
+        if item.dmt_config.mode == DMTMode.SOLO or not item.invite_config.cooperation_script:
+            return
     runtime = getattr(config, 'cooperation_runtime', None)
     peer = item.invite_config.cooperation_script
     if not peer:
