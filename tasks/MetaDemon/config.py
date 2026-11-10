@@ -185,8 +185,9 @@ class AssistanceRole(str, Enum):
 
 
 class MetaDemonAssistanceConfig(ConfigBase):
-    cooperation_script: str = Field(default='', title='鬼王协助协同脚本',
-        description='关联另一端的本地脚本。协助者接收上供端的鬼王截图，并在好友列表中匹配后挑战。')
+    cooperation_script: str = Field(default='', title='唤醒实例配置名',
+        description='留空则不启用协同，只运行本实例。\n'
+                    '两端身份须分别为上供（召唤六星鬼王并分享）和协助（在好友分享列表中找到同一只鬼王并挑战）')
     role: AssistanceRole = Field(default=AssistanceRole.OFFERING, title='鬼王协助身份',
         description='上供召唤六星鬼王并分享；协助从超鬼王主页寻找好友分享的鬼王并挑战。')
     friend_names: str = Field(default='', title='分享好友名字',
