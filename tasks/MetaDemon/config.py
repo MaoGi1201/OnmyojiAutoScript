@@ -8,6 +8,7 @@ from tasks.Component.QuickLoadout.config import parse_named_presets
 from tasks.Component.config_base import ConfigBase, TimeDelta, Time, dynamic_hide
 from pydantic import Field, field_validator, model_validator
 from module.cooperation import instance_name
+from module.logger import logger
 from enum import IntEnum, Enum
 from tasks.Component.config_scheduler import Scheduler
 
@@ -56,14 +57,33 @@ class MetaDemonConfig(ConfigBase):
     limit_time: Time = Field(default=Time(minute=45), description='limit_time_help')
     limit_count: int = Field(default=50, description='limit_count_help')
     auto_tea: bool = Field(default=False, description='疲劳度满时是否自动喝茶, 关闭则自动根据调度器等待间隔时间安排下一次调度')
-    fire_sequence: str = Field(default='1 2 3 4', description='攻击顺序:从左到右,空格分隔(1:一星鬼王,2:二星鬼王...)\n例:3 2(先攻击三星鬼王然后二星鬼王)')
+    fire_sequence: str = Field(default='1 2 3 4', description='攻击顺序:只填数字,无需分隔符(1:一星鬼王,2:二星鬼王...)\n例:321(先攻击三星鬼王,然后二星,最后一体);空格逗号等分隔符可写可不写')
     high_star_powerful_enable: bool = Field(
         default=False, title='启用高星强力追击', description='仅对五星、六星鬼王生效。',
     )
     powerful_count: int = Field(
         default=1, ge=1, title='强力追击次数', description='每只高星鬼王的前几次挑战使用强力追击，之后改用普通追击。',
     )
-    synthesis_list: str = Field(default='1', description='鬼王合成列表(空格分隔),支持1-5星合成,例:1 2 3(合成一星,二星,三星鬼王)')
+    synthesis_list: str = Field(default='1', description='鬼王合成列表:只填数字,无需分隔符,支持1-5星合成\n例:123(合成一星,二星,三星鬼王);空格逗号等分隔符可写可不写')
+
+    @field_validator('fire_sequence', 'synthesis_list', mode='before')
+    @classmethod
+    def normalize_star_digits(cls, value):
+        """星级顺序只认 1-6 的单个数字：数字连写或用任意分隔符均可，其余字符丢弃。
+
+        存储时归一化成纯数字串，非法数字（0、7-9）记 warning 后忽略。
+        """
+        if not isinstance(value, str):
+            return value
+        kept, dropped = [], []
+        for ch in value:
+            if not ch.isdigit():
+                continue  # 非数字一律当分隔符
+            num = int(ch)
+            (kept if num in BossType._value2member_map_ else dropped).append(str(num))
+        if dropped:
+            logger.warning(f'星级顺序含无效数字 {"".join(dropped)}（有效为 1-6），已忽略')
+        return ''.join(kept)
 
     @model_validator(mode='before')
     @classmethod
@@ -81,21 +101,11 @@ class MetaDemonConfig(ConfigBase):
 
     @property
     def fire_sequence_v(self) -> list[BossType]:
-        sequence_text = self.fire_sequence.strip()
-        if sequence_text == '':
-            return []
-        fire_num_list = sequence_text.split(' ')
-        fire_boss_type_list = [BossType(int(num_text)) for num_text in fire_num_list]
-        return fire_boss_type_list
+        return [BossType(int(ch)) for ch in self.fire_sequence if ch.isdigit()]
 
     @property
     def synthesis_list_v(self) -> list[BossType]:
-        synthesis_list_text = self.synthesis_list.strip()
-        if synthesis_list_text == '':
-            return []
-        synthesis_num_list = synthesis_list_text.split(' ')
-        synthesis_boss_type_list = [BossType(int(num_text)) for num_text in synthesis_num_list]
-        return synthesis_boss_type_list
+        return [BossType(int(ch)) for ch in self.synthesis_list if ch.isdigit()]
 
 
 def loadout_group(boss_type: BossType | None) -> str:
