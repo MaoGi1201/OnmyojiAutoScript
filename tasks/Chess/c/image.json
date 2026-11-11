@@ -242,12 +242,12 @@
   {
     "itemName": "share",
     "imageName": "c_share.png",
-    "roiFront": "1159,579,65,66",
-    "roiBack": "1147,568,85,86",
+    "roiFront": "1138,560,107,113",
+    "roiBack": "1138,560,107,113",
     "method": "Template matching",
     "threshold": 0.8,
     "profile": "High",
-    "description": ""
+    "description": "百鬼棋局分享页"
   },
   {
     "itemName": "select_sixrealms",
@@ -308,5 +308,15 @@
     "threshold": 0.8,
     "profile": "High",
     "description": "小怪阶段"
+  },
+  {
+    "itemName": "chess_reward",
+    "imageName": "c_chess_reward.png",
+    "roiFront": "482,215,317,42",
+    "roiBack": "464,142,350,145",
+    "method": "Template matching",
+    "threshold": 0.73,
+    "profile": "High",
+    "description": "百鬼棋局结算奖励"
   }
 ]

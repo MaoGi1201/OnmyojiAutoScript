@@ -256,10 +256,13 @@ page_chess_result = Page(
     any_of(
         GameUiAssets.I_CHESS_EXIT_TO_LOBBY,
         GameUiAssets.I_CHESS_EXIT_TO_LOBBY_2,
-        GlobalGameAssets.I_UI_REWARD,
-        ChessAssets.I_SHARE,
+        # 通用「点击领取」，任何领奖弹窗都会命中，曾把周常秘闻分享误判成棋局结算。
+        # 移出判页，仅在 _advance_chess_result_stage 的棋局上下文里使用。
+        # GlobalGameAssets.I_UI_REWARD,
         GameUiAssets.I_CHECK_CHESS_RANK,
         GameUiAssets.I_CHESS_RANK_GOTO_LOBBY,
+        # 分享图已合并进 ChessAssets（c_share.png 换成棋局专属裁切，1138,560 原位）
+        ChessAssets.I_SHARE,
     ),
     category="global",
     priority=96,

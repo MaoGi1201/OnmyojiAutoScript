@@ -44,8 +44,6 @@ class GameUiAssets:
 	I_CHESS_EXIT_TO_LOBBY = RuleImage(roi_front=(384,591,172,47), roi_back=(340,570,270,100), threshold=0.8, method="Template matching", profile="High", file="./tasks/GameUi/page/page_chess_exit_to_lobby.png")
 	# 百鬼棋局主动退出后返回大厅 
 	I_CHESS_EXIT_TO_LOBBY_2 = RuleImage(roi_front=(580,593,123,43), roi_back=(580,593,123,43), threshold=0.8, method="Template matching", profile="High", file="./tasks/GameUi/page/page_chess_exit_to_lobby_2.png")
-	# 百鬼棋局分享页 
-	I_CHESS_SHARE = RuleImage(roi_front=(1138,560,107,113), roi_back=(1138,560,107,113), threshold=0.8, method="Template matching", profile="High", file="./tasks/GameUi/page/page_chess_share.png")
 	# 百鬼棋局排名页 
 	I_CHECK_CHESS_RANK = RuleImage(roi_front=(14,75,79,38), roi_back=(14,75,79,38), threshold=0.8, method="Template matching", profile="High", file="./tasks/GameUi/page/page_check_chess_rank.png")
 	# 百鬼棋局排名页返回大厅 

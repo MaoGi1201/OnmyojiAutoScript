@@ -55,7 +55,7 @@ class ChessBattleNavigationMixin:
 
     def _advance_chess_result_stage(self) -> bool:
         """优先处理奖励和分享阶段，避免背景被识别成大厅。"""
-        if self.appear(GlobalGameAssets.I_UI_REWARD):
+        if self.appear(ChessAssets.I_CHESS_REWARD):
             self._chess_share_advancing = False
             from tasks.GameUi.default_pages import random_click
             self.click(random_click(), interval=1.5)
@@ -87,7 +87,7 @@ class ChessBattleNavigationMixin:
         return (
             self.appear(self.I_CHESS_EXIT_TO_LOBBY)
             or self.appear(self.I_CHESS_EXIT_TO_LOBBY_2)
-            or self.appear(GlobalGameAssets.I_UI_REWARD)
+            or self.appear(ChessAssets.I_CHESS_REWARD)
             or self.appear(ChessAssets.I_SHARE)
             or self.appear(self.I_CHECK_CHESS_RANK)
             or self.appear(self.I_CHESS_RANK_GOTO_LOBBY)

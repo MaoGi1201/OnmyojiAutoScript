@@ -97,8 +97,8 @@ class ChessAssets:
 	I_QUESTION_CHECK = RuleImage(roi_front=(209,16,33,34), roi_back=(199,5,57,53), threshold=0.8, method="Template matching", profile="High", file="./tasks/Chess/c/c_question_check.png")
 	#  
 	I_RESTART_AGAIN = RuleImage(roi_front=(1065,644,178,48), roi_back=(1049,636,202,59), threshold=0.8, method="Template matching", profile="High", file="./tasks/Chess/c/c_restart_again.png")
-	#  
-	I_SHARE = RuleImage(roi_front=(1159,579,65,66), roi_back=(1147,568,85,86), threshold=0.8, method="Template matching", profile="High", file="./tasks/Chess/c/c_share.png")
+	# 百鬼棋局分享页 
+	I_SHARE = RuleImage(roi_front=(1138,560,107,113), roi_back=(1138,560,107,113), threshold=0.8, method="Template matching", profile="High", file="./tasks/Chess/c/c_share.png")
 	# 选择六道场地 
 	I_SELECT_SIXREALMS = RuleImage(roi_front=(550,2,181,34), roi_back=(542,0,200,45), threshold=0.8, method="Template matching", profile="High", file="./tasks/Chess/c/c_select_sixrealms.png")
 	# 百鬼等待 
@@ -111,6 +111,8 @@ class ChessAssets:
 	I_STAGE_DEMON = RuleImage(roi_front=(708,0,31,29), roi_back=(702,0,44,34), threshold=0.9, method="Template matching", profile="High", file="./tasks/Chess/c/c_stage_demon.png")
 	# 小怪阶段 
 	I_STAGE_MONSTER = RuleImage(roi_front=(624,1,31,29), roi_back=(499,0,268,31), threshold=0.8, method="Template matching", profile="High", file="./tasks/Chess/c/c_stage_monster.png")
+	# 百鬼棋局结算奖励 
+	I_CHESS_REWARD = RuleImage(roi_front=(482,215,317,42), roi_back=(464,142,350,145), threshold=0.73, method="Template matching", profile="High", file="./tasks/Chess/c/c_chess_reward.png")
 
 
 	# Ocr Rule Assets
