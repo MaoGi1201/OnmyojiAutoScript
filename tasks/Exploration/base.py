@@ -93,19 +93,20 @@ class BaseExploration(GameUi, GeneralBattle, GeneralRoom, GeneralInvite, Replace
     # 打开指定的章节：
     def open_expect_level(self):
         swipeCount = 0
+        main_line_clicks = 0
         config_exploration_level = self._config.exploration_config.exploration_level
         while True:
             # 判断有无目标章节
             self.screenshot()
             # 获取当前章节名
-            results = self.O_E_EXPLORATION_LEVEL_NUMBER.detect_and_ocr(self.device.image)
+            results = self.O_E_EXPLORATION_LEVEL_NUMBER.detect_and_ocr(self.device.image, logDisplay=False)
             text1 = [result.ocr_text for result in results]
             exp_level_enum_list = []
             for txt in text1:
                 try:
                     exp_level_enum_list.append(ExplorationLevel(txt))
-                except ValueError as e:
-                    logger.warning(f'convert {txt} failed')
+                except ValueError:
+                    pass
             sorted(exp_level_enum_list, key=lambda x: x.get_index())  # Sort by index
             # 判断当前章节有无目标章节
             result = set(text1).intersection({config_exploration_level})
@@ -116,6 +117,14 @@ class BaseExploration(GameUi, GeneralBattle, GeneralRoom, GeneralInvite, Replace
                 continue
             if self.appear_then_click(self.I_UI_CONFIRM_SAMLL, interval=1):
                 continue
+            if not exp_level_enum_list and main_line_clicks < 3:
+                # 右侧面板可能停留在「玩法」页签，此时读不到任何章节名，点「主线」切回章节列表
+                # 点击可能被入场动画吞掉，切页动画也要 2s 左右才渲染完成，所以允许多点几次并等待
+                main_line_clicks += 1
+                logger.info(f'Exploration: no chapter detected, click 主线 tab ({main_line_clicks}/3)')
+                self.click(self.C_CLICK_MAIN_LINE)
+                time.sleep(1.5)
+                continue
             self.device.click_record_clear()
             if len(exp_level_enum_list) > 0:
                 min_level = exp_level_enum_list[0]
@@ -125,8 +134,7 @@ class BaseExploration(GameUi, GeneralBattle, GeneralRoom, GeneralInvite, Replace
                 elif config_exploration_level.get_index() > max_level.get_index():
                     self.swipe(self.S_SWIPE_LEVEL_DOWN)
             swipeCount += 1
-            debug_info = f"Swiped {swipeCount} times, current exploration level: {text1}"
-            logger.info(debug_info)
+            logger.info(f"Swiped {swipeCount} times")
             if swipeCount >= 25:
                 raise GameStuckError(
                     f"Swiped too many times ({swipeCount}), seems stuck in exploration level selection"
