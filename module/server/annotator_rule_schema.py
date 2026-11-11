@@ -29,7 +29,58 @@ RULE_TYPE_SCHEMAS: OrderedDict[str, dict[str, Any]] = OrderedDict(
                     "label": "method",
                     "control": "select",
                     "default": "Template matching",
-                    "options": ["Template matching", "Multi-scale template matching", "Sift Flann"],
+                    "options": [
+                        "Template matching",
+                        "Multi-scale template matching",
+                        "Masked template matching",
+                        "Sift Flann",
+                    ],
+                },
+                {
+                    "key": "threshold",
+                    "label": "threshold",
+                    "control": "number",
+                    "default": 0.8,
+                    "step": 0.01,
+                    "min": 0,
+                    "max": 1,
+                    "integer": False,
+                },
+                {"key": "description", "label": "description", "control": "textarea", "default": "", "full": True},
+            ],
+        },
+        "frame": {
+            "type": "frame",
+            "label": "RuleFrame",
+            "capabilities": {
+                "supports_test": True,
+                "supports_crop": True,
+                "supports_image_preview": True,
+                "shared_roi_back": False,
+            },
+            # roiFront 对应 JSON 里的 roiBadge（badge 模板位置），roiBack 对应搜索区域。
+            # roiRange / badges / rangeOperations 属于结构字段，不在界面暴露，
+            # 保存时由后端从原始 JSON 原样透传，避免被改图操作覆盖丢失。
+            "fields": [
+                {"key": "itemName", "label": "itemName", "control": "text", "default": "new"},
+                {
+                    "key": "imageName",
+                    "label": "imageName",
+                    "control": "text",
+                    "default": "",
+                    "auto_from_item_name": True,
+                },
+                {
+                    "key": "method",
+                    "label": "method",
+                    "control": "select",
+                    "default": "Template matching",
+                    "options": [
+                        "Template matching",
+                        "Multi-scale template matching",
+                        "Masked template matching",
+                        "Sift Flann",
+                    ],
                 },
                 {
                     "key": "threshold",
