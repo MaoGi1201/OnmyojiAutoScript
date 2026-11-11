@@ -30,6 +30,7 @@ class Screenshot(Adb, DroidCast, Scrcpy, Window, NemuIpc):
     _last_save_time = {}
     image: np.ndarray
     image_frame_id: str | None = None
+    image_frame_expires_at: float = 0.0
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -74,6 +75,7 @@ class Screenshot(Adb, DroidCast, Scrcpy, Window, NemuIpc):
             self.image = method()
             frame_info = get_image_client().register_frame(self.image, self.config.config_name)
             self.image_frame_id = frame_info["frame_id"]
+            self.image_frame_expires_at = time.monotonic() + float(frame_info["expire_seconds"])
 
             # if self.config.Emulator_ScreenshotDedithering:
             #     # This will take 40-60ms
@@ -90,6 +92,18 @@ class Screenshot(Adb, DroidCast, Scrcpy, Window, NemuIpc):
                 continue
 
         return self.image
+
+    def image_frame_stale(self) -> bool:
+        """
+        判断内存里这张截图是否已不能在图像服务端复用。
+
+        `register_frame()` 回传的 `expire_seconds` 是服务端帧的存活时长，超时后
+        服务端在查表前会先清理该帧，任何带这个 frame_id 的匹配都会抛
+        `KeyError: Unknown frame id`。这里留 1s 余量提前判定，避免踩着 TTL 边缘。
+        """
+        if self.image_frame_id is None:
+            return True
+        return time.monotonic() >= self.image_frame_expires_at - 1.0
 
     def _handle_orientated_image(self, image):
         """

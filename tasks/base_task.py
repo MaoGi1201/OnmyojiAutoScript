@@ -146,7 +146,7 @@ class BaseTask(GlobalGameAssets, CostumeBase):
         :param soft_skip: True跳过截图(但保证设备一定有图才跳过,否则依然截图)
         :return:
         """
-        if not soft_skip or not self.exist_image():
+        if not soft_skip or not self.exist_image() or self.device.image_frame_stale():
             return self.screenshot()
         return self.device.image
 

@@ -521,5 +521,9 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, Buy, GameUi, MetaDemon
 
     def finish_task(self):
         # 收尾回主页，直接 goto_page(page_main)
-        self.goto_page(ipages.page_main)
+        # 回主页只是收尾动作，失败不应把已正常结束的任务升级成异常退出
+        try:
+            self.goto_page(ipages.page_main)
+        except Exception as exc:
+            logger.warning(f'收尾回主页失败：{exc}')
         raise TaskEnd
