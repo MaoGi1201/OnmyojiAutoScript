@@ -29,8 +29,8 @@
   {
     "itemName": "check_pass_map",
     "imageName": "as_check_pass_map.png",
-    "roiFront": "595,0,129,46",
-    "roiBack": "583,0,151,85",
+    "roiFront": "153,11,129,46",
+    "roiBack": "139,0,151,85",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "门票地图页(map页)判定：活动页点 as_to_battle_pass 后抵达"
@@ -38,8 +38,8 @@
   {
     "itemName": "to_battle_pass",
     "imageName": "as_to_battle_pass.png",
-    "roiFront": "810,456,135,40",
-    "roiBack": "758,305,238,269",
+    "roiFront": "309,176,95,122",
+    "roiBack": "242,100,238,269",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "主页进入门票爬塔入口"
@@ -47,8 +47,8 @@
   {
     "itemName": "pass_map_goto_battle",
     "imageName": "as_pass_map_goto_battle.png",
-    "roiFront": "66,150,97,36",
-    "roiBack": "66,150,97,36",
+    "roiFront": "76,96,97,36",
+    "roiBack": "76,96,97,36",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "门票进入战斗"

@@ -29,8 +29,8 @@
   {
     "itemName": "to_battle_boss",
     "imageName": "as_to_battle_boss.png",
-    "roiFront": "1057,290,117,39",
-    "roiBack": "979,189,225,255",
+    "roiFront": "125,414,95,101",
+    "roiBack": "60,323,225,255",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "点击进入boss战斗页面"

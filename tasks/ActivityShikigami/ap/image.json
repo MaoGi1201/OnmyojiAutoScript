@@ -38,8 +38,8 @@
   {
     "itemName": "ap_map_goto_battle",
     "imageName": "as_ap_map_goto_battle.png",
-    "roiFront": "73,242,97,36",
-    "roiBack": "73,242,97,36",
+    "roiFront": "71,93,97,36",
+    "roiBack": "71,93,97,36",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "体力进入战斗"

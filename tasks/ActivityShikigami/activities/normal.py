@@ -13,7 +13,8 @@ class NormalClimbAct(BaseAct):
     HOME_MARKERS: tuple[str, ...] = ()
 
     # 本次活动开放的爬塔模式
-    SUPPORTED_CLIMB_TYPES: tuple[str, ...] = ('ap',)
+    # SUPPORTED_CLIMB_TYPES: tuple[str, ...] = ('ap',)                          # 上期：体力单入口
+    SUPPORTED_CLIMB_TYPES: tuple[str, ...] = ('ap', 'pass', 'boss')            # 当期启用：ap / pass 共用入口，boss 独立入口
     # 三入口形态（ap100 / boss 各自独立，ap 与 pass 共用 pass 入口）长这样：
     #   ENTRY_GROUPS = (
     #       (('ap100',), ('I_TO_BATTLE_AP100',), None),
@@ -21,21 +22,26 @@ class NormalClimbAct(BaseAct):
     #       (('ap', 'pass'), ('I_TO_BATTLE_PASS',), 'I_CLIMB_MODE_SWITCH'),
     #   )
     # 启用时记得把 'pass' 加进 SUPPORTED_CLIMB_TYPES 和 PAGE_CHECKS。
+    # 当期形态：ap / pass 共用「大地の共鳴 戦闘」入口，点一次落到大地の共鳴地图页，
+    #   再点「虚無精鋭」节点进战斗页；两模式是同一张战斗页的两个形态，靠右下角切换按钮互切，
+    #   进错模式由失败 hook 点切换自救。boss 在主页另有「首領」入口，一步直达。
     ENTRY_GROUPS: tuple[tuple[tuple[str, ...], tuple[str, ...], str | None], ...] = (
         # (('ap100',), ('I_TO_BATTLE_AP100',), None),
-        (('ap',), ('I_TO_BATTLE_AP',), None),
+        # (('ap',), ('I_TO_BATTLE_AP',), None),                                 # 上期：体力单入口
         # (('pass',), ('I_TO_BATTLE_PASS',), None),
         # (('boss',), ('I_TO_BATTLE_BOSS',), None),
-        # (('ap', 'pass'), ('I_TO_BATTLE_PASS',), 'I_CLIMB_MODE_SWITCH'),
+        # (('ap', 'pass'), ('I_TO_BATTLE_PASS',), 'I_CLIMB_MODE_SWITCH'),        # 共用入口但没有中转页时的写法
+        (('ap', 'pass'), ('I_TO_BATTLE_PASS', 'I_PASS_MAP_GOTO_BATTLE'), 'I_CLIMB_MODE_SWITCH'),  # 当期启用：共用入口 + 地图页中转 + 切换按钮
+        (('boss',), ('I_TO_BATTLE_BOSS',), None),                               # 当期启用：boss 独立入口
 
     )
 
     # （页面图里只有 page_act_pass_map 一个地图页节点，page_act_map 仅是 flag=True 时的别名）。
-    DETACH_MAP_ROUTES: bool = True
+    # DETACH_MAP_ROUTES: bool = True                                            # 上期：无中转页，摘掉 page.py 的中转边
+    DETACH_MAP_ROUTES: bool = False                                             # 当期启用：ap / pass 要走大地の共鳴地图页中转
 
-    # 跳转后等待目标页出现的上限（秒）
-    # 实测从点活动入口到认出活动页要 4.7~6.0s，设小了会提前判失败、被返回键踢出活动
-    page_arrive_timeout: float = 6.0  # 原值 2.0，恢复时改回
+    # 跳转后等待目标页出现的上限（秒）默认10s
+    # page_arrive_timeout: float = 10.0
 
     # 四个爬塔页各自的「上锁图 / 未上锁图」，判定顺序在通用图之后。
     # 某项 asset 未配置时 `_own_lock_names()` 返回 None，该轮跳过。
@@ -44,27 +50,30 @@ class NormalClimbAct(BaseAct):
         #'ap': ('I_AP_LOCK', 'I_AP_UNLOCK'),
         # 'pass': ('I_PASS_LOCK', 'I_PASS_UNLOCK'),
         # 'boss': ('I_BOSS_LOCK', 'I_BOSS_UNLOCK'),
+        # 当期未启用：ap / pass 是同一张战斗页的两个形态，三个模式共用下面的通用锁图即可
     }
 
     # 通用的那一对锁图，判定优先用它，失败后再退到各页专属的那一对。
     # 置 None 则只用专属图。
-    LOCK_FALLBACK: tuple[str, str] | None = ('I_LOCK', 'I_UNLOCK')
+    LOCK_FALLBACK: tuple[str, str] | None = ('I_LOCK', 'I_UNLOCK')  # 当期启用
 
     # 单轮锁容点击的超时（秒）；基类 `ui_click` 是死循环
     LOCK_CLICK_TIMEOUT: float = 5.0
 
     # 到达层：哪些类型的目标页只是地图页，还要再点一次才到真正的战斗页。
-    # 本期体力页进页即战斗页，不需要二次点击；原门票规则注释保留，恢复时取消注释。
+    # 上期体力页进页即战斗页，不需要二次点击；原门票规则注释保留，恢复时取消注释。
     BATTLE_PAGE_ENTER: dict[str, tuple[str, str]] = {
         # 'pass': ('I_PASS_MAP_GOTO_BATTLE', 'I_CLIMB_MODE_PASS'),
+        # 当期未启用：这一跳并进了 ENTRY_GROUPS 的第二跳（地图页点节点即进战斗页）
     }
 
     # 地图页上各类型的进入按钮：pass 先跑时，切到 ap / ap100 只要退回地图页点一下。
-    # 本期没有地图页；恢复时取消注释。
+    # 上期没有地图页；恢复时取消注释。
     MAP_GOTO_BATTLE: dict[str, str] = {
         # 'pass': 'I_PASS_MAP_GOTO_BATTLE',
         # 'ap': 'I_AP_MAP_GOTO_BATTLE',
         # 'ap100': 'I_AP100_MAP_GOTO_BATTLE',
+        # 当期未启用：ap / pass 共用同一个「虚無精鋭」节点，已在 ENTRY_GROUPS 里铺
     }
 
     # 四个爬塔页各自的进入后 check 图。
@@ -73,6 +82,7 @@ class NormalClimbAct(BaseAct):
          #'ap': 'I_CLIMB_MODE_AP',
         # 'pass': 'I_CLIMB_MODE_PASS',
         # 'boss': 'I_CHECK_BOSS',
+        # 当期未启用：ap / pass 靠模式图标区分（page.py 已注册），boss 靠 I_CHECK_BATTLE_BOSS
     }
 
     # 同一爬塔类型存在多个页面时，主 check 图之外的补充判据。
@@ -89,11 +99,14 @@ class NormalClimbAct(BaseAct):
          #'ap': ('O_REMAIN_AP', 'digit'),
         # 'pass': ('O_REMAIN_PASS', 'digit'),
         # 'boss': ('O_REMAIN_BOSS', 'counter'),
+        'ap': ('O_REMAIN_AP', 'digit'),          # 当期启用：顶栏体力数量
+        'pass': ('O_REMAIN_PASS', 'digit'),      # 当期启用：顶栏门票数量
+        'boss': ('O_REMAIN_BOSS', 'counter'),    # 当期启用：首领剩余次数
     }
 
     # 逻辑复用：把某个类型的余量读取委派给另一个类型。
     # 置空 dict 则四个类型各自读各自的。
-    REUSE_SOURCE: dict[str, str] = {}
+    REUSE_SOURCE: dict[str, str] = {}  # 当期未启用：三个模式各自读各自的
 
     # 单次挑战消耗的体力。右上角 `O_CHECK_AP_NUM`低于100就不打了
     # 直接结束该类型。只对配置了的类型生效，未配置的不检测。
@@ -170,6 +183,7 @@ class NormalClimbAct(BaseAct):
         rule = self.TICKET_OCR_RULES.get(source)
         if rule is None:
             #  ap 的剩余次数不参与判断，未登记规则是正常配置。
+            # 当期三个模式都登记了规则，正常不会走到这里。
             logger.info(f'Climb: {source} ticket check disabled, skip')
             return True
         asset_name, mode = rule

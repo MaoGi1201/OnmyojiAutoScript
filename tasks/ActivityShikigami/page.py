@@ -30,10 +30,12 @@ page_main.connect(
     page_act, ActivityShikigamiAssets.I_MAIN_GOTO_ACT, key="page_main->page_act"
 )
 # 是否存在特殊活动界面标志(点击一次无法进入体力爬塔界面，存在中转界面的情况，False表示没有中转界面，True表示有中转界面)
-# 本期体力入口一步直达，无中转页；原值 True，需要中转时改回。
-special_act_Flag = False
+# 上期：体力入口一步直达，无中转页；原值 True，需要中转时改回。
+# special_act_Flag = False                                                 # 上期：体力入口一步直达，无中转页
+special_act_Flag = True                                                    # 当期启用：ap / pass 共用「大地の共鳴 戦闘」入口，点一次只到大地の共鳴地图页
 
 # 门票地图页：活动页点 as_to_battle_pass 抵达，再点 as_pass_map_goto_battle 进战斗页。
+# 当期：这块就是 ap / pass 共用的大地の共鳴地图页（左上角标题「大地の共鳴」）。
 page_act_pass_map = Page(ActivityShikigamiAssets.I_CHECK_PASS_MAP)
 if special_act_Flag:
     # 特殊活动中转地图页面（与门票地图页同一块界面，只做别名）
@@ -77,7 +79,7 @@ if not special_act_Flag:
         page_act, GlobalGameAssets.I_UI_BACK_YELLOW, key="page_act_pass->page_act"
     )
 
-# 100体爬塔页面
+# 100体爬塔页面（当期不开放，仅保留节点）
 page_act_ap100 = Page(ActivityShikigamiAssets.I_CHECK_AP100)
 # BOSS爬塔页面
 page_act_boss = Page(ActivityShikigamiAssets.I_CHECK_BATTLE_BOSS)
@@ -85,6 +87,7 @@ page_act_boss.connect(
     page_act, GlobalGameAssets.I_UI_BACK_YELLOW, key="page_act_boss->page_act"
 )
 # 本期只有体力入口，boss 入口先注释掉；恢复时取消注释即可。
+# 当期：boss 也是开放模式之一，入口边由 NormalClimbAct 的 `ENTRY_GROUPS` 铺，这里保持注释。
 # page_act.connect(
 #     page_act_boss,
 #     ActivityShikigamiAssets.I_TO_BATTLE_BOSS,

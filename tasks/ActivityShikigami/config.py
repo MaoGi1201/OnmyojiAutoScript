@@ -15,15 +15,20 @@ from typing import Optional
 class GeneralClimb(ConfigBase):
     limit_time: Time = Field(default=Time(hour=1, minute=30), description='总限制时间')
     # 原默认：pass_limit=50、run_sequence='pass,ap,ap100,boss'，恢复时改回。
-    pass_limit: int = Field(default=0)
-    ap_limit: int = Field(default=300)
+    # pass_limit: int = Field(default=0)
+    pass_limit: int = Field(default=50)   # 当期启用：门票模式开放
+    ap_limit: int = Field(default=300)    # 当期启用：体力模式开放
     # boss 与 100 体默认关闭（limit=0 的类型会被 run_sequence_v 过滤掉，不进入执行流程）。
-    boss_limit: int = Field(default=0)
-    ap100_limit: int = Field(default=0)
-    run_sequence: str = Field(default='ap',
-                              description='pass:门票,ap100:100体,boss:boss战,ap:体力\n'
+    boss_limit: int = Field(default=0)    # 当期：首领「金を石に 首領」6 天后开放，先关
+    ap100_limit: int = Field(default=0)   # 当期：100 体未开放
+    # run_sequence: str = Field(default='ap',
+    #                           description='pass:门票,ap100:100体,boss:boss战,ap:体力\n'
+    #                                       '逗号分隔,从左到右依次运行\n'
+    #                                       '例:pass,ap100,boss,ap=门票->100体->boss战->体力')
+    run_sequence: str = Field(default='pass,ap,boss',  # 当期启用：门票 -> 体力 -> 首领战
+                              description='pass:门票,ap:体力,boss:首领战,ap100:100体(当期不开放)\n'
                                           '逗号分隔,从左到右依次运行\n'
-                                          '例:pass,ap100,boss,ap=门票->100体->boss战->体力')
+                                          '例:pass,ap,boss=门票->体力->首领战')
     # # 门票爬塔buff
     # pass_buff: str = Field(default='buff_4,buff_5', description='门票爬塔加成,buff1-5,加成页从左往右顺序,清空则不切换加成')
     # # 体力爬塔buff

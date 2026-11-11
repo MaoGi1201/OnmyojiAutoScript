@@ -155,7 +155,8 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
     BATTLE_PAGE_ENTER_TIMEOUT: float = 5.0
 
     # 从式神录返回目标页时，等待目标页被认出的上限（秒）。
-    page_arrive_timeout: float = 6.0
+    # 注释掉则退回 GameUi 的默认值 10.0s。
+    # page_arrive_timeout: float = 6.0
     
     # 进界面时统一清一遍的干扰元素：每项 = (要处理的图, 处理方式)。
     POPUP_CLEARS: tuple[tuple[tuple[str, ...], str], ...] = (
