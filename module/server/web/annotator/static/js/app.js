@@ -49,6 +49,9 @@
     testRoiFront: "",
     testRoiBack: "",
 
+    // RuleFrame 的 roiRange 段框（画布上动态创建的 div，与 state.rules 的 roiRanges 一一对应）
+    frameRangeBoxes: [],
+
     imagePreviewCache: new Map(),
     activeRuleImageExists: false,
     imageCheckToken: 0,
@@ -92,6 +95,7 @@
     noImagePlaceholder: document.getElementById("noImagePlaceholder"),
     roiFront: document.getElementById("roiFront"),
     roiBack: document.getElementById("roiBack"),
+    frameRanges: document.getElementById("frameRanges"),
     roiFrontValue: document.getElementById("roiFrontValue"),
     roiBackValue: document.getElementById("roiBackValue"),
     testRoiFront: document.getElementById("testRoiFront"),
@@ -123,6 +127,7 @@
     refreshRulesBtn: document.getElementById("refreshRulesBtn"),
 
     ruleFields: document.getElementById("ruleFields"),
+    frameRangeEditor: document.getElementById("frameRangeEditor"),
     itemName: null,
     imageNameWrap: null,
     imageName: null,
@@ -834,8 +839,11 @@
       el.noImagePlaceholder.classList.remove("hidden");
       el.roiFront.classList.add("hidden");
       el.roiBack.classList.add("hidden");
+      el.frameRanges.classList.add("hidden");
       el.testRoiFront.classList.add("hidden");
       el.testRoiBack.classList.add("hidden");
+      state.frameRangeBoxes = [];
+      el.frameRanges.innerHTML = "";
       updateRoiViewport();
       return;
     }
@@ -1192,6 +1200,12 @@
       rule.roiBack = back;
     }
 
+    if (isFrameRule() && state.frameRangeBoxes.length > 0) {
+      rule.roiRanges = state.frameRangeBoxes.map((box) => boxToRoi(box));
+      getFrameOperations(rule);
+      syncFrameRangeInputs();
+    }
+
     el.roiFrontValue.value = front;
     el.roiBackValue.value = back;
     markDirty();
@@ -1224,6 +1238,10 @@
       rule.roiBack = roi.back;
     } else {
       state.listMeta.roiBack = roi.back;
+    }
+    if (type === "frame") {
+      rule.roiRanges = defaultFrameRangesForNewRule();
+      rule.rangeOperations = rule.roiRanges.map(() => normalizeFrameOperation(null));
     }
     return rule;
   }
@@ -1275,6 +1293,7 @@
       applyBoxFromRoi(el.roiBack, "0,0,100,100");
       clampBox(el.roiFront);
       clampBox(el.roiBack);
+      renderFrameRangeBoxes();
       renderTestOverlay();
       return;
     }
@@ -1284,6 +1303,7 @@
     applyBoxFromRoi(el.roiBack, back);
     clampBox(el.roiFront);
     clampBox(el.roiBack);
+    renderFrameRangeBoxes();
     renderTestOverlay();
   }
 
@@ -1381,6 +1401,411 @@
     }
   }
 
+  const FRAME_RANGE_MAX = 12;
+  const FRAME_RANGE_TONES = 6;
+
+  function isFrameRule() {
+    return state.ruleType === "frame";
+  }
+
+  function frameRangeToneClass(index) {
+    return `range-tone-${index % FRAME_RANGE_TONES}`;
+  }
+
+  function getNaturalImageSize() {
+    return {
+      width: Math.max(1, el.mainImage.naturalWidth || state.roiViewport.naturalWidth || 1280),
+      height: Math.max(1, el.mainImage.naturalHeight || state.roiViewport.naturalHeight || 720),
+    };
+  }
+
+  // rangeOperations 的单项统一成完整结构，避免界面上出现 undefined 字段
+  function normalizeFrameOperation(op) {
+    const type = String((op && op.type) || "click").toLowerCase();
+    if (type === "image") {
+      const threshold = Number(op.threshold);
+      return {
+        type: "image",
+        imageName: String(op.imageName || "").trim(),
+        method: String(op.method || "Template matching"),
+        threshold: Number.isFinite(threshold) ? threshold : 0.8,
+      };
+    }
+    if (type === "ocr") {
+      return {
+        type: "ocr",
+        mode: String(op.mode || "Single") === "Digit" ? "Digit" : "Single",
+        keyword: String(op.keyword || ""),
+      };
+    }
+    return { type: "click" };
+  }
+
+  function getFrameRanges(rule) {
+    if (!rule) {
+      return [];
+    }
+    if (!Array.isArray(rule.roiRanges)) {
+      rule.roiRanges = [];
+    }
+    return rule.roiRanges;
+  }
+
+  function getFrameOperations(rule) {
+    if (!rule) {
+      return [];
+    }
+    const ranges = getFrameRanges(rule);
+    const raw = Array.isArray(rule.rangeOperations) ? rule.rangeOperations : [];
+    rule.rangeOperations = ranges.map((_, index) => normalizeFrameOperation(raw[index]));
+    return rule.rangeOperations;
+  }
+
+  function defaultFrameRangeRoi(index, count) {
+    const { width: naturalWidth, height: naturalHeight } = getNaturalImageSize();
+    const columns = Math.max(1, count);
+    const gap = 10;
+    const width = Math.max(40, Math.round((naturalWidth * 0.7) / columns));
+    const height = Math.max(24, Math.round(naturalHeight * 0.09));
+    const totalWidth = columns * width + (columns - 1) * gap;
+    const startX = Math.max(0, Math.round((naturalWidth - totalWidth) / 2));
+    const y = Math.max(0, Math.round(naturalHeight * 0.45));
+    return formatRoiFromNumbers(startX + index * (width + gap), y, width, height);
+  }
+
+  function defaultFrameRanges(count = 3) {
+    const ranges = [];
+    for (let index = 0; index < count; index += 1) {
+      ranges.push(defaultFrameRangeRoi(index, count));
+    }
+    return ranges;
+  }
+
+  // 新增 frame 时优先沿用当前条目的段位置，同机型界面布局通常一致
+  function defaultFrameRangesForNewRule() {
+    const current = getCurrentRule();
+    if (current && Array.isArray(current.roiRanges) && current.roiRanges.length > 0) {
+      return current.roiRanges.map((roi) => String(roi));
+    }
+    return defaultFrameRanges(3);
+  }
+
+  function ensureFrameRanges(rule) {
+    const ranges = getFrameRanges(rule);
+    if (ranges.length === 0) {
+      ranges.push(...defaultFrameRanges(3));
+      rule.rangeOperations = ranges.map(() => normalizeFrameOperation(null));
+    }
+    return ranges;
+  }
+
+  function renderFrameRangeBoxes() {
+    const host = el.frameRanges;
+    if (!host) {
+      return;
+    }
+    const rule = getCurrentRule();
+    const active = isFrameRule() && Boolean(rule);
+    host.classList.toggle("hidden", !active);
+    if (!active) {
+      host.innerHTML = "";
+      state.frameRangeBoxes = [];
+      return;
+    }
+
+    const ranges = ensureFrameRanges(rule);
+    while (state.frameRangeBoxes.length > ranges.length) {
+      const box = state.frameRangeBoxes.pop();
+      box.remove();
+    }
+    while (state.frameRangeBoxes.length < ranges.length) {
+      const box = document.createElement("div");
+      box.className = `roi frame-range-box ${frameRangeToneClass(state.frameRangeBoxes.length)}`;
+      box.innerHTML = [
+        '<span class="tag"></span>',
+        '<span class="resize-handle resize-handle-nw" data-resize-dir="nw"></span>',
+        '<span class="resize-handle resize-handle-ne" data-resize-dir="ne"></span>',
+        '<span class="resize-handle resize-handle-sw" data-resize-dir="sw"></span>',
+        '<span class="resize-handle resize-handle-se" data-resize-dir="se"></span>',
+      ].join("");
+      host.appendChild(box);
+      setupRoiBox(box);
+      state.frameRangeBoxes.push(box);
+    }
+
+    ranges.forEach((roi, index) => {
+      const box = state.frameRangeBoxes[index];
+      box.className = `roi frame-range-box ${frameRangeToneClass(index)}`;
+      box.querySelector(".tag").textContent = `R${index + 1}`;
+      applyBoxFromRoi(box, roi);
+      clampBox(box);
+    });
+  }
+
+  // 拖框时只更新输入框，不重建编辑器，避免打断正在输入的内容
+  function syncFrameRangeInputs() {
+    const host = el.frameRangeEditor;
+    if (!host) {
+      return;
+    }
+    const ranges = getFrameRanges(getCurrentRule());
+    for (const input of host.querySelectorAll(".frame-range-roi")) {
+      const index = Number.parseInt(input.dataset.index, 10);
+      if (Number.isInteger(index) && ranges[index]) {
+        input.value = ranges[index];
+      }
+    }
+  }
+
+  function applyFrameRangeRoiInput(index, input) {
+    const rule = getCurrentRule();
+    if (!rule || !isFrameRule()) {
+      return;
+    }
+    const ranges = getFrameRanges(rule);
+    const parsed = parseRoiStrict(input.value);
+    if (!parsed) {
+      input.value = ranges[index] || "0,0,100,100";
+      showMessage(`R${index + 1} 格式无效，应为 x,y,w,h`, "error");
+      return;
+    }
+    ranges[index] = parsed;
+    const box = state.frameRangeBoxes[index];
+    if (box) {
+      applyBoxFromRoi(box, parsed);
+      clampBox(box);
+      ranges[index] = boxToRoi(box);
+      input.value = ranges[index];
+    }
+    markDirty();
+  }
+
+  function setFrameRangeOperation(index, type) {
+    const rule = getCurrentRule();
+    if (!rule || !isFrameRule()) {
+      return;
+    }
+    const operations = getFrameOperations(rule);
+    const previous = operations[index];
+    if (!previous) {
+      return;
+    }
+    const next = normalizeFrameOperation({ type });
+    if (next.type === "image" && previous.type === "image") {
+      next.imageName = previous.imageName;
+    }
+    operations[index] = next;
+    markDirty();
+    renderFrameRangeEditor();
+  }
+
+  function updateFrameRangeOperationField(index, key, value) {
+    const rule = getCurrentRule();
+    if (!rule || !isFrameRule()) {
+      return;
+    }
+    const operations = getFrameOperations(rule);
+    if (!operations[index]) {
+      return;
+    }
+    operations[index][key] = value;
+    markDirty();
+  }
+
+  function addFrameRange() {
+    const rule = getCurrentRule();
+    if (!rule || !isFrameRule()) {
+      return;
+    }
+    const ranges = ensureFrameRanges(rule);
+    if (ranges.length >= FRAME_RANGE_MAX) {
+      showMessage(`最多 ${FRAME_RANGE_MAX} 段`, "error");
+      return;
+    }
+    ranges.push(defaultFrameRangeRoi(ranges.length, ranges.length + 1));
+    getFrameOperations(rule);
+    markDirty();
+    renderFrameRangeBoxes();
+    renderFrameRangeEditor();
+  }
+
+  function removeFrameRange(index) {
+    const rule = getCurrentRule();
+    if (!rule || !isFrameRule()) {
+      return;
+    }
+    const ranges = getFrameRanges(rule);
+    if (ranges.length <= 1) {
+      showMessage("至少保留一段", "error");
+      return;
+    }
+    ranges.splice(index, 1);
+    getFrameOperations(rule).splice(index, 1);
+    markDirty();
+    renderFrameRangeBoxes();
+    renderFrameRangeEditor();
+  }
+
+  function buildFrameRangeRow(roi, operation, index, total) {
+    const row = document.createElement("div");
+    row.className = `frame-range-row ${frameRangeToneClass(index)}`;
+    row.dataset.index = String(index);
+
+    const head = document.createElement("div");
+    head.className = "frame-range-head";
+    const label = document.createElement("span");
+    label.className = "frame-range-label";
+    label.textContent = `R${index + 1}`;
+    head.appendChild(label);
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "frame-range-remove";
+    removeBtn.textContent = "删除";
+    removeBtn.disabled = total <= 1;
+    removeBtn.addEventListener("click", () => removeFrameRange(index));
+    head.appendChild(removeBtn);
+    row.appendChild(head);
+
+    const roiInput = document.createElement("input");
+    roiInput.type = "text";
+    roiInput.className = "frame-range-roi";
+    roiInput.dataset.index = String(index);
+    roiInput.title = "x,y,w,h";
+    roiInput.value = roi;
+    roiInput.addEventListener("change", () => applyFrameRangeRoiInput(index, roiInput));
+    row.appendChild(roiInput);
+
+    const typeSelect = document.createElement("select");
+    typeSelect.className = "frame-range-type";
+    for (const value of ["click", "image", "ocr"]) {
+      createOption(typeSelect, value, value);
+    }
+    typeSelect.value = operation.type;
+    typeSelect.addEventListener("change", () => setFrameRangeOperation(index, typeSelect.value));
+    row.appendChild(typeSelect);
+
+    const extra = document.createElement("div");
+    extra.className = "frame-range-extra";
+    if (operation.type === "image") {
+      const nameLabel = document.createElement("label");
+      nameLabel.textContent = "模板图 imageName（裁剪段模板用）";
+      const nameInput = document.createElement("input");
+      nameInput.type = "text";
+      nameInput.value = operation.imageName || "";
+      nameInput.placeholder = "留空则不生成段模板";
+      nameInput.addEventListener("change", () => updateFrameRangeOperationField(index, "imageName", nameInput.value.trim()));
+      nameLabel.appendChild(nameInput);
+      extra.appendChild(nameLabel);
+
+      const actions = document.createElement("div");
+      actions.className = "frame-range-actions";
+      const cropBtn = document.createElement("button");
+      cropBtn.type = "button";
+      cropBtn.textContent = "裁剪该段为模板";
+      cropBtn.addEventListener("click", () => withError(() => cropFrameRangeImage(index))());
+      actions.appendChild(cropBtn);
+      extra.appendChild(actions);
+    } else if (operation.type === "ocr") {
+      const modeLabel = document.createElement("label");
+      modeLabel.textContent = "mode";
+      const modeSelect = document.createElement("select");
+      for (const value of ["Single", "Digit"]) {
+        createOption(modeSelect, value, value);
+      }
+      modeSelect.value = operation.mode;
+      modeSelect.addEventListener("change", () => updateFrameRangeOperationField(index, "mode", modeSelect.value));
+      modeLabel.appendChild(modeSelect);
+      extra.appendChild(modeLabel);
+
+      const keywordLabel = document.createElement("label");
+      keywordLabel.textContent = "keyword";
+      const keywordInput = document.createElement("input");
+      keywordInput.type = "text";
+      keywordInput.value = operation.keyword || "";
+      keywordInput.addEventListener("change", () => updateFrameRangeOperationField(index, "keyword", keywordInput.value));
+      keywordLabel.appendChild(keywordInput);
+      extra.appendChild(keywordLabel);
+    } else {
+      extra.classList.add("hidden");
+    }
+    row.appendChild(extra);
+    return row;
+  }
+
+  function renderFrameRangeEditor() {
+    const host = el.frameRangeEditor;
+    if (!host) {
+      return;
+    }
+    const rule = getCurrentRule();
+    const active = isFrameRule() && Boolean(rule);
+    host.classList.toggle("hidden", !active);
+    host.innerHTML = "";
+    if (!active) {
+      return;
+    }
+
+    const hint = document.createElement("div");
+    hint.className = "frame-range-hint";
+    hint.textContent = "R1/R2… 依次对应 roiRange 与 rangeOperations；画布上的虚线框可直接拖拽。";
+    host.appendChild(hint);
+
+    const ranges = ensureFrameRanges(rule);
+    const operations = getFrameOperations(rule);
+    ranges.forEach((roi, index) => {
+      host.appendChild(buildFrameRangeRow(roi, operations[index], index, ranges.length));
+    });
+
+    const addBtn = document.createElement("button");
+    addBtn.type = "button";
+    addBtn.className = "frame-range-add";
+    addBtn.textContent = `添加段（${ranges.length}/${FRAME_RANGE_MAX}）`;
+    addBtn.disabled = ranges.length >= FRAME_RANGE_MAX;
+    addBtn.addEventListener("click", () => addFrameRange());
+    host.appendChild(addBtn);
+  }
+
+  async function cropFrameRangeImage(index) {
+    const rule = getCurrentRule();
+    if (!rule || !isFrameRule()) {
+      return;
+    }
+    if (!state.currentImageId) {
+      showMessage("请先选择图片", "error");
+      return;
+    }
+    if (!state.taskName || !state.jsonRelPath) {
+      showMessage("请先选择规则 JSON", "error");
+      return;
+    }
+    const operations = getFrameOperations(rule);
+    const operation = operations[index];
+    const ranges = getFrameRanges(rule);
+    if (!operation || operation.type !== "image" || !ranges[index]) {
+      return;
+    }
+    let imageName = String(operation.imageName || "").trim();
+    if (!imageName) {
+      imageName = defaultImageNameForItem(`${rule.itemName || "frame"}_${index + 1}`);
+      operation.imageName = imageName;
+    }
+    const result = await api(`${API_PREFIX}/api/images/crop-save`, {
+      method: "POST",
+      body: JSON.stringify({
+        session_id: state.sessionId,
+        image_id: state.currentImageId,
+        task_name: state.taskName,
+        json_relpath: state.jsonRelPath,
+        image_name: imageName,
+        roi: ranges[index],
+      }),
+    });
+    appendOutput("裁剪段模板", result);
+    showMessage(`段模板已保存: ${result.target_image}`, "ok");
+    markDirty();
+    renderFrameRangeEditor();
+  }
+
   function adjustStageByImage() {
     const naturalW = el.mainImage.naturalWidth || 1280;
     const naturalH = el.mainImage.naturalHeight || 720;
@@ -1418,9 +1843,13 @@
     if (type !== "list") {
       rule.roiBack = "0,0,100,100";
     }
-    if (type === "image") {
+    if (type === "image" || type === "frame") {
       rule.imageName = String(rule.imageName || "").trim() || defaultImageNameForItem(rule.itemName || "new");
       rule.__autoImageName = true;
+    }
+    if (type === "frame") {
+      rule.roiRanges = [];
+      rule.rangeOperations = [];
     }
     if (type === "list") {
       delete rule.description;
@@ -1435,6 +1864,11 @@
       if (type === "image") {
         const autoName = defaultImageNameForItem(item.itemName || "");
         item.__autoImageName = !item.imageName || item.imageName === autoName;
+      }
+      if (type === "frame") {
+        item.roiRanges = Array.isArray(item.roiRanges) ? item.roiRanges.map((roi) => String(roi)) : [];
+        const rawOperations = Array.isArray(item.rangeOperations) ? item.rangeOperations : [];
+        item.rangeOperations = item.roiRanges.map((_, index) => normalizeFrameOperation(rawOperations[index]));
       }
       if (type === "list") {
         delete item.description;
@@ -1452,8 +1886,9 @@
     const type = state.ruleType;
     el.listMetaBox.classList.toggle("hidden", type !== "list");
 
-    const showSaveImage = type === "image" || isListImageRule();
+    const showSaveImage = isImageLikeRule() || isListImageRule();
     el.saveImageBtn.classList.toggle("hidden", !showSaveImage);
+    renderFrameRangeEditor();
 
     refreshActiveRuleImageExists().catch(() => {
       // ignore
@@ -1869,6 +2304,7 @@
     el.ruleType.value = state.ruleType;
     renderDynamicFieldGroups();
     updateFieldVisibility();
+    refreshRoiLayoutFromRule();
   }
 
   function resolveTaskAndJson(dirPath, jsonName) {
@@ -2773,7 +3209,15 @@
 
     el.addRuleBtn.addEventListener("click", () => {
       const rule = createRuleFromCurrentCanvas(state.ruleType);
-      rule.itemName = `item_${state.rules.length + 1}`;
+      // frame 用 itemName 对齐原始 JSON，重名会被当成覆盖已有条目，这里跳过已占用的名字
+      const usedNames = new Set(state.rules.map((item) => String(item.itemName || "").trim()));
+      let serial = state.rules.length + 1;
+      let nextName = `item_${serial}`;
+      while (usedNames.has(nextName)) {
+        serial += 1;
+        nextName = `item_${serial}`;
+      }
+      rule.itemName = nextName;
       if (isImageLikeRule()) {
         rule.imageName = defaultImageNameForItem(rule.itemName);
       }

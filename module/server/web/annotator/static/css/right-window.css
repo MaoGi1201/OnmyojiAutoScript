@@ -264,3 +264,101 @@
     grid-column: span 1;
   }
 }
+
+/* RuleFrame 段落编辑器 */
+.frame-range-editor {
+  margin: 8px 0;
+  padding: 8px;
+  border: 1px dashed var(--line-main);
+  border-radius: 6px;
+  background: var(--bg-subpanel);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.frame-range-editor.hidden {
+  display: none;
+}
+
+.frame-range-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.frame-range-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid var(--line-main);
+  border-radius: 6px;
+  background: var(--bg-panel, transparent);
+}
+
+.frame-range-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.frame-range-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--frame-range-tone, #a78bfa);
+}
+
+.frame-range-row.range-tone-0 { --frame-range-tone: #e879f9; }
+.frame-range-row.range-tone-1 { --frame-range-tone: #a78bfa; }
+.frame-range-row.range-tone-2 { --frame-range-tone: #f5a524; }
+.frame-range-row.range-tone-3 { --frame-range-tone: #38bdf8; }
+.frame-range-row.range-tone-4 { --frame-range-tone: #f472b6; }
+.frame-range-row.range-tone-5 { --frame-range-tone: #4ade80; }
+
+.frame-range-head .frame-range-remove {
+  margin-left: auto;
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+.frame-range-row input,
+.frame-range-row select {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.frame-range-extra {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.frame-range-extra.hidden {
+  display: none;
+}
+
+.frame-range-extra label {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.frame-range-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.frame-range-actions button {
+  flex: 0 0 auto;
+  padding: 3px 10px;
+  font-size: 12px;
+}
+
+.frame-range-add {
+  padding: 4px 10px;
+  font-size: 12px;
+}

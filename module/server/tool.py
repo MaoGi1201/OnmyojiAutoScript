@@ -754,13 +754,53 @@ class AnnotatorManager:
             )
         return normalized
 
+    MAX_FRAME_RANGES = 12
+
+    def _frame_structure_from_rule(self, rule: dict[str, Any], source: dict[str, Any] | None,
+                                    label: str) -> tuple[list[str], list[dict[str, Any]]]:
+        """取 frame 的 roiRange / rangeOperations：界面传了用界面，否则沿用原始 JSON。
+
+        新增条目（source 为 None）没有原始结构可透传，必须由界面给出至少一段区域。
+        """
+        from module.atom.frame import normalize_operations
+
+        raw_ranges = rule.get("roiRanges")
+        if isinstance(raw_ranges, list) and raw_ranges:
+            if len(raw_ranges) > self.MAX_FRAME_RANGES:
+                raise AnnotatorError(
+                    "invalid_rule", f"{label} 的 roiRange 最多 {self.MAX_FRAME_RANGES} 段", 400)
+            ranges = [self._parse_roi(str(value)) for value in raw_ranges]
+        elif source is not None:
+            ranges = [str(value) for value in (source.get("roiRange") or [])]
+        else:
+            ranges = []
+        if not ranges:
+            raise AnnotatorError(
+                "invalid_rule", f"{label} 缺少 roiRange：新增 frame 规则至少要给一段区域", 400)
+
+        raw_operations = rule.get("rangeOperations")
+        if not isinstance(raw_operations, list) or not raw_operations:
+            raw_operations = (source or {}).get("rangeOperations")
+        if not isinstance(raw_operations, list) or not raw_operations:
+            raw_operations = [{"type": "click"} for _ in ranges]
+        try:
+            operations = normalize_operations(raw_operations, len(ranges), allow_missing_image=True)
+        except ValueError as e:
+            raise AnnotatorError(
+                "invalid_rule",
+                f"{label} 的 rangeOperations 与 roiRange 段数不匹配"
+                f"（{len(raw_operations)} 项 / {len(ranges)} 段）: {e}",
+                400,
+            ) from e
+        return ranges, operations
+
     def _normalize_frame_rules(self, rules: list[dict[str, Any]],
                               original_items: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        """RuleFrame 归一化：界面可编辑字段取自表单，其余结构字段从原始 JSON 原样透传。
+        """RuleFrame 归一化：基础字段取自表单，结构字段取自界面，界面没给的沿用原始 JSON。
 
-        界面上 roiFront 表示 JSON 的 roiBadge（badge 模板位置），roiBack 为搜索区域；
-        roiRange / badges / rangeOperations 等结构字段不暴露给界面，直接沿用原值，
-        避免改图操作把 frame 规则降级成普通图片规则。
+        界面上 roiFront 表示 JSON 的 roiBadge（badge 模板位置），roiBack 为搜索区域，
+        roiRanges / rangeOperations 为可编辑的段落结构；已有条目若界面未传结构，
+        原样透传，避免改图操作把 frame 规则降级成普通图片规则。
         """
         by_name = {
             str(item.get("itemName", "")).strip(): item
@@ -773,22 +813,9 @@ class AnnotatorManager:
             if not item_name:
                 raise AnnotatorError("invalid_rule", f"第 {index + 1} 条规则缺少 itemName", 400)
             source = by_name.get(item_name)
-            if source is None:
-                raise AnnotatorError(
-                    "invalid_rule",
-                    f"第 {index + 1} 条 frame 规则在 JSON 中找不到同名原始条目: {item_name}"
-                    "（frame 规则不支持改名或新增，请手工编辑 JSON）",
-                    400,
-                )
-            missing = [key for key in ("roiRange", "rangeOperations") if key not in source]
-            if missing:
-                raise AnnotatorError(
-                    "invalid_rule",
-                    f"第 {index + 1} 条 frame 规则缺少结构字段 {'/'.join(missing)}: {item_name}"
-                    "（请手工编辑 JSON 补全）",
-                    400,
-                )
-            image_name = str(rule.get("imageName", "")).strip() or str(source.get("imageName", "")).strip() or f"{item_name}.png"
+            label = f"第 {index + 1} 条 frame 规则 {item_name}"
+            image_name = str(rule.get("imageName", "")).strip() or str(
+                (source or {}).get("imageName", "")).strip() or f"{item_name}.png"
             method = str(rule.get("method", field_default("frame", "method", "Template matching"))).strip() or field_default("frame", "method", "Template matching")
             if method not in ALLOWED_IMAGE_METHOD:
                 raise AnnotatorError("invalid_rule", f"第 {index + 1} 条规则 method 不支持: {method}", 400)
@@ -798,22 +825,51 @@ class AnnotatorManager:
                 raise AnnotatorError("invalid_rule", f"第 {index + 1} 条规则 threshold 非法", 400) from e
             if threshold < 0 or threshold > 1:
                 raise AnnotatorError("invalid_rule", f"第 {index + 1} 条规则 threshold 必须在 0-1", 400)
+            roi_back = self._parse_roi(str(rule.get("roiBack", "")))
+            roi_badge = self._parse_roi(str(rule.get("roiFront", "")))
+            ranges, operations = self._frame_structure_from_rule(rule, source, label)
+
+            if source is None:
+                # 新增条目：结构与基础字段全部来自界面
+                normalized.append({
+                    "itemName": item_name,
+                    "imageName": image_name,
+                    "roiBack": roi_back,
+                    "method": method,
+                    "threshold": threshold,
+                    "profile": str(rule.get("profile") or "High"),
+                    "description": str(rule.get("description", "")).strip(),
+                    "roiBadge": roi_badge,
+                    "badgeSerial": 1,
+                    "badgeGrayscale": False,
+                    "roiRange": ranges,
+                    "badges": [{"imageName": image_name}],
+                    "rangeOperations": operations,
+                })
+                continue
 
             payload = deepcopy(source)
             payload["itemName"] = item_name
             payload["imageName"] = image_name
-            payload["roiBack"] = self._parse_roi(str(rule.get("roiBack", "")))
+            payload["roiBack"] = roi_back
             payload["method"] = method
             payload["threshold"] = threshold
             payload["description"] = str(rule.get("description", "")).strip()
-            payload["roiBadge"] = self._parse_roi(str(rule.get("roiFront", "")))
+            payload["roiBadge"] = roi_badge
+            payload["roiRange"] = ranges
+            payload["rangeOperations"] = operations
 
             # badge 模板改名时同步 badges 引用，否则生成器仍指向旧文件
             old_image_name = str(source.get("imageName", "")).strip()
             badges = payload.get("badges")
-            if isinstance(badges, list) and old_image_name and image_name != old_image_name:
+            if not isinstance(badges, list) or not badges:
+                payload["badges"] = [{"imageName": image_name}]
+            else:
                 for badge in badges:
-                    if isinstance(badge, dict) and str(badge.get("imageName", "")).strip() == old_image_name:
+                    if not isinstance(badge, dict):
+                        continue
+                    current = str(badge.get("imageName", "")).strip()
+                    if not old_image_name or current == old_image_name:
                         badge["imageName"] = image_name
             normalized.append(payload)
         return normalized
@@ -1143,6 +1199,9 @@ class AnnotatorManager:
                         }
                     )
                 elif rule_type == "frame":
+                    raw_ranges = item.get("roiRange")
+                    if isinstance(raw_ranges, str):
+                        raw_ranges = [raw_ranges]
                     rules.append(
                         {
                             "itemName": str(item.get("itemName", "")),
@@ -1153,6 +1212,9 @@ class AnnotatorManager:
                             "method": str(item.get("method", "Template matching")),
                             "threshold": float(item.get("threshold", 0.8)),
                             "description": str(item.get("description", "")),
+                            # 段落结构交给界面编辑，保存时原样写回
+                            "roiRanges": [str(value) for value in (raw_ranges or [])],
+                            "rangeOperations": deepcopy(item.get("rangeOperations") or []),
                         }
                     )
                 elif rule_type == "ocr":
