@@ -349,5 +349,32 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "队伍租借次数耗尽弹窗的确认按钮"
+  },
+  {
+    "itemName": "md_gift_button",
+    "imageName": "md_md_gift_button.png",
+    "roiFront": "1198,120,40,47",
+    "roiBack": "1165,104,111,95",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "超鬼王主页右侧的礼包按钮"
+  },
+  {
+    "itemName": "md_gift_close",
+    "imageName": "md_md_gift_close.png",
+    "roiFront": "1183,97,46,44",
+    "roiBack": "1100,60,180,120",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "礼包页面右上角关闭叉"
+  },
+  {
+    "itemName": "md_gift_ticket_buy",
+    "imageName": "md_md_gift_ticket_buy.png",
+    "roiFront": "1011,305,152,61",
+    "roiBack": "900,120,380,350",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "礼包页裂变之眼卡片的30勾玉购买按钮（橙色可买）"
   }
 ]

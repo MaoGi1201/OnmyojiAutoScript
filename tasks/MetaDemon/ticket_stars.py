@@ -28,3 +28,15 @@ def recognize_ticket_stars(image, area, *, synthesis=False) -> int | None:
     if stars == 0 or illuminated != [True] * stars + [False] * (6 - stars):
         return None
     return stars
+
+
+def ticket_button_available(image, area) -> bool:
+    """礼包页 30 勾玉按钮是否可购买：橙色（高饱和）=可买，变灰=今日已购完。
+
+    橙/灰两态模板交叉匹配得分 0.90，模板区分不可靠，改用 HSV 饱和度：
+    实测橙色按钮 S 均值约 160，灰色约 40。
+    """
+    x, y, width, height = map(int, area)
+    roi = image[y:y + height, x:x + width]
+    sat = cv2.cvtColor(roi, cv2.COLOR_RGB2HSV)[:, :, 1]
+    return float((sat > 100).mean()) > 0.5
