@@ -55,9 +55,11 @@ class AssistanceLink:
             if portrait:
                 self.session = uuid4().hex
             remaining = (self.task.limit_time - (datetime.now() - self.task.start_time)).total_seconds()
+            boss = self.task.cur_boss_type
             self.runtime.publish_battle_state(self.CHANNEL, self.peer, self.session, {
                 'portrait': portrait,
                 'expires': time.time() + max(0, remaining),
+                'star': int(boss) if boss is not None else None,
             })
 
     def target(self):
@@ -67,7 +69,7 @@ class AssistanceLink:
         payload = state['payload']
         portrait = payload.get('portrait')
         if portrait and payload.get('expires', 0) > time.time():
-            return state['session'], state['updated'], portrait
+            return state['session'], state['updated'], portrait, payload.get('star')
         return None
 
     def confirm(self, target, *, settled=False):
@@ -262,8 +264,8 @@ class GhostOffering:
 
     def share(self):
         t = self.task
-        if t.cur_boss_type != BossType.SIX_STARS:
-            logger.warning('仅允许分享本次已确认召唤的六星鬼王')
+        if t.cur_boss_type not in self.settings.offering_stars_v:
+            logger.warning('仅允许分享本次已确认召唤的指定星级鬼王')
             return False
         portrait_sent = False
         select_recipients = True
@@ -338,9 +340,9 @@ class GhostOffering:
             return True
         if not self.settled and t.appear(t.I_MD_FIRE):
             self.empty_frames = 0
-            if t.cur_boss_type != BossType.SIX_STARS:
+            if t.cur_boss_type not in self.settings.offering_stars_v:
                 if not self.unknown_reported:
-                    logger.warning('已有鬼王星级未确认，不分享、不挑战；等待其消失后仅召唤六星')
+                    logger.warning('已有鬼王星级不在召唤星级内，不分享、不挑战；等待其消失后仅召唤指定星级')
                     self.unknown_reported = True
             elif self.shared_generation != t._boss_generation:
                 if not self.share():
@@ -369,7 +371,7 @@ class GhostOffering:
             if not self.within_limit():
                 return True
         self.empty_frames = 0
-        return t.check_and_switch_ticket(sequence=(BossType.SIX_STARS,)) or t.State.done
+        return t.check_and_switch_ticket(sequence=tuple(self.settings.offering_stars_v)) or t.State.done
 
 
 class GhostAssistant:
@@ -419,7 +421,7 @@ class GhostAssistant:
     def fight(self, target):
         t = self.task
         if self.active_target != target:
-            t.cur_boss_type = BossType.SIX_STARS
+            t.cur_boss_type = BossType(target[3])
             t._boss_generation += 1
             t._current_boss_attempts = 0
             self.active_target = target

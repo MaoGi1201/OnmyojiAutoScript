@@ -28,6 +28,24 @@ class MetaDemonMode(str, Enum):
     BOSS_ASSIST = '鬼王协助'
 
 
+def normalize_star_text(value):
+    """星级顺序只认 1-6 的单个数字：数字连写或用任意分隔符均可，其余字符丢弃。
+
+    存储时归一化成纯数字串，非法数字（0、7-9）记 warning 后忽略。
+    """
+    if not isinstance(value, str):
+        return value
+    kept, dropped = [], []
+    for ch in value:
+        if not ch.isdigit():
+            continue  # 非数字一律当分隔符
+        num = int(ch)
+        (kept if num in BossType._value2member_map_ else dropped).append(str(num))
+    if dropped:
+        logger.warning(f'星级顺序含无效数字 {"".join(dropped)}（有效为 1-6），已忽略')
+    return ''.join(kept)
+
+
 def mode_values(value) -> list[str]:
     """兼容旧配置里的列表写法（["鬼王战斗"]），统一成取值列表。"""
     if isinstance(value, str):
@@ -64,9 +82,9 @@ class MetaDemonConfig(ConfigBase):
     powerful_count: int = Field(
         default=1, ge=1, title='强力追击次数', description='每只高星鬼王的前几次挑战使用强力追击，之后改用普通追击。',
     )
-    synthesis_list: str = Field(default='1', description='鬼王合成列表:只填数字,无需分隔符,支持1-5星合成\n例:123(合成一星,二星,三星鬼王);空格逗号等分隔符可写可不写')
+    synthesis_list: str = Field(default='1', description='鬼王合成列表:只填数字,支持1-5星合成\n例:123(合成一星,二星,三星鬼王);空格逗号等分隔符可写可不写')
     jade_buy_ticket_enable: bool = Field(default=False, title='勾玉购买鬼王令',
-        description='进入超鬼王后自动打开礼包页,用勾玉购买鬼王令(裂变之眼),每次购买最大数量;当日已购完(按钮变灰)时自动跳过。')
+        description='进入超鬼王后自动打开礼包页,用勾玉购买鬼王令,每次购买最大数量;当日已购完时自动跳过。')
 
     @field_validator('fire_sequence', 'synthesis_list', mode='before')
     @classmethod
@@ -75,17 +93,7 @@ class MetaDemonConfig(ConfigBase):
 
         存储时归一化成纯数字串，非法数字（0、7-9）记 warning 后忽略。
         """
-        if not isinstance(value, str):
-            return value
-        kept, dropped = [], []
-        for ch in value:
-            if not ch.isdigit():
-                continue  # 非数字一律当分隔符
-            num = int(ch)
-            (kept if num in BossType._value2member_map_ else dropped).append(str(num))
-        if dropped:
-            logger.warning(f'星级顺序含无效数字 {"".join(dropped)}（有效为 1-6），已忽略')
-        return ''.join(kept)
+        return normalize_star_text(value)
 
     @model_validator(mode='before')
     @classmethod
@@ -199,18 +207,30 @@ class AssistanceRole(str, Enum):
 class MetaDemonAssistanceConfig(ConfigBase):
     cooperation_script: str = Field(default='', title='唤醒实例配置名',
         description='留空则不启用协同，只运行本实例。\n'
-                    '两端身份须分别为上供（召唤六星鬼王并分享）和协助（在好友分享列表中找到同一只鬼王并挑战）')
+                    '两端身份须分别为上供（按召唤星级召唤鬼王并分享）和协助（在好友分享列表中找到同一只鬼王并挑战）')
     role: AssistanceRole = Field(default=AssistanceRole.OFFERING, title='鬼王协助身份',
-        description='上供召唤六星鬼王并分享；协助从超鬼王主页寻找好友分享的鬼王并挑战。')
+        description='上供按召唤星级召唤鬼王并分享；协助从超鬼王主页寻找好友分享的鬼王并挑战。')
+    offering_stars: str = Field(default='6', title='上供召唤星级',
+        description='仅上供身份生效:按顺序召唤并分享这些星级的鬼王\n例:56(先召唤五星鬼王,再六星);空格逗号等分隔符可写可不写')
     friend_names: str = Field(default='', title='分享好友名字',
         description='填写游戏内好友完整名字；多个名字用分号或换行分隔，按名称精确匹配，不使用近似名字。')
     poll_interval: int = Field(default=5, ge=2, le=60, title='协助轮询间隔（秒）',
         description='上供按此间隔检查是否已击杀，协助按此间隔重新寻找好友分享。')
 
+    @field_validator('offering_stars', mode='before')
+    @classmethod
+    def normalize_offering_stars(cls, value):
+        """召唤星级与 fire_sequence/synthesis_list 同一套归一化规则。"""
+        return normalize_star_text(value)
+
     @field_validator('cooperation_script')
     @classmethod
     def validate_cooperation_script(cls, value: str) -> str:
         return instance_name(value)
+
+    @property
+    def offering_stars_v(self) -> list[BossType]:
+        return [BossType(int(ch)) for ch in self.offering_stars if ch.isdigit()]
 
     @property
     def friends(self) -> list[str]:
