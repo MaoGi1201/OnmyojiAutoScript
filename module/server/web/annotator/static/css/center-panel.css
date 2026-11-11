@@ -194,6 +194,7 @@ html[data-theme="light"] .roi .tag {
   border-width: 2px;
   border-color: #ff6b6b;
   color: #ff6b6b;
+  z-index: 5;
 }
 
 .roi-back {
@@ -216,6 +217,61 @@ html[data-theme="light"] .roi .tag {
   color: #58c7c7;
   border-style: dashed;
   pointer-events: none;
+}
+
+/* RuleFrame 的 roiRange 段：badge/roiBack 之外多出来的可拖拽区域 */
+.frame-ranges {
+  position: absolute;
+  inset: 0;
+  /* 压在 roiBack 之上，否则大搜索区会吃掉段框的拖拽；badge(roiFront) 再高一档 */
+  z-index: 4;
+  pointer-events: none;
+}
+
+.frame-ranges.hidden {
+  display: none;
+}
+
+.frame-ranges .roi {
+  z-index: 2;
+  pointer-events: auto;
+  border-width: 2px;
+  border-style: dashed;
+  border-color: var(--frame-range-tone, #a78bfa);
+  color: var(--frame-range-tone, #a78bfa);
+}
+
+.frame-ranges .roi .tag {
+  top: 0;
+  left: 0;
+  border-radius: 0 0 4px 0;
+  font-size: 9px;
+  padding: 1px 4px;
+  opacity: 0.92;
+}
+
+.frame-ranges .roi.range-tone-0 {
+  --frame-range-tone: #e879f9;
+}
+
+.frame-ranges .roi.range-tone-1 {
+  --frame-range-tone: #a78bfa;
+}
+
+.frame-ranges .roi.range-tone-2 {
+  --frame-range-tone: #f5a524;
+}
+
+.frame-ranges .roi.range-tone-3 {
+  --frame-range-tone: #38bdf8;
+}
+
+.frame-ranges .roi.range-tone-4 {
+  --frame-range-tone: #f472b6;
+}
+
+.frame-ranges .roi.range-tone-5 {
+  --frame-range-tone: #4ade80;
 }
 
 .roi-values {
