@@ -8,6 +8,7 @@ from datetime import datetime
 from module.atom.image import RuleImage
 
 from tasks.Component.GeneralBattle.general_battle import GeneralBattle
+from tasks.Component.Buy.buy import Buy
 from tasks.Component.SwitchSoul.switch_soul import SwitchSoul
 from tasks.Component.QuickLoadout.quick_loadout import QuickLoadout
 from tasks.GameUi.assets import GameUiAssets
@@ -16,15 +17,18 @@ from tasks.GameUi.game_ui import GameUi
 from tasks.MetaDemon.config import MetaDemon, BossType, loadout_group
 from tasks.MetaDemon.assets import MetaDemonAssets
 from tasks.MetaDemon.synthesis import parse_synthesis_material_level
-from tasks.MetaDemon.ticket_stars import recognize_ticket_stars
+from tasks.MetaDemon.ticket_stars import recognize_ticket_stars, ticket_button_available
 import tasks.MetaDemon.page as ipages
 
 from module.logger import logger
 from module.exception import TaskEnd
 
 
-class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, GameUi, MetaDemonAssets):
+class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, Buy, GameUi, MetaDemonAssets):
     """超鬼王"""
+
+    # 礼包页 30 勾玉按钮的内部采样区（避开边框），用于橙/灰颜色判断
+    GIFT_BUY_SAMPLE = (1030, 322, 115, 38)
 
     class State:
         done: bool = False
@@ -69,6 +73,8 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, GameUi, MetaDemonAsset
 
     def run(self):
         self.before_run()
+        if self.conf.meta_demon_config.jade_buy_ticket_enable:
+            self.buy_jade_ticket()
         self.goto_page(ipages.page_meta_demon_boss)
         while True:
             self.update_global_state()
@@ -92,6 +98,57 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, GameUi, MetaDemonAsset
                     time.sleep(random.uniform(0.7, 1.4))
         self.set_next_run(task="MetaDemon", success=True)
         self.finish_task()
+
+    def _close_gift_page(self) -> None:
+        """点右上叉关闭礼包页，确认回到超鬼王主页。"""
+        deadline = time.monotonic() + 6
+        while time.monotonic() < deadline:
+            self.screenshot()
+            # 礼包按钮重新可见 = 已回到超鬼王主页（I_MD_CHECK_MAIN_PAGE 是活动主页判据，在这里不命中）
+            if self.appear(self.I_MD_GIFT_BUTTON):
+                return
+            if self.appear_then_click(self.I_MD_GIFT_CLOSE, interval=1.2):
+                continue
+            time.sleep(0.5)
+        logger.warning('关闭礼包页面超时')
+
+    def buy_jade_ticket(self) -> bool:
+        """勾玉购买鬼王令：主页打开礼包页 → 通用 buy_more 拉满购买 → 确认按钮变灰 → 关闭。
+
+        当日已购完（30勾玉按钮变灰）时直接跳过。
+        """
+        logger.hr('Buy jade ticket')
+        # 礼包入口在超鬼王主页；page_meta_demon 是「祸至无日」活动主页，那里没有礼包按钮（实测 0.206）。
+        # self.goto_page(ipages.page_meta_demon)
+        self.goto_page(ipages.page_meta_demon_boss)
+        # 打开礼包页（已在礼包页时 stop 条件直接命中）
+        if not self.ui_click_until_appear_or_timeout(
+                self.I_MD_GIFT_BUTTON, self.I_MD_GIFT_CLOSE, timeout=8):
+            logger.warning('未能打开礼包页面，跳过勾玉购买')
+            return False
+        # 30勾玉按钮：橙色=可买，变灰=今日已购完（模板交叉得分0.9，改用HSV饱和度判断）
+        self.screenshot()
+        if not ticket_button_available(self.device.image, self.GIFT_BUY_SAMPLE):
+            logger.info('鬼王令今日已购买，跳过')
+            self._close_gift_page()
+            return True
+        # 通用购买组件：点 30 勾玉按钮 → 等弹窗(拉满按钮出现) → 拉满 → 点击购买
+        self.buy_more(self.I_MD_GIFT_TICKET_BUY, number=None)
+        # 购买完成的标志：弹窗关闭后礼包页 30 勾玉按钮变灰
+        deadline = time.monotonic() + 15
+        while time.monotonic() < deadline:
+            self.screenshot()
+            if self.appear(self.I_BUY_PLUS) or self.ui_reward_appear_click():
+                time.sleep(0.8)  # 购买弹窗或奖励动画还没结束
+                continue
+            if not ticket_button_available(self.device.image, self.GIFT_BUY_SAMPLE):
+                logger.info('鬼王令购买完成')
+                self._close_gift_page()
+                return True
+            logger.warning('购买后按钮未变灰，按未完成处理')
+            break
+        self._close_gift_page()
+        return False
 
     def start_battle(self, within_limit=None):
         logger.hr('Click fire, start battle')

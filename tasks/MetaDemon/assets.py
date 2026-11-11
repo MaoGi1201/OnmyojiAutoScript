@@ -101,6 +101,12 @@ class MetaDemonAssets:
 	I_MD_RENTAL_LIMIT_POPUP = RuleImage(roi_front=(432,283,359,34), roi_back=(403,229,470,264), threshold=0.8, method="Template matching", profile="High", file="./tasks/MetaDemon/md/md_md_rental_limit_popup.png")
 	# 队伍租借次数耗尽弹窗的确认按钮 
 	I_MD_RENTAL_LIMIT_CONFIRM = RuleImage(roi_front=(665,408,179,58), roi_back=(600,390,300,100), threshold=0.8, method="Template matching", profile="High", file="./tasks/MetaDemon/md/md_md_rental_limit_confirm.png")
+	# 超鬼王主页右侧的礼包按钮 
+	I_MD_GIFT_BUTTON = RuleImage(roi_front=(1198,120,40,47), roi_back=(1165,104,111,95), threshold=0.8, method="Template matching", profile="High", file="./tasks/MetaDemon/md/md_md_gift_button.png")
+	# 礼包页面右上角关闭叉 
+	I_MD_GIFT_CLOSE = RuleImage(roi_front=(1183,97,46,44), roi_back=(1100,60,180,120), threshold=0.8, method="Template matching", profile="High", file="./tasks/MetaDemon/md/md_md_gift_close.png")
+	# 礼包页裂变之眼卡片的30勾玉购买按钮（橙色可买） 
+	I_MD_GIFT_TICKET_BUY = RuleImage(roi_front=(1011,305,152,61), roi_back=(900,120,380,350), threshold=0.8, method="Template matching", profile="High", file="./tasks/MetaDemon/md/md_md_gift_ticket_buy.png")
 
 
 	# Ocr Rule Assets

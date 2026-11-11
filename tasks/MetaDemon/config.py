@@ -65,6 +65,8 @@ class MetaDemonConfig(ConfigBase):
         default=1, ge=1, title='强力追击次数', description='每只高星鬼王的前几次挑战使用强力追击，之后改用普通追击。',
     )
     synthesis_list: str = Field(default='1', description='鬼王合成列表:只填数字,无需分隔符,支持1-5星合成\n例:123(合成一星,二星,三星鬼王);空格逗号等分隔符可写可不写')
+    jade_buy_ticket_enable: bool = Field(default=False, title='勾玉购买鬼王令',
+        description='进入超鬼王后自动打开礼包页,用勾玉购买鬼王令(裂变之眼),每次购买最大数量;当日已购完(按钮变灰)时自动跳过。')
 
     @field_validator('fire_sequence', 'synthesis_list', mode='before')
     @classmethod
