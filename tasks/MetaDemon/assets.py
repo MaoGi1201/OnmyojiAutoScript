@@ -92,7 +92,7 @@ class MetaDemonAssets:
 	# 鬼王页面标志 
 	I_CHECK_BOSS_PAGE = RuleImage(roi_front=(1064,19,43,40), roi_back=(1054,7,62,63), threshold=0.8, method="Template matching", profile="High", file="./tasks/MetaDemon/md/md_check_boss_page.png")
 	# 超鬼王主界面 
-	I_MD_CHECK_MAIN_PAGE = RuleImage(roi_front=(991,176,26,83), roi_back=(991,176,26,83), threshold=0.8, method="Template matching", profile="High", file="./tasks/MetaDemon/md/md_md_check_main_page.png")
+	I_MD_CHECK_MAIN_PAGE = RuleImage(roi_front=(991,176,26,83), roi_back=(966,149,93,127), threshold=0.8, method="Template matching", profile="High", file="./tasks/MetaDemon/md/md_md_check_main_page.png")
 	# 活动列表页超鬼王活动标志 
 	I_CHECK_ACT_LIST_METADEMON_ACT = RuleImage(roi_front=(718,293,448,127), roi_back=(675,249,566,240), threshold=0.8, method="Template matching", profile="High", file="./tasks/MetaDemon/md/md_check_act_list_metademon_act.png")
 	# 庭院主页右侧活动栏的超鬼王入口 

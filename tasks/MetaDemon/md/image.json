@@ -309,7 +309,7 @@
     "itemName": "md_check_main_page",
     "imageName": "md_md_check_main_page.png",
     "roiFront": "991,176,26,83",
-    "roiBack": "991,176,26,83",
+    "roiBack": "966,149,93,127",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "超鬼王主界面"
