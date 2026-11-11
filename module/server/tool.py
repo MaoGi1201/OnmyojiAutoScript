@@ -9,6 +9,7 @@ import threading
 import time
 import uuid
 import base64
+from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 from queue import Empty as QueueEmpty
@@ -753,6 +754,70 @@ class AnnotatorManager:
             )
         return normalized
 
+    def _normalize_frame_rules(self, rules: list[dict[str, Any]],
+                              original_items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """RuleFrame 归一化：界面可编辑字段取自表单，其余结构字段从原始 JSON 原样透传。
+
+        界面上 roiFront 表示 JSON 的 roiBadge（badge 模板位置），roiBack 为搜索区域；
+        roiRange / badges / rangeOperations 等结构字段不暴露给界面，直接沿用原值，
+        避免改图操作把 frame 规则降级成普通图片规则。
+        """
+        by_name = {
+            str(item.get("itemName", "")).strip(): item
+            for item in original_items
+            if isinstance(item, dict)
+        }
+        normalized: list[dict[str, Any]] = []
+        for index, rule in enumerate(rules):
+            item_name = str(rule.get("itemName", "")).strip()
+            if not item_name:
+                raise AnnotatorError("invalid_rule", f"第 {index + 1} 条规则缺少 itemName", 400)
+            source = by_name.get(item_name)
+            if source is None:
+                raise AnnotatorError(
+                    "invalid_rule",
+                    f"第 {index + 1} 条 frame 规则在 JSON 中找不到同名原始条目: {item_name}"
+                    "（frame 规则不支持改名或新增，请手工编辑 JSON）",
+                    400,
+                )
+            missing = [key for key in ("roiRange", "rangeOperations") if key not in source]
+            if missing:
+                raise AnnotatorError(
+                    "invalid_rule",
+                    f"第 {index + 1} 条 frame 规则缺少结构字段 {'/'.join(missing)}: {item_name}"
+                    "（请手工编辑 JSON 补全）",
+                    400,
+                )
+            image_name = str(rule.get("imageName", "")).strip() or str(source.get("imageName", "")).strip() or f"{item_name}.png"
+            method = str(rule.get("method", field_default("frame", "method", "Template matching"))).strip() or field_default("frame", "method", "Template matching")
+            if method not in ALLOWED_IMAGE_METHOD:
+                raise AnnotatorError("invalid_rule", f"第 {index + 1} 条规则 method 不支持: {method}", 400)
+            try:
+                threshold = float(rule.get("threshold", 0.8))
+            except (TypeError, ValueError) as e:
+                raise AnnotatorError("invalid_rule", f"第 {index + 1} 条规则 threshold 非法", 400) from e
+            if threshold < 0 or threshold > 1:
+                raise AnnotatorError("invalid_rule", f"第 {index + 1} 条规则 threshold 必须在 0-1", 400)
+
+            payload = deepcopy(source)
+            payload["itemName"] = item_name
+            payload["imageName"] = image_name
+            payload["roiBack"] = self._parse_roi(str(rule.get("roiBack", "")))
+            payload["method"] = method
+            payload["threshold"] = threshold
+            payload["description"] = str(rule.get("description", "")).strip()
+            payload["roiBadge"] = self._parse_roi(str(rule.get("roiFront", "")))
+
+            # badge 模板改名时同步 badges 引用，否则生成器仍指向旧文件
+            old_image_name = str(source.get("imageName", "")).strip()
+            badges = payload.get("badges")
+            if isinstance(badges, list) and old_image_name and image_name != old_image_name:
+                for badge in badges:
+                    if isinstance(badge, dict) and str(badge.get("imageName", "")).strip() == old_image_name:
+                        badge["imageName"] = image_name
+            normalized.append(payload)
+        return normalized
+
     def _normalize_ocr_rules(self, rules: list[dict[str, Any]]) -> list[dict[str, Any]]:
         normalized: list[dict[str, Any]] = []
         for index, rule in enumerate(rules):
@@ -1015,6 +1080,10 @@ class AnnotatorManager:
             item = data[0]
             if not isinstance(item, dict):
                 return "unknown"
+            # RuleFrame 也带 imageName，必须在 image 之前判定，否则会被当成普通图片规则，
+            # 保存时丢掉 roiBadge / roiRange / badges / rangeOperations。
+            if "roiBadge" in item or "roiRange" in item:
+                return "frame"
             if "imageName" in item:
                 return "image"
             if "keyword" in item:
@@ -1067,6 +1136,19 @@ class AnnotatorManager:
                             "itemName": str(item.get("itemName", "")),
                             "imageName": str(item.get("imageName", "")),
                             "roiFront": str(item.get("roiFront", "0,0,100,100")),
+                            "roiBack": str(item.get("roiBack", "0,0,100,100")),
+                            "method": str(item.get("method", "Template matching")),
+                            "threshold": float(item.get("threshold", 0.8)),
+                            "description": str(item.get("description", "")),
+                        }
+                    )
+                elif rule_type == "frame":
+                    rules.append(
+                        {
+                            "itemName": str(item.get("itemName", "")),
+                            "imageName": str(item.get("imageName", "")),
+                            # roiFront 承载 JSON 的 roiBadge（badge 模板位置）
+                            "roiFront": str(item.get("roiBadge", "0,0,100,100")),
                             "roiBack": str(item.get("roiBack", "0,0,100,100")),
                             "method": str(item.get("method", "Template matching")),
                             "threshold": float(item.get("threshold", 0.8)),
@@ -1220,12 +1302,12 @@ class AnnotatorManager:
         session = self._get_session(session_id)
         _, source_path = self._load_session_bgr_image(session, image_id)
 
-        if rule_type == "image":
+        if rule_type in ("image", "frame"):
             item_name = str(rule.get("itemName", "")).strip() or "unnamed"
             image_name = str(rule.get("imageName", "")).strip()
             if not image_name:
                 raise AnnotatorError("invalid_rule", "image 规则缺少 imageName", 400)
-            method = str(rule.get("method", field_default("image", "method", "Template matching"))).strip() or field_default("image", "method", "Template matching")
+            method = str(rule.get("method", field_default(rule_type, "method", "Template matching"))).strip() or field_default(rule_type, "method", "Template matching")
             try:
                 threshold = float(rule.get("threshold", 0.8))
             except (TypeError, ValueError) as e:
@@ -1244,7 +1326,7 @@ class AnnotatorManager:
             )
             detail = detect_image_detail(str(source_path), target)
             return {
-                "rule_type": "image",
+                "rule_type": rule_type,
                 "item_name": item_name,
                 "image_name": image_name,
                 "matched": bool(detail.get("matched", False)),
@@ -1367,6 +1449,17 @@ class AnnotatorManager:
 
         if rule_type == "image":
             payload = self._normalize_image_rules(rules) if rules else []
+        elif rule_type == "frame":
+            original_items: list[dict[str, Any]] = []
+            if rules and target_json.exists():
+                try:
+                    with open(target_json, "r", encoding="utf-8") as f:
+                        raw = json.load(f)
+                    if isinstance(raw, list):
+                        original_items = [item for item in raw if isinstance(item, dict)]
+                except (OSError, ValueError):
+                    original_items = []
+            payload = self._normalize_frame_rules(rules, original_items) if rules else []
         elif rule_type == "ocr":
             payload = self._normalize_ocr_rules(rules) if rules else []
         elif rule_type == "click":

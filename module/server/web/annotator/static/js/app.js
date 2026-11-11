@@ -640,6 +640,12 @@
     return state.ruleType;
   }
 
+  // RuleFrame 在界面上与 RuleImage 同构：imageName 是 badge 模板、roiBadge 承载在 roiFront 上，
+  // 模板预览/裁剪/测试/自动命名等图片型处理都要一并覆盖 frame。
+  function isImageLikeRule() {
+    return state.ruleType === "image" || state.ruleType === "frame";
+  }
+
   function isListImageRule() {
     return state.ruleType === "list" && getRuleSubtype() === "image";
   }
@@ -649,7 +655,7 @@
   }
 
   function isImagePreviewRule() {
-    return state.ruleType === "image" || isListImageRule();
+    return isImageLikeRule() || isListImageRule();
   }
 
   function parseRoi(text) {
@@ -1458,7 +1464,7 @@
     if (!rule) {
       return "";
     }
-    if (state.ruleType === "image") {
+    if (isImageLikeRule()) {
       return String(rule.imageName || "").trim();
     }
     if (isListImageRule()) {
@@ -1471,7 +1477,7 @@
     if (!rule) {
       return "";
     }
-    if (state.ruleType === "image") {
+    if (isImageLikeRule()) {
       const imageName = String(rule.imageName || "").trim();
       return imageName || defaultImageNameForItem(rule.itemName || "image");
     }
@@ -1485,7 +1491,7 @@
     if (!rule) {
       return false;
     }
-    return state.ruleType === "image" || isListImageRule();
+    return isImageLikeRule() || isListImageRule();
   }
 
   function currentRulePreviewUrl(rule) {
@@ -1783,7 +1789,7 @@
 
     const oldPreviewImageName = getRulePreviewImageName(rule);
     for (const field of getRuleFields()) {
-      if (state.ruleType === "image" && field.key === "imageName" && changedField === "itemName") {
+      if (isImageLikeRule() && field.key === "imageName" && changedField === "itemName") {
         continue;
       }
       const element = document.getElementById(getRuleFieldDomId(field.key));
@@ -1793,7 +1799,7 @@
     const newItemName = String(rule.itemName || "").trim() || "unnamed";
     rule.itemName = newItemName;
 
-    if (state.ruleType === "image") {
+    if (isImageLikeRule()) {
       if (changedField === "itemName") {
         rule.imageName = defaultImageNameForItem(newItemName);
         rule.__autoImageName = true;
@@ -2261,7 +2267,7 @@
     syncRoiToRule();
 
     let imageName = "";
-    if (state.ruleType === "image") {
+    if (isImageLikeRule()) {
       imageName = String(rule.imageName || "").trim();
       if (!imageName) {
         imageName = defaultImageNameForItem(rule.itemName || "image");
@@ -2421,7 +2427,7 @@
   function updateTestButtonVisibility() {
     const hasRule = Boolean(getCurrentRule());
     const subtype = getRuleSubtype();
-    const canTestType = state.ruleType === "image"
+    const canTestType = isImageLikeRule()
       || state.ruleType === "ocr"
       || (state.ruleType === "list" && (subtype === "image" || subtype === "ocr"));
     let canUse = canTestType && hasRule && !!state.currentImageId && !!state.taskName && !!state.jsonRelPath;
@@ -2768,7 +2774,7 @@
     el.addRuleBtn.addEventListener("click", () => {
       const rule = createRuleFromCurrentCanvas(state.ruleType);
       rule.itemName = `item_${state.rules.length + 1}`;
-      if (state.ruleType === "image") {
+      if (isImageLikeRule()) {
         rule.imageName = defaultImageNameForItem(rule.itemName);
       }
       state.rules.push(rule);
