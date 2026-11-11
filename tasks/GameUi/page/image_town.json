@@ -2,7 +2,7 @@
   {
     "itemName": "check_town",
     "imageName": "page_check_town.png",
-    "roiFront": "947,103,68,82",
+    "roiFront": "1026,106,68,82",
     "roiBack": "765,98,402,96",
     "method": "Template matching",
     "threshold": 0.8,
