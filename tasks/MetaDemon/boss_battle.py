@@ -435,9 +435,15 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, GameUi, MetaDemonAsset
                     logger.error(f'首领 {boss_name} 无匹配预设，请配置对应名称或 ALL')
                     return False
                 quick.group_name, quick.preset_name = target
-            if not self.run_quick_loadout(
+            # 快速预设入口（「预设」旁的举旗小纸人）在超鬼王主页和鬼王详情页都存在，
+            # 召唤后停在详情页即可直接打开，不必来回跳页。
+            # 注意：page_meta_demon 是「祸至无日」活动主页，那里没有该入口（实测 0.569）。
+            # self.goto_page(ipages.page_meta_demon)
+            applied = self.run_quick_loadout(
                 quick, frame=self.F_QUICK_LOADOUT_FRAME, skip_equip_soul=custom.skip_equip_soul,
-            ):
+            )
+            # self.goto_page(ipages.page_meta_demon_boss)
+            if not applied:
                 return False
         else:
             soul = self.conf.switch_soul_config.switch_for(category)
