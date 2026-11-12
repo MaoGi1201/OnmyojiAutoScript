@@ -125,11 +125,9 @@ class ScriptTask(GeneralBattle, GeneralInvite, GeneralBuff, GeneralRoom, GameUi,
         self.goto_page(page_awake_zones)
         self.evozone_enter()
         layer = self._config.evo_zone_config.layer
-        logger.info("test0")
+        logger.info(f'EvoZone leader: layer={layer}, lock team={self._config.general_battle_config.lock_team_enable}')
         self.check_layer(layer)
-        logger.info("test1")
         self.check_lock(self._config.general_battle_config.lock_team_enable, self.I_EVOZONE_LOCK, self.I_EVOZONE_UNLOCK)
-        logger.info("test2")
         # 创建队伍
         logger.info('Create team')
         while 1:
