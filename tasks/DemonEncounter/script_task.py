@@ -198,7 +198,15 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
             self.wait_until_appear(self.I_PREPARE_HIGHLIGHT, wait_time=2)
 
         # 等待回到挑战boss主界面
-        self.wait_until_appear(self.I_BOSS_GATHER)
+        # 原实现: self.wait_until_appear(self.I_BOSS_GATHER)
+        # boss 未被击杀时进入就是集结界面; 被击杀则不会出现集结界面, 会弹出 de_win 结算, 需要点击推进
+        while 1:
+            self.screenshot()
+            if self.appear(self.I_BOSS_GATHER) or self.appear(self.I_DE_LOCATION):
+                break
+            if self.appear_then_click(self.I_DE_WIN, interval=1):
+                logger.info('Boss killed, de_win settlement appear, click to finish')
+                continue
         while 1:
             self.screenshot()
             if self.appear(self.I_DE_LOCATION):
