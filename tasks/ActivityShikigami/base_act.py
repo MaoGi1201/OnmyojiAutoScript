@@ -148,7 +148,7 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
     BATTLE_PAGE_ENTER: dict[str, tuple[str, str]] = {}
     
     # 从式神录返回目标页时，等待目标页被认出的上限（秒）。
-    # 注释掉则退回 GameUi 的默认值 10.0s（_leave_records 里已单独内联 6s）。
+    # 注释掉则退回 GameUi 的默认值 10.0s；_leave_records 里已内联 10s。
     # page_arrive_timeout: float = 6.0
     
     # 进界面时统一清一遍的干扰元素：每项 = (要处理的图, 处理方式)。
@@ -402,7 +402,7 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
                 continue
             if not self.appear_then_click(back, interval=1.0):
                 continue
-            deadline = time.time() + 6.0  # 等返回后目标页出现的时间上限（秒）
+            deadline = time.time() + 10.0  # 等返回后目标页出现的时间上限（秒），活动页加载慢，给足
             while time.time() < deadline:
                 self.screenshot()
                 if target.recognizer.evaluate(self):
