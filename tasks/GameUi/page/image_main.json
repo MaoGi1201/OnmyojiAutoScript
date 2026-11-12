@@ -191,8 +191,8 @@
   {
     "itemName": "check_team",
     "imageName": "page_check_team.png",
-    "roiFront": "32,585,82,65",
-    "roiBack": "0,563,148,139",
+    "roiFront": "97,17,85,47",
+    "roiBack": "77,0,151,78",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "组队页面标志"
