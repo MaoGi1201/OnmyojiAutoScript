@@ -148,21 +148,11 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
     # 某些活动的目标页只是地图页，还要再点一次才到真正的战斗页。
     BATTLE_PAGE_ENTER: dict[str, tuple[str, str]] = {}
     
-    # 进入战斗页前的等待时长（秒），给页面切换留时间。
-    
-    BATTLE_PAGE_ENTER_WAIT: float = 1.0
-    
-    # 点跳转按钮后等待确认图出现的上限（秒）。
-    BATTLE_PAGE_ENTER_TIMEOUT: float = 5.0
-    
     # 进界面时统一清一遍的干扰元素：每项 = (要处理的图, 处理方式)。
     POPUP_CLEARS: tuple[tuple[tuple[str, ...], str], ...] = (
         (("I_UI_BACK_RED",), "disappear"),
         (("I_SKIP_BUTTON", "I_CONFIRM_SKIP"), "chain"),
     )
-
-    # 清理干扰元素时的点击/等待间隔（秒）。
-    POPUP_CLEAR_INTERVAL: float = 1.5
 
     # 是否已经到达战斗页；决定锁容是否需要推迟。
     _battle_page_ready: bool = False
@@ -193,9 +183,7 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
                 continue
             logger.info(f"Climb: clear popup {names} with {mode}")
             if mode == "disappear":
-                self.ui_click_until_disappear(
-                    images[0], interval=self.POPUP_CLEAR_INTERVAL
-                )
+                self.ui_click_until_disappear(images[0], interval=1.5)
             else:
                 self._click_popup_chain(images)
             handled = True
@@ -206,9 +194,9 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
 
         for index, image in enumerate(images):
             if index:
-                time.sleep(self.POPUP_CLEAR_INTERVAL)
+                time.sleep(1.5)
             self.screenshot()
-            if not self.appear_then_click(image, interval=self.POPUP_CLEAR_INTERVAL):
+            if not self.appear_then_click(image, interval=1.5):
                 logger.warning(f"Climb: popup chain stopped at {index}: {image.name}")
                 return
 
@@ -412,7 +400,7 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
                 continue
             if not self.appear_then_click(back, interval=1.0):
                 continue
-            deadline = time.time() + self.page_arrive_timeout
+            deadline = time.time() + 6.0  # 等返回后目标页出现的时间上限（秒）
             while time.time() < deadline:
                 self.screenshot()
                 if target.recognizer.evaluate(self):
@@ -548,11 +536,12 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
         if button is None or confirm is None:
             logger.warning(f"Climb: battle page enter assets missing: {rule}")
             return False
-        time.sleep(self.BATTLE_PAGE_ENTER_WAIT)
+        # 进入地图页后先等 1s，给页面切换留时间
+        time.sleep(1.0)
         # 地图页上的红叉弹窗、跳过框统一在这一步清掉
         self.clear_popups()
         arrived = self.ui_click_until_appear_or_timeout(
-            button, confirm, interval=1.5, timeout=self.BATTLE_PAGE_ENTER_TIMEOUT
+            button, confirm, interval=1.5
         )
         if not arrived:
             logger.warning(f"Climb: {self.climb_type} did not reach battle page in time")
@@ -600,6 +589,13 @@ class BaseAct(StateMachine, GameUi, GeneralBattle, SwitchSoul, ActivityShikigami
                 self.device.click_record_clear()
                 click_times += 1
                 logger.info(f"Try click fire, remain times[{max_times - click_times}]")
+                # 点完挑战到认出战斗页要 5~13s，先等 4s，别把慢加载算成一次失败
+                deadline = time.time() + 4
+                while time.time() < deadline:
+                    self.screenshot()
+                    if self.is_in_battle(False):
+                        return True
+                    time.sleep(1)
                 continue
 
     def switch_soul(self, enter_button: RuleImage):

@@ -33,11 +33,6 @@ class NormalClimbAct(BaseAct):
     # （页面图里只有 page_act_pass_map 一个地图页节点，page_act_map 仅是 flag=True 时的别名）。
     DETACH_MAP_ROUTES: bool = True
 
-    # 跳转后等待目标页出现的上限（秒）
-    # 实测从点活动入口到认出活动页要 4.7~6.0s，设小了会在页面出来前就判失败，
-    # 进而被 close_unknown_pages 用返回键踢出活动。
-    page_arrive_timeout: float = 6.0  # 原值 2.0，恢复时改回
-
     # 四个爬塔页各自的「上锁图 / 未上锁图」，判定顺序在通用图之后。
     # 某项 asset 未配置时 `_own_lock_names()` 返回 None，该轮跳过。
     LOCK_RULES: dict[str, tuple[str, str]] = {
@@ -50,9 +45,6 @@ class NormalClimbAct(BaseAct):
     # 通用的那一对锁图，判定优先用它，失败后再退到各页专属的那一对。
     # 置 None 则只用专属图。
     LOCK_FALLBACK: tuple[str, str] | None = ('I_LOCK', 'I_UNLOCK')
-
-    # 单轮锁容点击的超时（秒）；基类 `ui_click` 是死循环
-    LOCK_CLICK_TIMEOUT: float = 5.0
 
     # 到达层：哪些类型的目标页只是地图页，还要再点一次才到真正的战斗页。
     # 本期体力页进页即战斗页，不需要二次点击；原门票规则注释保留，恢复时取消注释。
@@ -246,7 +238,7 @@ class NormalClimbAct(BaseAct):
         """点 `click` 图直到出现 `stop` 图，带超时返回是否达成。"""
 
         return self.ui_click_until_appear_or_timeout(
-            click, stop, interval=1.5, timeout=self.LOCK_CLICK_TIMEOUT
+            click, stop, interval=1.5, timeout=5.0
         )
 
     def _own_lock_names(self) -> tuple[str, str] | None:
