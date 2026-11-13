@@ -390,6 +390,7 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
             # 还未测试题库无法识别的情况
             logger.hr(f'Answer {i}', 3)
             answer_click = answer()
+            click_count = 0
             while 1:
                 self.screenshot()
                 if self.ui_reward_appear_click():
@@ -412,8 +413,17 @@ class ScriptTask(GameUi, GeneralBattle, DemonEncounterAssets, SwitchSoul):
                         logger.warning('Answer finish')
                         return
 
+                # 答完最后一题后选项不再响应、也没有奖励弹窗，面板不会自己关，需要点 X
+                if click_count >= 3:
+                    cur, _, total = self.O_LETTER_COUNT.ocr(self.device.image)
+                    if (cur and cur == total) or click_count >= 8:
+                        logger.warning(f'Answer all done {cur}/{total}, close letter panel')
+                        self.ui_click_until_disappear(self.I_LETTER_CLOSE)
+                        return
+
                 # 一直点击
-                self.click(answer_click, interval=1.5)
+                if self.click(answer_click, interval=1.5):
+                    click_count += 1
             time.sleep(0.5)
 
     def _battle(self, target_click):

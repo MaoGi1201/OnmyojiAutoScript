@@ -1,8 +1,8 @@
 [
   {
     "itemName": "letter_count",
-    "roiFront": "480,133,55,34",
-    "roiBack": "480,133,55,34",
+    "roiFront": "484,120,55,34",
+    "roiBack": "484,120,55,34",
     "mode": "DigitCounter",
     "method": "Default",
     "keyword": "",
