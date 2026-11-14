@@ -107,6 +107,10 @@ class MetaDemonAssets:
 	I_MD_GIFT_CLOSE = RuleImage(roi_front=(1183,97,46,44), roi_back=(1100,60,180,120), threshold=0.8, method="Template matching", profile="High", file="./tasks/MetaDemon/md/md_md_gift_close.png")
 	# 礼包页裂变之眼卡片的30勾玉购买按钮（橙色可买） 
 	I_MD_GIFT_TICKET_BUY = RuleImage(roi_front=(1011,305,152,61), roi_back=(900,120,380,350), threshold=0.8, method="Template matching", profile="High", file="./tasks/MetaDemon/md/md_md_gift_ticket_buy.png")
+	# 超鬼王主页右侧积分按钮 
+	I_MD_POINTS = RuleImage(roi_front=(1204,304,34,21), roi_back=(1160,280,110,90), threshold=0.8, method="Template matching", profile="High", file="./tasks/MetaDemon/md/md_md_points.png")
+	# 积分页右下角一键领取 
+	I_MD_POINTS_CLAIM = RuleImage(roi_front=(1136,581,55,43), roi_back=(1100,550,140,110), threshold=0.8, method="Template matching", profile="High", file="./tasks/MetaDemon/md/md_md_points_claim.png")
 
 
 	# Ocr Rule Assets

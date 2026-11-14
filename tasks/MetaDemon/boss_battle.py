@@ -95,8 +95,33 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, Buy, GameUi, MetaDemon
                     self.click(ipages.random_click(), interval=0.6)
                 case _:
                     time.sleep(random.uniform(0.7, 1.4))
+        if self.conf.meta_demon_config.points_claim_enable:
+            self.claim_points()
         self.set_next_run(task="MetaDemon", success=True)
         self.finish_task()
+
+    def claim_points(self) -> None:
+        """结束前领取积分：主页打开积分页，一键领取高星积分，并点掉结算弹窗。"""
+        logger.hr('Claim points', 2)
+        self.goto_page(ipages.page_meta_demon_boss)
+        if not self.appear_then_click(self.I_MD_POINTS, interval=1.5):
+            logger.warning('未识别到积分按钮，跳过积分领取')
+            return
+        # 进入积分页会先弹低星结算，先点掉再等一键领取出现
+        deadline = time.monotonic() + 15
+        while time.monotonic() < deadline:
+            self.screenshot()
+            if self.ui_reward_appear_click():
+                time.sleep(0.5)
+                continue
+            if self.appear(self.I_MD_POINTS_CLAIM):
+                break
+            time.sleep(0.5)
+        if self.appear(self.I_MD_POINTS_CLAIM):
+            # 点一键领取后弹出积分结算，ui_get_reward 会一直点到弹窗消失
+            self.ui_get_reward(self.I_MD_POINTS_CLAIM)
+        else:
+            logger.warning('积分页未出现一键领取，跳过领取')
 
     def _close_gift_page(self) -> None:
         """点右上叉关闭礼包页，确认回到超鬼王主页。"""
