@@ -36,6 +36,8 @@ class TicketGeneralConfig(ConfigBase):
     awake_layer: Layer = Field(default=Layer.SEVEN, title='觉醒层数',
         description='门票刷取：觉醒使用的层数，可选一至十层；默认七层。')
     exploration_target: ExplorationTarget = Field(default=ExplorationTarget.ALL, title='探索目标')
+    realm_raid_enable: bool = Field(default=False, title='结束时调用个人突破',
+        description='门票刷取结束后调用个人突破任务；该任务需已启用，未启用时仅在日志提示。')
 
 
     @property
