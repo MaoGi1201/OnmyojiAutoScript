@@ -376,5 +376,23 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "礼包页裂变之眼卡片的30勾玉购买按钮（橙色可买）"
+  },
+  {
+    "itemName": "md_points",
+    "imageName": "md_md_points.png",
+    "roiFront": "1204,304,34,21",
+    "roiBack": "1160,280,110,90",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "超鬼王主页右侧积分按钮"
+  },
+  {
+    "itemName": "md_points_claim",
+    "imageName": "md_md_points_claim.png",
+    "roiFront": "1136,581,55,43",
+    "roiBack": "1100,550,140,110",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "积分页右下角一键领取"
   }
 ]

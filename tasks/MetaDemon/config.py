@@ -85,6 +85,8 @@ class MetaDemonConfig(ConfigBase):
     synthesis_list: str = Field(default='1', description='鬼王合成列表:只填数字,支持1-5星合成\n例:123(合成一星,二星,三星鬼王);空格逗号等分隔符可写可不写')
     jade_buy_ticket_enable: bool = Field(default=False, title='勾玉购买鬼王令',
         description='进入超鬼王后自动打开礼包页,用勾玉购买鬼王令,每次购买最大数量;当日已购完时自动跳过。')
+    points_claim_enable: bool = Field(default=False, title='结束前领取积分',
+        description='检查没有鬼王可以攻打后，进入积分页一键领取高星积分。')
 
     @field_validator('fire_sequence', 'synthesis_list', mode='before')
     @classmethod
