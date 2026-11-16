@@ -126,6 +126,24 @@
     "description": "喝茶"
   },
   {
+    "itemName": "md_tea_use",
+    "imageName": "md_md_tea_use.png",
+    "roiFront": "556,465,168,54",
+    "roiBack": "527,455,235,80",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "喝茶弹窗「清酿·欢饮」的使用按钮(赠送一次58免费)"
+  },
+  {
+    "itemName": "md_tea_first_free",
+    "imageName": "md_md_tea_first_free.png",
+    "roiFront": "547,465,184,54",
+    "roiBack": "527,455,235,80",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "喝茶弹窗「购买 清酿」的58首次免费按钮(免费次数)"
+  },
+  {
     "itemName": "md_disable_powerful_fire",
     "imageName": "md_md_disable_powerful_fire.png",
     "roiFront": "1113,513,24,24",

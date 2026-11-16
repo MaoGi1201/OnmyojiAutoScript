@@ -61,5 +61,14 @@
     "method": "Default",
     "keyword": "",
     "description": "超鬼王门票(结算页)"
+  },
+  {
+    "itemName": "md_check_main_page",
+    "roiFront": "970,130,70,150",
+    "roiBack": "970,130,70,150",
+    "mode": "Full",
+    "method": "Default",
+    "keyword": "超鬼王",
+    "description": "超鬼王主页右侧「超鬼王」"
   }
 ]
