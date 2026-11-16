@@ -78,7 +78,7 @@ class Screenshot(Adb, DroidCast, Scrcpy, Window, NemuIpc, WindowWin32):
             self.image = method()
             frame_info = get_image_client().register_frame(self.image, self.config.config_name)
             self.image_frame_id = frame_info["frame_id"]
-            self.image_frame_expires_at = time.monotonic() + float(frame_info["expire_seconds"])
+            self.image_frame_expires_at = time.monotonic() + float(frame_info.get("expire_seconds", float("inf")))
 
             # if self.config.Emulator_ScreenshotDedithering:
             #     # This will take 40-60ms
