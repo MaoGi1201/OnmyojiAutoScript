@@ -18,11 +18,13 @@ page_act_list_meta_demon = Page(MetaDemonAssets.I_CHECK_ACT_LIST_METADEMON_ACT)
 page_act_list.connect(page_act_list_meta_demon, MetaDemonAssets.L_GOTO_METADEMON_LIST, key="page_act_list->page_act_list_meta_demon")
 page_act_list_meta_demon.connect(page_main, GlobalGameAssets.I_UI_BACK_YELLOW, key="page_act_list_meta_demon->page_main")
 
-page_meta_demon = Page(MetaDemonAssets.I_MD_CHECK_MAIN_PAGE)
+page_meta_demon = Page(MetaDemonAssets.O_MD_CHECK_MAIN_PAGE)
+# 原判据：模板匹配「超鬼王」红标签，三张截图背景深浅不同时匹配不上，改用 OCR
+# page_meta_demon = Page(MetaDemonAssets.I_MD_CHECK_MAIN_PAGE)
 page_meta_demon.add_enter_success_hooks(MetaDemonAssets.I_MD_GET_YESTERDAY_REWARD, MetaDemonAssets.I_MD_CLOSE_POPUP)
 page_meta_demon.connect(page_act_list_meta_demon, GlobalGameAssets.I_UI_BACK_YELLOW, key="page_meta_demon->page_act_list_meta_demon")
 
-# 进入超鬼王主页（I_MD_CHECK_MAIN_PAGE）的过场等待
+# 进入超鬼王主页（O_MD_CHECK_MAIN_PAGE）的过场等待
 META_DEMON_ENTER_SETTLE_TIMEOUT: float = 12.0
 META_DEMON_ENTER_SETTLE_INTERVAL: float = 0.5
 
@@ -56,7 +58,9 @@ page_main.connect(page_meta_demon, enter_meta_demon_settle(MetaDemonAssets.I_MAI
 page_meta_demon_boss = Page(MetaDemonAssets.I_CHECK_BOSS_PAGE)
 page_meta_demon_boss.add_enter_success_hooks(MetaDemonAssets.I_MD_CLOSE_POPUP)
 page_meta_demon_boss.connect(page_meta_demon, GlobalGameAssets.I_UI_BACK_YELLOW, key="page_meta_demon_boss->page_meta_demon")
-page_meta_demon.connect(page_meta_demon_boss, MetaDemonAssets.I_MD_CHECK_MAIN_PAGE, key="page_meta_demon->page_meta_demon_boss")
+page_meta_demon.connect(page_meta_demon_boss, MetaDemonAssets.O_MD_CHECK_MAIN_PAGE, key="page_meta_demon->page_meta_demon_boss")
+# 原动作：点模板图（背景变化时点不准），OCR 后改为点识别到的「超鬼王」标签位置
+# page_meta_demon.connect(page_meta_demon_boss, MetaDemonAssets.I_MD_CHECK_MAIN_PAGE, key="page_meta_demon->page_meta_demon_boss")
 
 page_reward.connect(page_meta_demon_boss, random_click(), key="page_reward->page_meta_demon_boss")
 page_battle_result.connect(page_meta_demon_boss, random_click(), key="page_battle_result->page_meta_demon_boss")

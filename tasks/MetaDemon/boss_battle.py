@@ -105,9 +105,11 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, Buy, GameUi, MetaDemon
         """结束前领取积分：主页打开积分页，一键领取高星积分，并点掉结算弹窗。"""
         logger.hr('Claim points', 2)
         self.goto_page(ipages.page_meta_demon_boss)
-        if not self.appear_then_click(self.I_MD_POINTS, interval=1.5):
+        if not self.appear(self.I_MD_POINTS):
             logger.warning('未识别到积分按钮，跳过积分领取')
             return
+        # 出现即点击进入积分页
+        self.ui_click_until_disappear(self.I_MD_POINTS, interval=1)
         # 进入积分页会先弹低星结算，先点掉再等一键领取出现
         deadline = time.monotonic() + 15
         while time.monotonic() < deadline:
@@ -198,9 +200,15 @@ class BossBattle(GeneralBattle, SwitchSoul, QuickLoadout, Buy, GameUi, MetaDemon
                     exit_matcher=self.I_MD_SETTLING if within_limit is not None else None,
                 )
                 return True
-            if self.appear(self.I_MD_DRINK_TEA, interval=1.2):  # 出现喝茶弹窗
+            # 喝茶弹窗有三种按钮：赠送一次「使用」/ 每日首次免费「58 首次免费」/ 花58勾玉「58」，逐个按钮判
+            tea_button = None
+            for button in (self.I_MD_TEA_USE, self.I_MD_TEA_FIRST_FREE, self.I_MD_DRINK_TEA):
+                if self.appear(button, interval=1.2):
+                    tea_button = button
+                    break
+            if tea_button:  # 出现喝茶弹窗
                 if self.conf.meta_demon_config.auto_tea:
-                    self.click(self.I_MD_DRINK_TEA)  # 喝茶
+                    self.click(tea_button)  # 喝茶
                     continue
                 # 不喝茶则结束任务安排下一次运行
                 self.ui_click_until_disappear(self.I_MD_CLOSE_POPUP, interval=0.6)
