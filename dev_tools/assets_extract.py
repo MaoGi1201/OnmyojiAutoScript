@@ -68,8 +68,9 @@ class ImageExtractor:
         :return:
         """
         description: str = f'\t# {item["description"]} \n'
+        # High 是 RuleImage 的默认值，不写出来，避免每次导出都刷出一片无意义的 diff
         profile = str(item.get("profile", "High"))
-        profile_arg = f'profile="{profile}", ' if profile in ("Default", "High", "More") else ''
+        profile_arg = f'profile="{profile}", ' if profile in ("Default", "More") else ''
         image_file = f'./{self.image_path}/{item["imageName"]}' if item.get('imageName') else ''
         name: str = f'\tI_{name_transform(item["itemName"])} = RuleImage(' \
                     f'roi_front=({item["roiFront"]}), ' \
@@ -440,13 +441,26 @@ class AssetsExtractor:
             return True
         return False
 
+    def prune_imports(self, text: str) -> str:
+        """
+        没有 F_/Scatter 规则的任务去掉对应的 import，保持老文件的最小头部
+        :param text: 待写入的内容
+        :return:
+        """
+        for symbol, module in (('RuleFrame(', 'from module.atom.frame import'),
+                               ('RuleScatter(', 'from module.atom.scatter import')):
+            if symbol in text:
+                continue
+            text = '\n'.join(line for line in text.split('\n') if not line.startswith(module))
+        return text
+
     def write_file(self) -> None:
         """
         将自身的_resule写入文件
         :return:
         """
         with open(self.assets_file, 'w', encoding='utf-8', newline='\n') as f:
-            f.write(self._result)
+            f.write(self.prune_imports(self._result))
 
     def extract(self) -> str:
         """
