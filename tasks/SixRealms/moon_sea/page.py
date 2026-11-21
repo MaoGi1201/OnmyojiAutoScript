@@ -57,7 +57,8 @@ page_ms_map.connect(page_ms_main, GlobalGameAssets.I_UI_BACK_BLUE, key="page_ms_
 
 # 主界面退出弹窗
 page_ms_exit = Page(SixRealmsAssets.I_EXIT_SIXREALMS, category="moon_sea", priority=88)
-page_ms_exit.connect(page_moon_sea, SixRealmsAssets.I_EXIT_SIXREALMS, key="page_ms_exit->page_moon_sea")
+# 一時中止 -> 月海から離脱 确认框, 复用准备界面退出弹窗那条边(它的 I_UI_CONFIRM 正好是"確認")
+page_ms_exit.connect(page_sr_prepare_exit, SixRealmsAssets.I_EXIT_SIXREALMS, key="page_ms_exit->page_sr_prepare_exit")
 page_ms_exit.connect(page_ms_shop_land, random_click(ltrb=(True, True, True, True)), key="page_ms_exit->page_ms_shop_land")
 page_ms_exit.connect(page_ms_main, random_click(ltrb=(True, True, True, True)), key="page_ms_exit->page_ms_main")
 page_ms_exit.connect(page_ms_chaos_land, random_click(ltrb=(True, True, True, True)), key="page_ms_exit->page_ms_chaos_land")

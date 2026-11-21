@@ -92,8 +92,8 @@
   {
     "itemName": "exit_sixrealms",
     "imageName": "ms_exit_sixrealms.png",
-    "roiFront": "507.5,308,100,100",
-    "roiBack": "507.5,308,100,100",
+    "roiFront": "526,329,66,64",
+    "roiBack": "526,329,66,64",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "暂时离开六道之门"

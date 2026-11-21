@@ -11,20 +11,20 @@ class SixRealmsAssets:
 
 
 	# Click Rule Assets
-	# description 
+	# description
 	C_MAIN_ANIMATE_KEEP = RuleClick(roi_front=(565,7,100,215), roi_back=(565,7,100,215), name="main_animate_keep")
-	# description 
+	# description
 	C_STORE_ANIMATE_KEEP = RuleClick(roi_front=(825,87,317,466), roi_back=(825,87,317,466), name="store_animate_keep")
 
 
 	# Click Rule Assets
-	# 左边的 
+	# 左边的
 	C_NPC_FIRE_LEFT = RuleClick(roi_front=(465,258,102,123), roi_back=(465,258,102,123), name="npc_fire_left")
-	# description 
+	# description
 	C_NPC_FIRE_RIGHT = RuleClick(roi_front=(792,278,90,129), roi_back=(792,278,90,129), name="npc_fire_right")
-	# 中间的精英 
+	# 中间的精英
 	C_NPC_FIRE_CENTER = RuleClick(roi_front=(668,211,110,171), roi_back=(668,211,110,171), name="npc_fire_center")
-	# 默认的 
+	# 默认的
 	C_ISLAND_ENTER = RuleClick(roi_front=(1,0,101,101), roi_back=(1,0,101,101), name="island_enter")
 
 
@@ -50,7 +50,7 @@ class SixRealmsAssets:
 	# 第二阵容确定 
 	I_MSTART_CONFIRM2 = RuleImage(roi_front=(1154,581,74,85), roi_back=(1079,535,196,177), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_mstart_confirm2.png")
 	# 暂时离开六道之门 
-	I_EXIT_SIXREALMS = RuleImage(roi_front=(507.5,308,100,100), roi_back=(507.5,308,100,100), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_exit_sixrealms.png")
+	I_EXIT_SIXREALMS = RuleImage(roi_front=(526,329,66,64), roi_back=(526,329,66,64), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_exit_sixrealms.png")
 	# 退出准备界面弹窗 
 	I_MS_CHECK_EXIT_PREPARE = RuleImage(roi_front=(480,285,326,57), roi_back=(436,223,414,249), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_ms_check_exit_prepare.png")
 	# 召唤商店弹窗 
@@ -289,7 +289,7 @@ class SixRealmsAssets:
 
 
 	# Click Rule Assets
-	# 切换式神区域 
+	# 切换式神区域
 	C_SR_SWITCH_SHIKIGAMI = RuleClick(roi_front=(51,614,53,55), roi_back=(51,614,53,55), name="sr_switch_shikigami")
 
 
