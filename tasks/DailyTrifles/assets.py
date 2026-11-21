@@ -11,15 +11,15 @@ class DailyTriflesAssets:
 
 
 	# Click Rule Assets
-	# 寮祈愿点击输入框 
+	# 寮祈愿点击输入框
 	C_DT_GW_CLICK_INPUT = RuleClick(roi_front=(38,0,911,40), roi_back=(38,0,911,40), name="dt_gw_click_input")
-	# 点击昵称搜索区域 
+	# 点击昵称搜索区域
 	C_DT_GW_INPUT_SEARCH = RuleClick(roi_front=(334,90,554,33), roi_back=(334,90,554,33), name="dt_gw_input_search")
 
 
 	# Image Rule Assets
 	# 进入庭院事务标志 
-	I_ENTER_COURTYARD_AFFAIRS = RuleImage(roi_front=(990,372,25,30), roi_back=(696,349,343,231), threshold=0.8, method="Template matching", file="./tasks/DailyTrifles/dt/dt_enter_courtyard_affairs.png")
+	I_ENTER_COURTYARD_AFFAIRS = RuleImage(roi_front=(990,372,25,30), roi_back=(324,349,715,217), threshold=0.8, method="Template matching", file="./tasks/DailyTrifles/dt/dt_enter_courtyard_affairs.png")
 	# 庭院事务页面标志 
 	I_CHECK_COURTYARD_AFFAIRS = RuleImage(roi_front=(254,40,196,57), roi_back=(134,0,415,180), threshold=0.8, method="Template matching", file="./tasks/DailyTrifles/dt/dt_check_courtyard_affairs.png")
 	# 一键完成标志 
