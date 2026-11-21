@@ -28,17 +28,17 @@ class FrogBossAssets:
 	# 确认竞猜 
 	I_BET_SURE = RuleImage(roi_front=(1025,402,100,100), roi_back=(972,340,200,226), threshold=0.8, method="Template matching", file="./tasks/FrogBoss/fb/fb_bet_sure.png")
 	# description 
-	I_GOLD_30_CHECK = RuleImage(roi_front=(513,196,58,53), roi_back=(402,141,459,489), threshold=0.8, method="Template matching", file="./tasks/FrogBoss/fb/fb_gold_30_check.png")
+	I_GOLD_30_CHECK = RuleImage(roi_front=(516,218,58,53), roi_back=(402,141,459,489), threshold=0.8, method="Template matching", file="./tasks/FrogBoss/fb/fb_gold_30_check.png")
 	# description 
-	I_BETTED = RuleImage(roi_front=(1093,313,125,54), roi_back=(207,240,1058,312), threshold=0.8, method="Template matching", file="./tasks/FrogBoss/fb/fb_betted.png")
+	I_BETTED = RuleImage(roi_front=(286,309,121,51), roi_back=(207,240,1058,312), threshold=0.8, method="Template matching", file="./tasks/FrogBoss/fb/fb_betted.png")
 	# description 
 	I_SUCCESS_RIGHT = RuleImage(roi_front=(1098,289,122,116), roi_back=(1040,250,201,260), threshold=0.8, method="Template matching", file="./tasks/FrogBoss/fb/fb_success_right.png")
 	# description 
 	I_FAILURE_LEFT = RuleImage(roi_front=(296,303,100,100), roi_back=(243,245,212,259), threshold=0.8, method="Template matching", file="./tasks/FrogBoss/fb/fb_failure_left.png")
 	# description 
-	I_BET_FAILURE = RuleImage(roi_front=(622,274,269,72), roi_back=(540,222,447,211), threshold=0.8, method="Template matching", file="./tasks/FrogBoss/fb/fb_bet_failure.png")
+	I_BET_FAILURE = RuleImage(roi_front=(716,292,82,39), roi_back=(690,271,131,81), threshold=0.8, method="Template matching", file="./tasks/FrogBoss/fb/fb_bet_failure.png")
 	# description 
-	I_BET_SUCCESS = RuleImage(roi_front=(625,278,260,73), roi_back=(482,243,521,225), threshold=0.8, method="Template matching", file="./tasks/FrogBoss/fb/fb_bet_success.png")
+	I_BET_SUCCESS = RuleImage(roi_front=(719,289,76,43), roi_back=(704,277,105,69), threshold=0.8, method="Template matching", file="./tasks/FrogBoss/fb/fb_bet_success.png")
 
 
 	# Image Rule Assets

@@ -74,7 +74,7 @@
   {
     "itemName": "gold_30_check",
     "imageName": "fb_gold_30_check.png",
-    "roiFront": "513,196,58,53",
+    "roiFront": "516,218,58,53",
     "roiBack": "402,141,459,489",
     "method": "Template matching",
     "threshold": 0.8,
@@ -83,7 +83,7 @@
   {
     "itemName": "betted",
     "imageName": "fb_betted.png",
-    "roiFront": "1093,313,125,54",
+    "roiFront": "286,309,121,51",
     "roiBack": "207,240,1058,312",
     "method": "Template matching",
     "threshold": 0.8,
@@ -110,8 +110,8 @@
   {
     "itemName": "bet_failure",
     "imageName": "fb_bet_failure.png",
-    "roiFront": "622,274,269,72",
-    "roiBack": "540,222,447,211",
+    "roiFront": "716,292,82,39",
+    "roiBack": "690,271,131,81",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
@@ -119,8 +119,8 @@
   {
     "itemName": "bet_success",
     "imageName": "fb_bet_success.png",
-    "roiFront": "625,278,260,73",
-    "roiBack": "482,243,521,225",
+    "roiFront": "719,289,76,43",
+    "roiBack": "704,277,105,69",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"

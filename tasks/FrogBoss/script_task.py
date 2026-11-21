@@ -87,22 +87,22 @@ class ScriptTask(RightActivity, FrogBossAssets, GeneralBattleAssets):
         time_delta = TimeDelta(hours=time.hour, minutes=time.minute, seconds=time.second)
         time_now = datetime.now()
         time_set = time_now.replace(minute=0, second=0, microsecond=0)
-        if 10 <= time_now.hour < 12:
-            time_set = time_set.replace(hour=14)
-        elif 12 <= time_now.hour < 14:
-            time_set = time_set.replace(hour=16)
-        elif 14 <= time_now.hour < 16:
-            time_set = time_set.replace(hour=18)
-        elif 16 <= time_now.hour < 18:
-            time_set = time_set.replace(hour=20)
-        elif 18 <= time_now.hour < 20:
-            time_set = time_set.replace(hour=22)
-        elif 20 <= time_now.hour < 22:
-            time_set = time_set.replace(hour=0) + TimeDelta(days=1)
-        elif 22 <= time_now.hour < 24:
-            time_set = time_set.replace(hour=12) + TimeDelta(days=1)
-        else:
+        if 9 <= time_now.hour < 11:
             time_set = time_set.replace(hour=12)
+        elif 11 <= time_now.hour < 13:
+            time_set = time_set.replace(hour=14)
+        elif 13 <= time_now.hour < 15:
+            time_set = time_set.replace(hour=16)
+        elif 15 <= time_now.hour < 17:
+            time_set = time_set.replace(hour=18)
+        elif 17 <= time_now.hour < 19:
+            time_set = time_set.replace(hour=20)
+        elif 19 <= time_now.hour < 21:
+            time_set = time_set.replace(hour=22)
+        elif 21 <= time_now.hour < 24:
+            time_set = time_set.replace(hour=10) + TimeDelta(days=1)
+        else:
+            time_set = time_set.replace(hour=10)
 
         self.set_next_run(task='FrogBoss', target=time_set - time_delta)
 
