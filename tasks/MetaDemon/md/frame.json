@@ -5,7 +5,6 @@
     "roiBack": "474,177,800,450",
     "method": "Template matching",
     "threshold": 0.8,
-    "profile": "High",
     "description": "",
     "roiBadge": "1221,427,37,40",
     "badgeSerial": 2,

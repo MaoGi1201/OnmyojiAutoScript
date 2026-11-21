@@ -872,13 +872,12 @@ class AnnotatorManager:
 
             if source is None:
                 # 新增条目：结构与基础字段全部来自界面
-                normalized.append({
+                entry = {
                     "itemName": item_name,
                     "imageName": image_name,
                     "roiBack": roi_back,
                     "method": method,
                     "threshold": threshold,
-                    "profile": str(rule.get("profile") or "High"),
                     "description": str(rule.get("description", "")).strip(),
                     "roiBadge": roi_badge,
                     "badgeSerial": 1,
@@ -886,7 +885,12 @@ class AnnotatorManager:
                     "roiRange": ranges,
                     "badges": [{"imageName": image_name}],
                     "rangeOperations": operations,
-                })
+                }
+                # High 是 RuleFrame 的默认值，不落盘
+                profile = str(rule.get("profile") or "High")
+                if profile != "High":
+                    entry["profile"] = profile
+                normalized.append(entry)
                 continue
 
             payload = deepcopy(source)
