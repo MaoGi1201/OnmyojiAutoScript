@@ -14,8 +14,6 @@ from tasks.Utils.config_enum import DemonClass
 # 御魂兑换的单价与单笔上限
 DEMON_UNIT_PRICE = 50
 DEMON_BATCH_LIMIT = 20
-SEA_UNIT_PRICE = 200
-SEA_BATCH_LIMIT = 10
 
 
 class Scales(Buy, MallNavbar):
@@ -374,35 +372,15 @@ class Scales(Buy, MallNavbar):
             logger.warning('Scales sea is not appear')
             return
 
-        # 购买：每批买完都重读库存和余额，买不起/卖光了立刻停
-        bought = 0
-        while bought < buy_number:
-            self.screenshot()
-            remain_number = self.O_SCA_NUMBER_SEA.ocr(self.device.image)
-            if not isinstance(remain_number, int) or remain_number <= 0:
-                logger.warning(f'Scales sea remain {remain_number}, stop')
-                return
-            current_money = self.O_SCA_RES_SEA.ocr(self.device.image)
-            if not isinstance(current_money, int):
-                logger.warning('OCR error')
-                return
-            affordable = current_money // SEA_UNIT_PRICE
-            if affordable <= 0:
-                logger.warning(f'Scales sea money {current_money} not enough, stop')
-                return
-            # 本批数量：目标剩余、库存、可负担三者取最小，再受单笔上限约束
-            batch = min(buy_number - bought, remain_number, affordable, SEA_BATCH_LIMIT)
-            logger.info(f'Scales sea buy {batch} ({bought}/{buy_number})')
-            if self.config.rich_man.scales.enable_book_auto:
-                ok = self._scales_buy_more(self.I_SCA_PICTURE_BOOK, batch)
-            else:
-                ok = self._scales_buy_sea_more(self.I_SCA_PICTURE_BOOK, batch)
-            if not ok:
-                logger.warning('Scales sea buy failed, stop')
-                return
-            bought += batch
-            time.sleep(0.5)
-        logger.info(f'Scales sea finished, bought {bought}')
+        # 拉满按钮会按余额和库存自动拉到当前可兑换的最大数量，一轮买完即可，不用分轮
+        if self.config.rich_man.scales.enable_book_auto:
+            ok = self._scales_buy_more(self.I_SCA_PICTURE_BOOK)
+        else:
+            ok = self._scales_buy_sea_more(self.I_SCA_PICTURE_BOOK)
+        if not ok:
+            logger.warning('Scales sea buy failed')
+            return
+        logger.info('Scales sea finished')
 
 
 if __name__ == '__main__':

@@ -7,11 +7,12 @@ from module.logger import logger
 
 from tasks.GameUi.page import page_main, page_summon
 from tasks.GameUi.game_ui import GameUi
+from tasks.Component.Buy.buy import Buy
 from tasks.RichMan.assets import RichManAssets
 from tasks.RichMan.config import Shrine as ConfigShrine
 
 
-class Shrine(GameUi, RichManAssets):
+class Shrine(Buy, GameUi, RichManAssets):
 
     def execute_shrine(self, con: ConfigShrine):
         logger.hr('Start Shrine')
@@ -96,10 +97,15 @@ class Shrine(GameUi, RichManAssets):
         if not self.appear(self.I_S_WHITE_FOUR):
             logger.info('White four is not available')
             return
-        if not self.shrine_check_money(400):
+        # 四星达摩可以兑换多个，一个都不够买就不进购买界面
+        if not self.shrine_check_money(200):
             return
-        # 点达摩进入购买界面, I_S_CHECK_WHITE_FOUR 确认弹窗里是这个达摩
-        self.ui_click(self.I_S_WHITE_FOUR, self.I_S_CHECK_WHITE_FOUR)
+        if self.shrine_check_money(400):
+            # 够两个及以上，直接拉满
+            self.buy_more(self.I_S_WHITE_FOUR)
+        else:
+            # 只够一个，点达摩进入购买界面, I_S_CHECK_WHITE_FOUR 确认弹窗里是这个达摩
+            self.ui_click(self.I_S_WHITE_FOUR, self.I_S_CHECK_WHITE_FOUR)
         # I_S_CONFIRM_WHITE_FOUR 就是"确认购买"按钮, 点它即购买成功
         self.ui_get_reward(self.I_S_CONFIRM_WHITE_FOUR)
         self.ui_click_until_disappear(self.I_UI_BACK_RED)
