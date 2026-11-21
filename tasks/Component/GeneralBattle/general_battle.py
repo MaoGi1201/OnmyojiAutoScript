@@ -779,6 +779,12 @@ class GeneralBattle(GeneralBuff, GeneralBattleAssets):
             if self.exit_battle():
                 context.quick_exit = False
                 context.quick_exit_timer = None
+                # 超时强退后不一定落在结算/奖励页。落在任务页面时若继续循环,
+                # 下一轮会再次判超时、再去找退出按钮, 10 秒后判死整个任务。
+                page = GameUi.get_current_page(self)
+                if page not in (page_battle_result, page_reward):
+                    logger.info(f"Quick exit left battle at {page.name if page else 'unknown'}, stop battle")
+                    return False
                 return None
             if context.quick_exit_timer.reached():
                 raise GameStuckError(
