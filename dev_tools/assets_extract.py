@@ -67,7 +67,7 @@ class ImageExtractor:
         :param item:
         :return:
         """
-        description: str = f'\t# {item["description"]} \n'
+        description: str = f'\t# {item["description"]}\n'
         # High 是 RuleImage 的默认值，不写出来，避免每次导出都刷出一片无意义的 diff
         profile = str(item.get("profile", "High"))
         profile_arg = f'profile="{profile}", ' if profile in ("Default", "More") else ''
@@ -103,9 +103,12 @@ class FrameExtractor(ImageExtractor):
             name=item['itemName'],
             roi_badge=parse(item['roiBadge']),
             roi_range=[parse(r) for r in ranges], roi_back=parse(item['roiBack']),
-            threshold=item['threshold'], method=item['method'], profile=item.get('profile', 'High'),
+            threshold=item['threshold'], method=item['method'],
             badgefile=[f"./{self.image_path}/{b['imageName']}" for b in badges])
         name = name_transform(item['itemName'])
+        # High 是 RuleFrame 的默认值，不写出来
+        if str(item.get('profile', 'High')) != 'High':
+            arguments['profile'] = item['profile']
         if item.get('badgeGrayscale', False):
             arguments['badge_grayscale'] = True
         return (f"\tF_{name} = RuleFrame(" + ', '.join(f'{k}={v!r}' for k,v in arguments.items()) +
@@ -157,7 +160,7 @@ class ScatterExtractor:
 
     @staticmethod
     def extract_item(item) -> str:
-        description = f'\t# {item["description"]} \n'
+        description = f'\t# {item["description"]}\n'
         points = ", ".join(
             f"({int(x)}, {int(y)})"
             for x, y in item["polygon"]
@@ -193,7 +196,7 @@ class LongClickExtractor:
         :param item:
         :return:
         """
-        description: str = f'\t# {item["description"]} \n'
+        description: str = f'\t# {item["description"]}\n'
         name: str = f'\tL_{name_transform(item["itemName"])} = RuleLongClick(' \
                     f'roi_front=({item["roiFront"]}), ' \
                     f'roi_back=({item["roiBack"]}), ' \
@@ -223,7 +226,7 @@ class SwipeExtractor:
         :param item:
         :return:
         """
-        description: str = f'\t# {item["description"]} \n'
+        description: str = f'\t# {item["description"]}\n'
         name: str = f'\tS_{name_transform(item["itemName"])} = RuleSwipe(' \
                     f'roi_front=({item["roiFront"]}), ' \
                     f'roi_back=({item["roiBack"]}), ' \
@@ -253,7 +256,7 @@ class OcrExtractor:
         :param item:
         :return:
         """
-        description: str = f'\t# {item["description"]} \n'
+        description: str = f'\t# {item["description"]}\n'
         name: str = f'\tO_{name_transform(item["itemName"])} = RuleOcr(' \
                     f'roi=({item["roiFront"]}), ' \
                     f'area=({item["roiBack"]}), ' \
