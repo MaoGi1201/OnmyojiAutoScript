@@ -5,6 +5,7 @@ from time import sleep
 from datetime import datetime, timedelta
 from random import randint
 
+from module.base.timer import Timer
 from module.logger import logger
 from module.exception import TaskEnd
 
@@ -52,6 +53,8 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, GoryouRealmAssets):
                 break
             if self.click(match_click[goryou_class], interval=1):
                 continue
+        # 切到参階，保证战斗是第三层
+        self.click(self.C_GR_C_THREE, interval=1)
         self.check_lock(con.general_battle_config.lock_team_enable, self.I_GR_LOCK, self.I_GR_UNLOCK)
         # 开始循环
         while True:
@@ -73,7 +76,7 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, GoryouRealmAssets):
     def enter_battle(self) -> bool:
         """成功进入True, 否则False"""
         # 点击挑战
-        click_max_cnt = randint(2, 4)
+        click_max_cnt = randint(2, 3)
         while True:
             self.screenshot()
             if self.get_current_page() in (page_battle_prepare, page_battle):
@@ -83,6 +86,13 @@ class ScriptTask(GeneralBattle, GameUi, SwitchSoul, GoryouRealmAssets):
                 break
             if self.appear_then_click(self.I_GR_FIRE, interval=2):
                 click_max_cnt -= 1
+                # 点击后一直等到进战斗页，过场慢也不当成没票
+                timer = Timer(20).start()
+                while not timer.reached():
+                    sleep(1)
+                    self.screenshot()
+                    if self.get_current_page() in (page_battle_prepare, page_battle):
+                        return True
                 continue
         return False
 

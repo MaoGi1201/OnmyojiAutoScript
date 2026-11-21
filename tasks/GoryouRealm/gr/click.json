@@ -22,5 +22,11 @@
     "roiFront": "1026,82,206,334",
     "roiBack": "1026,82,206,334",
     "description": "description"
+  },
+  {
+    "itemName": "gr_c_three",
+    "roiFront": "96,361,138,36",
+    "roiBack": "96,361,138,36",
+    "description": "参階"
   }
 ]

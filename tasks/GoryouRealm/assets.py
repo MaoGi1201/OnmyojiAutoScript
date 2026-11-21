@@ -11,14 +11,16 @@ class GoryouRealmAssets:
 
 
 	# Click Rule Assets
-	# description 
+	# description
 	C_GR_C_1 = RuleClick(roi_front=(111,77,206,431), roi_back=(111,77,206,431), name="gr_c_1")
-	# description 
+	# description
 	C_GR_C_2 = RuleClick(roi_front=(413,76,209,342), roi_back=(413,76,209,342), name="gr_c_2")
-	# description 
+	# description
 	C_GR_C_3 = RuleClick(roi_front=(725,97,195,401), roi_back=(725,97,195,401), name="gr_c_3")
-	# description 
+	# description
 	C_GR_C_4 = RuleClick(roi_front=(1026,82,206,334), roi_back=(1026,82,206,334), name="gr_c_4")
+	# 参階
+	C_GR_C_THREE = RuleClick(roi_front=(96,361,138,36), roi_back=(96,361,138,36), name="gr_c_three")
 
 
 	# Image Rule Assets
