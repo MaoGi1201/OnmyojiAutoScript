@@ -11,22 +11,22 @@ class PetsAssets:
 
 
 	# Image Rule Assets
-	# 宠物小屋 
+	# 宠物小屋
 	I_PET_HOUSE = RuleImage(roi_front=(1012,414,56,25), roi_back=(952,412,144,60), threshold=0.7, method="Template matching", file="./tasks/Pets/pet/pet_pet_house.png")
-	# 爪印 
+	# 爪印
 	I_PET_CLAW = RuleImage(roi_front=(1171,625,55,56), roi_back=(1171,625,55,56), threshold=0.8, method="Template matching", file="./tasks/Pets/pet/pet_pet_claw.png")
-	# 快速喂养 
+	# 快速喂养
 	I_PET_FEAST = RuleImage(roi_front=(849,624,69,49), roi_back=(849,624,69,49), threshold=0.8, method="Template matching", file="./tasks/Pets/pet/pet_pet_feast.png")
-	# 喂食 
+	# 喂食
 	I_PET_FEED = RuleImage(roi_front=(899,511,79,68), roi_back=(884,485,127,123), threshold=0.8, method="Template matching", file="./tasks/Pets/pet/pet_pet_feed.png")
-	# 跳过 
+	# 跳过
 	I_PET_SKIP = RuleImage(roi_front=(1089,119,72,41), roi_back=(999,42,242,147), threshold=0.65, method="Template matching", file="./tasks/Pets/pet/pet_pet_skip.png")
 
 
 	# Ocr Rule Assets
-	# 喂食的体力 
+	# 喂食的体力
 	O_PET_FEED_AP = RuleOcr(roi=(817,538,57,33), area=(817,538,57,33), mode="Digit", method="Default", keyword="", name="pet_feed_ap")
-	# 玩耍的体力 
+	# 玩耍的体力
 	O_PET_PLAY_GOLD = RuleOcr(roi=(681,524,74,40), area=(681,524,74,40), mode="Digit", method="Default", keyword="", name="pet_play_gold")
 
 

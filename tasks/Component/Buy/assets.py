@@ -11,29 +11,29 @@ class BuyAssets:
 
 
 	# Click Rule Assets
-	# description 
+	# description
 	C_BUY_ONE = RuleClick(roi_front=(551,516,174,36), roi_back=(551,516,174,36), name="buy_one")
-	# description 
+	# description
 	C_BUY_MORE = RuleClick(roi_front=(551,573,175,35), roi_back=(551,573,175,35), name="buy_more")
-	# 取消购买 
+	# 取消购买
 	C_BUY_CANCEL = RuleClick(roi_front=(121,2,100,22), roi_back=(121,2,100,22), name="buy_cancel")
 
 
 	# Image Rule Assets
-	# 拉满 
+	# 拉满
 	I_BUY_PLUS = RuleImage(roi_front=(761,439,50,58), roi_back=(746,397,98,156), threshold=0.8, method="Template matching", file="./tasks/Component/Buy/buy/buy_buy_plus.png")
-	# 加一个 
+	# 加一个
 	I_BUY_ADD = RuleImage(roi_front=(669,442,51,54), roi_back=(645,412,111,141), threshold=0.8, method="Template matching", file="./tasks/Component/Buy/buy/buy_buy_add.png")
-	# 减 
+	# 减
 	I_BUY_SUB = RuleImage(roi_front=(466,445,50,48), roi_back=(452,412,85,147), threshold=0.8, method="Template matching", file="./tasks/Component/Buy/buy/buy_buy_sub.png")
-	# 出现用魂玉购买 
+	# 出现用魂玉购买
 	I_BUY_RMB = RuleImage(roi_front=(610,532,35,32), roi_back=(548,483,178,119), threshold=0.8, method="Template matching", file="./tasks/Component/Buy/buy/buy_buy_rmb.png")
-	# 购买成功 
+	# 购买成功
 	I_BUY_SUCCESS = RuleImage(roi_front=(520,115,261,44), roi_back=(449,0,405,167), threshold=0.8, method="Template matching", file="./tasks/Component/Buy/buy/buy_buy_success.png")
 
 
 	# Ocr Rule Assets
-	# Ocr-description 
+	# Ocr-description
 	O_BUY_NUMBER = RuleOcr(roi=(565,431,74,75), area=(565,431,74,75), mode="Digit", method="Default", keyword="", name="buy_number")
 
 

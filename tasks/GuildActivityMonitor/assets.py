@@ -11,7 +11,7 @@ class GuildActivityMonitorAssets:
 
 
 	# Ocr Rule Assets
-	# 寮活动通知检测区域 
+	# 寮活动通知检测区域
 	O_GUILD_ACTIVITY_NOTIFY = RuleOcr(roi=(13,213,457,86), area=(13,213,457,86), mode="Full", method="Default", keyword="", name="guild_activity_notify")
 
 

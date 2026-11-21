@@ -11,7 +11,7 @@ class GoldYoukaiAssets:
 
 
 	# Image Rule Assets
-	# 金币妖怪的赢 
+	# 金币妖怪的赢
 	I_GOLD_WIN = RuleImage(roi_front=(380,44,100,100), roi_back=(380,44,100,100), threshold=0.8, method="Template matching", file="./tasks/GoldYoukai/gy/gy_gold_win.png")
 
 

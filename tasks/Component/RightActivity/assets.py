@@ -11,11 +11,11 @@ class RightActivityAssets:
 
 
 	# Image Rule Assets
-	# description 
+	# description
 	I_RA_OPEN = RuleImage(roi_front=(1257,78,22,58), roi_back=(1257,78,22,58), threshold=0.8, method="Template matching", file="./tasks/Component/RightActivity/ra/ra_ra_open.png")
-	# description 
+	# description
 	I_RA_CLOSE = RuleImage(roi_front=(1256,123,23,44), roi_back=(1256,123,23,44), threshold=0.8, method="Template matching", file="./tasks/Component/RightActivity/ra/ra_ra_close.png")
-	# description 
+	# description
 	I_TOGGLE_BUTTON = RuleImage(roi_front=(1193,527,27,25), roi_back=(1169,146,73,453), threshold=0.8, method="Template matching", file="./tasks/Component/RightActivity/ra/as_toggle_button.png")
 
 

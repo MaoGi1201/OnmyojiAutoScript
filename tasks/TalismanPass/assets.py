@@ -11,35 +11,35 @@ class TalismanPassAssets:
 
 
 	# Image Rule Assets
-	# 领取全部 
+	# 领取全部
 	I_TP_GET_ALL = RuleImage(roi_front=(903,599,70,71), roi_back=(903,599,70,71), threshold=0.8, method="Template matching", file="./tasks/TalismanPass/tp/tp_tp_get_all.png")
-	# 任务 的右上方红点 
+	# 任务 的右上方红点
 	I_RED_POINT_TASK = RuleImage(roi_front=(1218,286,45,45), roi_back=(1218,286,45,45), threshold=0.8, method="Template matching", file="./tasks/TalismanPass/tp/tp_red_point_task.png")
-	# 今日 的右上方红点 
+	# 今日 的右上方红点
 	I_RED_POINT_DAY = RuleImage(roi_front=(633,153,35,35), roi_back=(633,153,35,35), threshold=0.8, method="Template matching", file="./tasks/TalismanPass/tp/tp_red_point_day.png")
-	# 本周 的右上方红点 
+	# 本周 的右上方红点
 	I_RED_POINT_WEEK = RuleImage(roi_front=(795,153,35,35), roi_back=(795,153,35,35), threshold=0.8, method="Template matching", file="./tasks/TalismanPass/tp/tp_red_point_week.png")
-	# 等级奖励 
+	# 等级奖励
 	I_RED_POINT_LEVEL = RuleImage(roi_front=(1215,154,45,45), roi_back=(1215,154,45,45), threshold=0.8, method="Template matching", file="./tasks/TalismanPass/tp/tp_red_point_level.png")
-	# 选择一号奖励 
+	# 选择一号奖励
 	I_TP_LEVEL_1 = RuleImage(roi_front=(203,435,122,59), roi_back=(203,435,122,59), threshold=0.8, method="Template matching", file="./tasks/TalismanPass/tp/tp_tp_level_1.png")
-	# 选择二号奖励 
+	# 选择二号奖励
 	I_TP_LEVEL_2 = RuleImage(roi_front=(577,435,122,55), roi_back=(577,435,122,55), threshold=0.8, method="Template matching", file="./tasks/TalismanPass/tp/tp_tp_level_2.png")
-	# 选择三号奖励 
+	# 选择三号奖励
 	I_TP_LEVEL_3 = RuleImage(roi_front=(957,434,122,58), roi_back=(957,434,122,58), threshold=0.8, method="Template matching", file="./tasks/TalismanPass/tp/tp_tp_level_3.png")
-	# 前往 
+	# 前往
 	I_TP_GOTO = RuleImage(roi_front=(995,254,85,34), roi_back=(928,219,206,315), threshold=0.8, method="Template matching", file="./tasks/TalismanPass/tp/tp_tp_goto.png")
-	# 经验的 
+	# 经验的
 	I_TP_EXP = RuleImage(roi_front=(922,254,32,36), roi_back=(884,215,100,331), threshold=0.8, method="Template matching", file="./tasks/TalismanPass/tp/tp_tp_exp.png")
-	# 溢出确认 
+	# 溢出确认
 	I_OVERFLOW_CONFIRME = RuleImage(roi_front=(585,410,116,44), roi_back=(585,410,116,44), threshold=0.8, method="Template matching", file="./tasks/TalismanPass/tp/tp_overflow_confirme.png")
-	# 点击随机御魂 
+	# 点击随机御魂
 	I_TP_SOUL_1 = RuleImage(roi_front=(248,501,34,37), roi_back=(165,389,930,189), threshold=0.7, method="Multi-scale template matching", file="./tasks/TalismanPass/tp/tp_tp_soul_1.png")
-	# 选择中间第二个御魂 
+	# 选择中间第二个御魂
 	I_TP_SOUL_2 = RuleImage(roi_front=(582,438,115,48), roi_back=(570,427,139,71), threshold=0.8, method="Template matching", file="./tasks/TalismanPass/tp/tp_tp_soul_2.png")
-	# 六星御魂标志 
+	# 六星御魂标志
 	I_TP_SOUL_3 = RuleImage(roi_front=(313,489,188,33), roi_back=(302,472,216,60), threshold=0.8, method="Template matching", file="./tasks/TalismanPass/tp/tp_tp_soul_3.png")
-	# 本月 的右上方红点（截点用） 
+	# 本月 的右上方红点（截点用）
 	I_RED_POINT_MONTH = RuleImage(roi_front=(966,162,17,17), roi_back=(966,162,17,17), threshold=0.8, method="Template matching", file="./tasks/TalismanPass/tp/tp_red_point_month.png")
 
 

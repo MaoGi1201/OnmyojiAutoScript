@@ -11,26 +11,26 @@ class IbukiArenaAssets:
 
 
 	# Image Rule Assets
-	# 庭院右侧活动栏进入伊吹之擂 
+	# 庭院右侧活动栏进入伊吹之擂
 	I_MAIN_TO_IBUKI = RuleImage(roi_front=(1186,291,32,34), roi_back=(1160,110,120,470), threshold=0.8, method="Template matching", file="./tasks/IbukiArena/iba/iba_main_to_ibuki.png")
-	# 伊吹之擂主界面标题 
+	# 伊吹之擂主界面标题
 	I_CHECK_ACT = RuleImage(roi_front=(88,24,151,38), roi_back=(60,10,190,70), threshold=0.8, method="Template matching", file="./tasks/IbukiArena/iba/iba_check_act.png")
-	# 狭间幻境入口 
+	# 狭间幻境入口
 	I_GOTO_ARENA = RuleImage(roi_front=(42,662,116,32), roi_back=(20,560,170,140), threshold=0.8, method="Template matching", file="./tasks/IbukiArena/iba/iba_goto_arena.png")
-	# 狭间幻境标题 
+	# 狭间幻境标题
 	I_CHECK_ARENA = RuleImage(roi_front=(143,25,148,40), roi_back=(120,10,200,70), threshold=0.8, method="Template matching", file="./tasks/IbukiArena/iba/iba_check_arena.png")
-	# 挑战 
+	# 挑战
 	I_CHALLENGE = RuleImage(roi_front=(1128,558,104,52), roi_back=(1090,530,180,150), threshold=0.8, method="Template matching", file="./tasks/IbukiArena/iba/iba_challenge.png")
-	# 跳过剧情 
+	# 跳过剧情
 	I_SKIP = RuleImage(roi_front=(804,416,82,40), roi_back=(740,380,240,110), threshold=0.75, method="Template matching", file="./tasks/IbukiArena/iba/iba_skip.png")
-	# 未锁定状态 
+	# 未锁定状态
 	I_ACT_UNLOCK = RuleImage(roi_front=(760,634,22,27), roi_back=(733,617,117,61), threshold=0.8, method="Template matching", file="./tasks/IbukiArena/iba/iba_act_unlock.png")
-	# 锁定状态 
+	# 锁定状态
 	I_ACT_LOCK = RuleImage(roi_front=(760,634,22,27), roi_back=(733,617,117,61), threshold=0.8, method="Template matching", file="./tasks/IbukiArena/iba/iba_act_lock.png")
 
 
 	# Ocr Rule Assets
-	# 狭间幻境挑战次数 可用/上限(每天3次) 
+	# 狭间幻境挑战次数 可用/上限(每天3次)
 	O_CHALLENGE_TIMES = RuleOcr(roi=(1176,32,68,32), area=(1176,32,68,32), mode="DigitCounter", method="Default", keyword="", name="challenge_times")
 
 

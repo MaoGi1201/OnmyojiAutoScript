@@ -12,67 +12,67 @@ class MartialTournamentAssets:
 
 
 	# Click Rule Assets
-	# 一键配置面板外安全关闭区域 
+	# 一键配置面板外安全关闭区域
 	C_MT_QUICK_LOADOUT_CLOSE = RuleClick(roi_front=(491,595,189,73), roi_back=(491,595,189,73), name="mt_quick_loadout_close")
 
 
 	# Image Rule Assets
-	F_MT_QUICK_LOADOUT_FRAME = RuleFrame(name='mt_quick_loadout_frame', roi_badge=(910, 597, 32, 36), roi_range=[(496, 224, 553, 387), (809, 518, 119, 42), (491, 595, 189, 73)], roi_back=(700, 480, 520, 220), threshold=0.8, method='Template matching', profile='High', badgefile=['./tasks/MartialTournament/MT/MT_mt_goto_quick_loadout.png'], range=[Image(method='Template matching', threshold=0.8), Image(file='./tasks/MartialTournament/MT/MT_mt_quick_loadout_fight.png', method='Template matching', threshold=0.8), Click()])
+	F_MT_QUICK_LOADOUT_FRAME = RuleFrame(name='mt_quick_loadout_frame', roi_badge=(910, 597, 32, 36), roi_range=[(496, 224, 553, 387), (809, 518, 119, 42), (491, 595, 189, 73)], roi_back=(700, 480, 520, 220), threshold=0.8, method='Template matching', badgefile=['./tasks/MartialTournament/MT/MT_mt_goto_quick_loadout.png'], range=[Image(method='Template matching', threshold=0.8), Image(file='./tasks/MartialTournament/MT/MT_mt_quick_loadout_fight.png', method='Template matching', threshold=0.8), Click()])
 
 
 	# Image Rule Assets
-	# 庭院进入活动 
+	# 庭院进入活动
 	I_MT_ENTER = RuleImage(roi_front=(1189,462,36,29), roi_back=(1155,131,94,441), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_enter.png")
-	# 活动进入日清门票界面 
+	# 活动进入日清门票界面
 	I_MT_PASS = RuleImage(roi_front=(1117,259,32,133), roi_back=(1004,97,235,441), threshold=0.6, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_pass.png")
-	# 活动界面标志 
+	# 活动界面标志
 	I_MT_CHECK = RuleImage(roi_front=(563,137,48,68), roi_back=(504,89,197,151), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_check.png")
-	# 日清活动界面标志 
+	# 日清活动界面标志
 	I_MT_PASS_CHECK = RuleImage(roi_front=(158,14,121,44), roi_back=(22,0,393,112), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_pass_check.png")
-	# 搜索boss（日清活动界面） 
+	# 搜索boss（日清活动界面）
 	I_MT_SEARCH = RuleImage(roi_front=(1107,607,72,24), roi_back=(1094,596,100,53), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_search.png")
-	# 挑战boss（挑战boss界面） 
+	# 挑战boss（挑战boss界面）
 	I_MT_CHALLENGE = RuleImage(roi_front=(1103,529,77,37), roi_back=(1060,503,158,154), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_challenge.png")
-	# 挑战boss界面式神录 
+	# 挑战boss界面式神录
 	I_MT_RECORDS = RuleImage(roi_front=(1001,593,37,39), roi_back=(673,486,585,234), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_records.png")
-	# 阵容解锁 
+	# 阵容解锁
 	I_UNLOCK = RuleImage(roi_front=(1101,454,20,25), roi_back=(1085,430,116,71), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_unlock.png")
-	# 阵容锁定 
+	# 阵容锁定
 	I_LOCK = RuleImage(roi_front=(1101,454,20,25), roi_back=(1077,443,120,59), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_lock.png")
-	# 已经发现boss 
+	# 已经发现boss
 	I_NO_SEARCH = RuleImage(roi_front=(1127,606,30,30), roi_back=(944,488,314,232), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_no_search.png")
-	# 门票界面进入已经发现的boss挑战界面 
+	# 门票界面进入已经发现的boss挑战界面
 	I_SEARCH_BOSS = RuleImage(roi_front=(261,82,19,19), roi_back=(189,67,120,515), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_search_boss.png")
-	# 单体boss1 
+	# 单体boss1
 	I_BOSS_1 = RuleImage(roi_front=(368,238,23,25), roi_back=(288,84,182,418), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_boss_1.png")
-	# 单体boss2 
+	# 单体boss2
 	I_BOSS_2 = RuleImage(roi_front=(368,291,24,55), roi_back=(288,84,182,418), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_boss_2.png")
-	# 活动进入体力界面 
+	# 活动进入体力界面
 	I_MT_AP = RuleImage(roi_front=(184,212,28,132), roi_back=(76,57,236,439), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_ap.png")
-	# 挑战boss（ap界面） 
+	# 挑战boss（ap界面）
 	I_MT_CHALLENGE_AP = RuleImage(roi_front=(1141,604,77,37), roi_back=(944,488,314,232), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_challenge_ap.png")
-	# 注灵搜寻 
+	# 注灵搜寻
 	I_PASS_2 = RuleImage(roi_front=(1107,581,75,37), roi_back=(944,488,314,232), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_pass_2.png")
-	# 切换门票模式 
+	# 切换门票模式
 	I_SWITCH_MODE = RuleImage(roi_front=(1164,539,28,26), roi_back=(944,488,314,232), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_switch_mode.png")
-	#  
+	# 
 	I_MT_REWARD = RuleImage(roi_front=(600,616,85,36), roi_back=(464,550,337,154), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_reward.png")
-	# 首领挑战浮窗打开一键配置 
+	# 首领挑战浮窗打开一键配置
 	I_MT_GOTO_QUICK_LOADOUT = RuleImage(roi_front=(910,597,32,36), roi_back=(900,586,52,56), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_goto_quick_loadout.png")
-	# 一键配置面板出战按钮 
+	# 一键配置面板出战按钮
 	I_MT_QUICK_LOADOUT_FIGHT = RuleImage(roi_front=(809,518,119,42), roi_back=(804,513,129,52), threshold=0.8, method="Template matching", file="./tasks/MartialTournament/MT/MT_mt_quick_loadout_fight.png")
 
 
 	# Ocr Rule Assets
-	# 门票数量 
+	# 门票数量
 	O_O_PASS = RuleOcr(roi=(940,17,82,26), area=(940,17,82,26), mode="Digit", method="Default", keyword="", name="o_pass")
-	# 体力门票数量 
+	# 体力门票数量
 	O_O_AP = RuleOcr(roi=(1148,16,82,28), area=(1148,16,82,28), mode="Quantity", method="Default", keyword="", name="o_ap")
-	# 注灵门票数量 
+	# 注灵门票数量
 	O_O_PASS2 = RuleOcr(roi=(1151,19,69,26), area=(1151,19,69,26), mode="Digit", method="Default", keyword="", name="o_pass2")
-	# 首领挑战体力数量 
+	# 首领挑战体力数量
 	O_BOSS_AP_COUNT = RuleOcr(roi=(1138,19,83,27), area=(1138,19,83,27), mode="Quantity", method="Default", keyword="", name="boss_ap_count")
-	# 首领名称（竖排） 
+	# 首领名称（竖排）
 	O_BOSS_NAME = RuleOcr(roi=(364,212,32,139), area=(364,212,32,139), mode="Single", method="Default", keyword="", name="boss_name")
 
 
