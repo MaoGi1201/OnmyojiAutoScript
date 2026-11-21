@@ -14,7 +14,7 @@
     "roiFront": "806,653,22,25",
     "roiBack": "686,610,313,92",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.6,
     "description": "体力爬塔阵容解锁"
   },
   {
@@ -23,7 +23,7 @@
     "roiFront": "801,656,27,26",
     "roiBack": "686,610,313,92",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.6,
     "description": "体力爬塔阵容锁定"
   },
   {

@@ -14,7 +14,7 @@
     "roiFront": "779,645,28,25",
     "roiBack": "686,610,313,92",
     "method": "Template matching",
-    "threshold": 0.7,
+    "threshold": 0.6,
     "description": "还未上锁图片"
   },
   {

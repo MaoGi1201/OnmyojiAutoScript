@@ -14,7 +14,7 @@
     "roiFront": "897,653,27,26",
     "roiBack": "686,610,313,92",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.6,
     "description": "boss爬塔阵容锁定"
   },
   {
@@ -23,7 +23,7 @@
     "roiFront": "898,654,22,25",
     "roiBack": "686,610,313,92",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.6,
     "description": "boss爬塔阵容解锁"
   },
   {
