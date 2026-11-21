@@ -8,7 +8,7 @@ from tasks.Component.RightActivity.assets import RightActivityAssets
 from tasks.DemonMartialTrials.assets import DemonMartialTrialsAssets
 from tasks.GameUi.action import conditional_action
 from tasks.GameUi.default_pages import random_click
-from tasks.GameUi.page import Page, page_main
+from tasks.GameUi.page import Page, not_, page_main, sequence
 from tasks.GlobalGame.assets import GlobalGameAssets
 
 # 逢魔演武主界面
@@ -20,7 +20,19 @@ page_demon_martial.add_enter_failure_hooks(
 # 演武挑战界面（点演武挑战进入，挑战按钮在此页）
 page_demon_martial_challenge = Page(DemonMartialTrialsAssets.I_DEMON_CHALLENGE_CHECK, priority=68)
 
-page_main.connect(page_demon_martial, DemonMartialTrialsAssets.I_DEMON_ENTRY, key='main->dmt')
+# 侧栏收起时入口匹配不到，动作循环内先翻侧栏，入口出现再点
+page_main.connect(
+    page_demon_martial,
+    sequence(
+        conditional_action(
+            not_(DemonMartialTrialsAssets.I_DEMON_ENTRY),
+            RightActivityAssets.I_TOGGLE_BUTTON,
+        ),
+        DemonMartialTrialsAssets.I_DEMON_ENTRY,
+        success_index=1,
+    ),
+    key='main->dmt',
+)
 page_demon_martial.connect(
     page_demon_martial_challenge, DemonMartialTrialsAssets.I_DEMON_YANWU_CHALLENGE, key='dmt->dmt_challenge')
 page_demon_martial.connect(page_main, GlobalGameAssets.I_UI_BACK_YELLOW, key='dmt->main')

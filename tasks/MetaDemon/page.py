@@ -1,8 +1,11 @@
 import time
 
+from tasks.Component.RightActivity.assets import RightActivityAssets
+from tasks.GameUi.action import conditional_action, sequence
 from tasks.GameUi.assets import GameUiAssets
 from tasks.GameUi.page import (
     Page,
+    not_,
     page_act_list,
     page_battle,
     page_battle_result,
@@ -44,16 +47,31 @@ def enter_meta_demon_settle(action):
         # 过场结束仍未认出来：交回导航器按原失败流程处理（降权 / 重新规划）
         return True
 
-    # 日志里显示成 enter_meta_demon_settle(MD_MAIN_GOTO_METADEMON) 便于排查
-    _action.__name__ = f"enter_meta_demon_settle({getattr(action, 'name', action)!s})"
+    # 日志里显示成 enter_meta_demon_settle(MD_MAIN_GOTO_METADEMON) 便于排查；
+    # 传入序列时显示成 enter_meta_demon_settle(ActionSequence)，避免整段 dataclass repr。
+    action_name = getattr(action, 'name', None) or type(action).__name__
+    _action.__name__ = f"enter_meta_demon_settle({action_name})"
     return _action
 
 
 page_act_list_meta_demon.connect(page_meta_demon, enter_meta_demon_settle(GameUiAssets.I_ACT_LIST_GOTO_ACT),
                                  key="page_act_list_meta_demon->page_meta_demon")
 # 庭院主页右侧活动栏的超鬼王入口直达超鬼王主页
-page_main.connect(page_meta_demon, enter_meta_demon_settle(MetaDemonAssets.I_MAIN_GOTO_METADEMON),
-                  key="page_main->page_meta_demon")
+# 侧栏收起时入口匹配不到，动作循环内先翻侧栏，入口出现再点
+page_main.connect(
+    page_meta_demon,
+    enter_meta_demon_settle(
+        sequence(
+            conditional_action(
+                not_(MetaDemonAssets.I_MAIN_GOTO_METADEMON),
+                RightActivityAssets.I_TOGGLE_BUTTON,
+            ),
+            MetaDemonAssets.I_MAIN_GOTO_METADEMON,
+            success_index=1,
+        )
+    ),
+    key="page_main->page_meta_demon",
+)
 
 page_meta_demon_boss = Page(MetaDemonAssets.I_CHECK_BOSS_PAGE)
 page_meta_demon_boss.add_enter_success_hooks(MetaDemonAssets.I_MD_CLOSE_POPUP)

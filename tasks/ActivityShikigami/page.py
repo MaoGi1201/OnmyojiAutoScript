@@ -14,6 +14,7 @@ from tasks.GameUi.page import (
     page_reward,
     page_battle_result,
     any_of,
+    not_,
 )
 from tasks.GlobalGame.assets import GlobalGameAssets
 
@@ -26,8 +27,20 @@ page_act.add_enter_failure_hooks(
 page_act.connect(
     page_main, GlobalGameAssets.I_UI_BACK_YELLOW, key="page_act->page_main"
 )
+# 上期：侧栏入口直接点一次，收起状态下匹配不到就会 8s*3 空转到 Game page unknown
+# page_main.connect(page_act, ActivityShikigamiAssets.I_MAIN_GOTO_ACT, key="page_main->page_act")
+# 当期启用：先在动作循环里翻侧栏，入口出现再点，success_index=1 以入口点击为成功
 page_main.connect(
-    page_act, ActivityShikigamiAssets.I_MAIN_GOTO_ACT, key="page_main->page_act"
+    page_act,
+    sequence(
+        conditional_action(
+            not_(ActivityShikigamiAssets.I_MAIN_GOTO_ACT),
+            RightActivityAssets.I_TOGGLE_BUTTON,
+        ),
+        ActivityShikigamiAssets.I_MAIN_GOTO_ACT,
+        success_index=1,
+    ),
+    key="page_main->page_act",
 )
 # 是否存在特殊活动界面标志(点击一次无法进入体力爬塔界面，存在中转界面的情况，False表示没有中转界面，True表示有中转界面)
 # 上期：体力入口一步直达，无中转页；原值 True，需要中转时改回。
