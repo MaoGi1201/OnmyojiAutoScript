@@ -11,11 +11,11 @@ class SoulsTidyAssets:
 
 
 	# Click Rule Assets
-	# 御魂详细 
+	# 御魂详细
 	C_ST_DETAIL = RuleClick(roi_front=(1188,318,87,74), roi_back=(1190,317,87,74), name="st_detail")
-	# 出现神赐 
+	# 出现神赐
 	C_ST_GOD_PRSENT = RuleClick(roi_front=(717,165,100,48), roi_back=(926,165,100,54), name="st_god_prsent")
-	# 御魂奉纳奖励 
+	# 御魂奉纳奖励
 	C_ST_SOUL_OFFERING_REWARD = RuleClick(roi_front=(717,165,100,48), roi_back=(926,165,100,54), name="st_soul_offering_reward")
 
 
@@ -85,6 +85,6 @@ class SoulsTidyAssets:
 	# 位置 
 	O_ST_SORT_LOCATION = RuleOcr(roi=(415,119,61,39), area=(415,119,61,39), mode="Single", method="Default", keyword="位置", name="st_sort_location")
 	# Ocr-description 
-	O_ST_OVERFLOW = RuleOcr(roi=(686,397,109,48), area=(686,397,109,48), mode="Single", method="Default", keyword="知道了", name="st_overflow")
+	O_ST_OVERFLOW = RuleOcr(roi=(686,397,109,48), area=(686,397,109,48), mode="Single", method="Default", keyword="後で", name="st_overflow")
 
 

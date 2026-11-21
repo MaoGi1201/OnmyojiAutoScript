@@ -263,8 +263,8 @@
   {
     "itemName": "over_ghost",
     "imageName": "gb_over_ghost.png",
-    "roiFront": "697,409,89,32",
-    "roiBack": "697,409,89,32",
+    "roiFront": "675,392,132,60",
+    "roiBack": "675,392,132,60",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "御魂溢出"
