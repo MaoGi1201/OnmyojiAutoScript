@@ -68,19 +68,26 @@ class ScriptTask(GameUi, GuildBanquetAssets):
                 case None:
                     time.sleep(1)
                 case pages.page_banquet_switch_shikigami:
+                    cur, _, total = self.O_BANQUET_SHIKIGAMI_NUM.ocr_digit_counter(self.device.image)
+                    # 当前式神数量不为0且等于总数, 切换完毕
+                    if cur == total and cur != 0:
+                        logger.info('Switch shikigami done, back to banquet')
+                        self.appear_then_click(self.I_BANQUET_CONFIRM, interval=1.5)
+                        continue
                     if max_tries <= 0:
                         logger.warning('Maybe shikigami not enough, exit switch')
                         break
-                    cur, _, total = self.O_BANQUET_SHIKIGAMI_NUM.ocr_digit_counter(self.device.image)
-                    if cur != total or cur == 0:
-                        max_tries -= 1
-                        if self.appear_then_click(self.I_BANQUET_CLEAR_ALL, interval=3):
-                            time.sleep(random.randrange(30, 51, 5) / 10)  # 两次点击之间稍微加点延迟
-                        self.appear_then_click(self.I_BANQUET_ALL_PUT, interval=3)
-                        continue
-                    # 当前式神数量不为0且等于总数, 切换完毕
-                    logger.info('Switch shikigami done, back to banquet')
-                    self.appear_then_click(self.I_BANQUET_CONFIRM, interval=1.5)
+                    max_tries -= 1
+                    if self.appear_then_click(self.I_BANQUET_CLEAR_ALL, interval=3):
+                        time.sleep(random.randrange(30, 51, 5) / 10)  # 两次点击之间稍微加点延迟
+                    if self.appear_then_click(self.I_BANQUET_ALL_PUT, interval=3):
+                        # 投入后轮询读数, 避免还没投进去就判失败
+                        for _ in range(6):
+                            time.sleep(1)
+                            self.screenshot()
+                            if self.O_BANQUET_SHIKIGAMI_NUM.ocr_digit_counter(self.device.image)[0] > 0:
+                                break
+                    continue
                 case pages.page_banquet_shikigami:
                     # 回到了式神展示界面, 说明已经切换完毕直接退出即可
                     break
