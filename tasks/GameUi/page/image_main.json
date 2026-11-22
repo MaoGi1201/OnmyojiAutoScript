@@ -77,7 +77,7 @@
     "roiFront": "667,648,40,18",
     "roiBack": "601,613,163,78",
     "method": "Template matching",
-    "threshold": 0.7,
+    "threshold": 0.6,
     "description": "庭院前往商店"
   },
   {
@@ -88,6 +88,15 @@
     "method": "Template matching",
     "threshold": 0.7,
     "description": "庭院前往阴阳寮"
+  },
+  {
+    "itemName": "main_goto_guild_2",
+    "imageName": "page_main_goto_guild_2.png",
+    "roiFront": "529,620,85,26",
+    "roiBack": "495,590,120,100",
+    "method": "Template matching",
+    "threshold": 0.7,
+    "description": "庭院前往阴阳寮（签到不足500天）"
   },
   {
     "itemName": "main_goto_team",
