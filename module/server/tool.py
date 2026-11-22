@@ -2,6 +2,7 @@
 # @author runhey
 # github https://github.com/runhey
 import json
+import importlib
 import multiprocessing
 import re
 import shutil
@@ -19,7 +20,6 @@ import cv2
 import numpy as np
 from filelock import FileLock
 
-from dev_tools.assets_extract import AssetsExtractor
 from dev_tools.assets_test import detect_image_detail, detect_ocr_detail
 from module.config.atomicwrites import atomic_write
 from module.logger import logger
@@ -1595,7 +1595,9 @@ class AnnotatorManager:
         try:
             extract_root, assets_path = self._resolve_assets_extract_target(task_root, target_json)
             assets_file = str(assets_path.relative_to(PROJECT_ROOT).as_posix())
-            AssetsExtractor(str(extract_root)).extract()
+            # 标注器是常驻进程，重新加载生成器，避免改了 assets_extract 仍按旧格式导出
+            extractor = importlib.reload(importlib.import_module("dev_tools.assets_extract"))
+            extractor.AssetsExtractor(str(extract_root)).extract()
         except Exception as e:
             generate_status = "failed"
             generate_error = str(e)

@@ -11,7 +11,7 @@ from module.logger import logger
 
 MODULE_FOLDER = 'tasks'
 ASSETS_FILE = 'assets.py'
-ASSETS_CLASS = '\nclass Assets: \n'
+ASSETS_CLASS = '\nclass Assets:\n'
 IMPORT_EXP = """
 from module.atom.image import RuleImage
 from module.atom.frame import RuleFrame, Image, Ocr, Click
@@ -309,13 +309,13 @@ class ListExtractor:
         height = int(height / len(items))
         array = ', '.join(array)
 
-        description: str = f'\t# {data["description"]} \n'
+        description: str = f'\t# {data["description"]}\n'
         name: str = f'\tL_{name_transform(data["name"])} = RuleList(' \
                     f'folder="./{str(self.image_path)}", ' \
                     f'direction="{data["direction"]}", ' \
                     f'mode="{data["type"]}", ' \
                     f'roi_back=({data["roiBack"]}), ' \
-                    f'size=({width}, {height}), ' \
+                    f'size=({width}, {height}),' \
                     f'\n\t\t\t\t\t array=[{str(array)}])\n'
         return description + name
 
@@ -332,7 +332,7 @@ class AssetsExtractor:
         self.task_name = self.task_path.name
         self.assets_file = self.task_path / ASSETS_FILE
 
-        self.class_name = f'\nclass {self.task_name}Assets: \n'
+        self.class_name = f'\nclass {self.task_name}Assets:\n'
 
         self._result = ''
         for import_exp in IMPORT_EXP:
@@ -460,10 +460,13 @@ class AssetsExtractor:
     def write_file(self) -> None:
         """
         将自身的_resule写入文件
+        每行尾空格统一清掉，避免注释模板或旧版本逻辑把空白又刷回来
         :return:
         """
+        text = self.prune_imports(self._result)
+        text = '\n'.join(line.rstrip() for line in text.split('\n'))
         with open(self.assets_file, 'w', encoding='utf-8', newline='\n') as f:
-            f.write(self.prune_imports(self._result))
+            f.write(text)
 
     def extract(self) -> str:
         """
