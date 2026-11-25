@@ -19,11 +19,11 @@
   },
   {
     "itemName": "st_sort_time",
-    "roiFront": "387,118,110,42",
-    "roiBack": "387,118,110,42",
+    "roiFront": "385,117,109,40",
+    "roiBack": "385,117,109,40",
     "mode": "Single",
     "method": "Default",
-    "keyword": "入手顺",
+    "keyword": "入手順",
     "description": "入手顺序"
   },
   {
