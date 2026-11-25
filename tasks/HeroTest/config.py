@@ -41,6 +41,8 @@ class HeroTestConfig(BaseModel):
     exp_100_buff_enable_help: bool = Field(
         default=False, description="打开经验100%加成"
     )
+    # 是否标记主怪
+    mark_main_enable: bool = Field(default=True, description="mark_main_enable_help")
 
 
 class HeroTest(ConfigBase):

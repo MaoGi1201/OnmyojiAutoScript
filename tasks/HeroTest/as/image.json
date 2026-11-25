@@ -304,5 +304,14 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "真钱"
+  },
+  {
+    "itemName": "mark_main",
+    "imageName": "as_mark_main.png",
+    "roiFront": "375,40,60,30",
+    "roiBack": "375,40,60,30",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "红标主怪"
   }
 ]

@@ -99,6 +99,15 @@
     "description": ""
   },
   {
+    "itemName": "wq_count",
+    "roiFront": "0,0,96,22",
+    "roiBack": "0,0,96,22",
+    "mode": "Single",
+    "method": "Default",
+    "keyword": "",
+    "description": "悬赏封印标签上方窄条的单行进度识别, find_wq 兜底用"
+  },
+  {
     "itemName": "wq_list_check",
     "roiFront": "11,114,92,388",
     "roiBack": "11,114,92,388",

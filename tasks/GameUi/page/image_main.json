@@ -113,7 +113,7 @@
     "roiFront": "170,590,64,61",
     "roiBack": "170,590,120,100",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.7,
     "description": "庭院前往珍旅居"
   },
   {

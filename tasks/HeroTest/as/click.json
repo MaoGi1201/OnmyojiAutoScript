@@ -4,5 +4,11 @@
     "roiFront": "54,113,52,55",
     "roiBack": "8,64,156,161",
     "description": "切换英杰按钮"
+  },
+  {
+    "itemName": "mark_main",
+    "roiFront": "380,15,45,30",
+    "roiBack": "380,15,45,30",
+    "description": "红标主怪点击区域"
   }
 ]

@@ -6,7 +6,8 @@ import random  # type: ignore
 from module.atom.image import RuleImage
 from tasks.Component.GeneralBattle.config_general_battle import GeneralBattleConfig
 
-from tasks.Component.GeneralBattle.general_battle import BattleAction, BattleContext, ExitMatcher, GeneralBattle
+from tasks.Component.GeneralBattle.general_battle import BattleAction, BattleBehaviorScope, BattleContext, ExitMatcher, \
+    GeneralBattle
 from tasks.GameUi.default_pages import page_battle_result
 from tasks.GameUi.matcher import any_of
 from tasks.HeroTest.assets import HeroTestAssets
@@ -33,6 +34,19 @@ class ScriptTask(GameUi, GeneralBattle, HeroTestAssets, SwitchSoul):
             return
         logger.info('Update page_battle_result')
         page_result.recognizer = any_of(self.I_BCMJ_SKILL_ADD_CONFIRM, page_result.recognizer)
+
+    def _get_battle_behavior_scopes(self, config: GeneralBattleConfig,
+                                    battle_key: str) -> dict[str, BattleBehaviorScope]:
+        scopes = super()._get_battle_behavior_scopes(config, battle_key)
+        # 标记主怪按轮次执行: 连战每轮战斗重新标记一次
+        scopes["mark_main"] = BattleBehaviorScope.ROUND
+        return scopes
+
+    def _handle_in_battle(self, context: BattleContext, config: GeneralBattleConfig) -> BattleAction:
+        action = super()._handle_in_battle(context, config)
+        if self.conf.herotest.mark_main_enable:
+            self._run_battle_behavior_once(behavior_name="mark_main", action=self.mark_main)
+        return action
 
     def _handle_result(self, context: BattleContext, config: GeneralBattleConfig) -> BattleAction:
         if self.appear(self.I_BCMJ_SKILL_ADD_CONFIRM):
@@ -118,6 +132,16 @@ class ScriptTask(GameUi, GeneralBattle, HeroTestAssets, SwitchSoul):
         logger.error('Battle cannot enter, maybe recognize failed')
         self.success = False  # 进入失败且不知道发生了什么情况
         return False
+
+    def mark_main(self):
+        """红标主怪, 最多尝试 5 次"""
+        for _ in range(5):
+            if self.appear(self.I_MARK_MAIN):
+                logger.info("Mark main success")
+                return
+            self.click(self.C_MARK_MAIN, interval=1)
+            self.wait_until_appear(self.I_MARK_MAIN, wait_time=1)
+        logger.warning("Mark main failed")
 
     def hero1_skill_wait(self):
         if self.appear_then_click(self.I_BCMJ_SKILL_ADD1, interval=1) or \

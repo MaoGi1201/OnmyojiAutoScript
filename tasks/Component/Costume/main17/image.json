@@ -3,7 +3,7 @@
     "itemName": "check_main_17",
     "imageName": "main17_check_main_17.png",
     "roiFront": "853,149,43,46",
-    "roiBack": "790,102,175,160",
+    "roiBack": "493,102,478,125",
     "method": "Template matching",
     "threshold": 0.75,
     "description": "狐栖归处庭院判定"

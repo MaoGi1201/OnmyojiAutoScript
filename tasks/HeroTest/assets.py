@@ -13,6 +13,8 @@ class HeroTestAssets:
 	# Click Rule Assets
 	# 切换英杰按钮 
 	C_SWITCH_HERO_BTN = RuleClick(roi_front=(54,113,52,55), roi_back=(8,64,156,161), name="switch_hero_btn")
+	# 红标主怪点击区域 
+	C_MARK_MAIN = RuleClick(roi_front=(380,15,45,30), roi_back=(380,15,45,30), name="mark_main")
 
 
 	# Image Rule Assets
@@ -111,6 +113,8 @@ class HeroTestAssets:
 	I_HERO2_SKILL11 = RuleImage(roi_front=(521,357,60,39), roi_back=(48,342,1172,74), threshold=0.8, method="Template matching", file="./tasks/HeroTest/as/as_hero2_skill11.png")
 	# 伤害加成 
 	I_HERO2_SKILL12 = RuleImage(roi_front=(1034,354,122,41), roi_back=(53,341,1172,74), threshold=0.8, method="Template matching", file="./tasks/HeroTest/as/as_hero2_skill12.png")
+	# 红标主怪 
+	I_MARK_MAIN = RuleImage(roi_front=(375,40,60,30), roi_back=(375,40,60,30), threshold=0.8, method="Template matching", file="./tasks/HeroTest/as/as_mark_main.png")
 
 
 	# Ocr Rule Assets

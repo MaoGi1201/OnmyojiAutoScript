@@ -726,6 +726,39 @@ class ScriptTask(WQExplore, SecretScriptTask, WantedQuestsAssets):
             # 例如：1414 66 1212
             if reg_XX.match(res.ocr_text):
                 continue
+        # 的窄条单独做单行 OCR.
+        for res in res_list:
+            if not reg_fengyin.match(res.ocr_text):
+                continue
+            x, y, w, h = calc_xywh(res.box)
+            # calc_xywh 返回浮点数, numpy 切片只接受整数
+            x, y, w, h = int(x), int(y), int(w), int(h)
+            if y < 22:
+                continue
+            band = img[y - 17:y + 5, x:x + w]
+            if band.size == 0:
+                continue
+            count_text = self.O_WQ_COUNT.ocr(band)
+            match = reg_progress.match(count_text)
+            if not match:
+                continue
+            cu, total = int(match.group(1)), int(match.group(3))
+            # 识别结果规范性检查(与主路径一致)
+            if total > 14:
+                logger.warning("Total number of wanted quests is greater than 14")
+                total = total % 10
+            if cu > total:
+                logger.warning('Current number of wanted quests is greater than total number')
+                cu = cu % 10
+            if cu == total:
+                continue
+            xywh = [x, y, w, h]
+            # 神秘妖怪条目: 图标区在标签上方, 问号模板命中则跳过
+            if self.is_mystery_quest(img, xywh):
+                logger.info(f'mystery quest {count_text} @ {xywh}, skip')
+                continue
+            logger.info(f'find wq (label fallback) {count_text} @ {xywh}')
+            return cu, 1, total, xywh
         return -1, -1, -1, [0, 0, 0, 0]
 
     def is_wq_remained(self):
