@@ -590,6 +590,19 @@ class ImageRuntime:
         active_threshold = float(rule_data.get("threshold", 0.0) if threshold is None else threshold)
         roi_front = [int(v) for v in rule_data.get("roi_front", [0, 0, 0, 0])]
         roi_back = [int(v) for v in (roi if roi is not None else rule_data.get("roi_back", [0, 0, 0, 0]))]
+        # 请求级相位容差：roi_back 与模板（roi_front 尺寸）等宽/等高时，matchTemplate
+        # 结果在该维度只有 1 列/1 行，零搜索空间，1px 渲染相位差就足以判成「不存在」。
+        # 只给零搜索的维度外扩 pad，已有搜索余量的规则保持逐位不变。
+        roi_pad = int(rule_data.get("roi_pad", 0) or 0)
+        if roi_pad > 0:
+            x, y, w, h = roi_back
+            if w == roi_front[2]:
+                x -= roi_pad
+                w += 2 * roi_pad
+            if h == roi_front[3]:
+                y -= roi_pad
+                h += 2 * roi_pad
+            roi_back = [x, y, w, h]
         scale_range = rule_data.get("scale_range")
         if scale_range is not None:
             scale_range = tuple(float(v) for v in scale_range)
@@ -666,10 +679,24 @@ class ImageRuntime:
         raise ValueError(f"unknown method {method}")
 
     @staticmethod
-    def _crop(image: np.ndarray, roi: list[int]) -> np.ndarray:
-        """按 `[x, y, w, h]` 形式的 ROI 从图像中裁出子区域。"""
+    def _crop_origin(image: np.ndarray, roi: list[int]) -> tuple[np.ndarray, int, int]:
+        """裁剪 ROI 并 clamp 到图像边界，返回子图与其在原图中的真实起点。
+
+        外扩 roi_pad 后 ROI 可能越出屏幕（贴边规则尤其常见）；若直接用负数索引
+        切片，numpy 会把它解释成「从末尾取」，静默裁出完全错误的区域。
+        """
         x, y, w, h = [int(v) for v in roi]
-        return image[y:y + h, x:x + w]
+        width, height = int(image.shape[1]), int(image.shape[0])
+        x0 = max(0, min(x, width))
+        y0 = max(0, min(y, height))
+        x1 = max(x0, min(x + w, width))
+        y1 = max(y0, min(y + h, height))
+        return image[y0:y1, x0:x1], x0, y0
+
+    @classmethod
+    def _crop(cls, image: np.ndarray, roi: list[int]) -> np.ndarray:
+        """按 `[x, y, w, h]` 形式的 ROI 从图像中裁出子区域（越界自动 clamp）。"""
+        return cls._crop_origin(image, roi)[0]
 
     @staticmethod
     def _template_image_invalid(mat: np.ndarray) -> bool:
@@ -697,7 +724,7 @@ class ImageRuntime:
 
         `roi_back` 表示在原图上的搜索区域，命中结果会被换算回原图坐标系。
         """
-        source = self._crop(image, roi_back)
+        source, origin_x, origin_y = self._crop_origin(image, roi_back)
         if self._template_image_invalid(template):
             logger.error(f"Template image is invalid: {None if template is None else template.shape}")
             return True, 1.0, [int(v) for v in roi_back]
@@ -709,8 +736,8 @@ class ImageRuntime:
         matched = max_val > threshold
         if matched:
             roi_front = [
-                int(max_loc[0] + roi_back[0]),
-                int(max_loc[1] + roi_back[1]),
+                int(max_loc[0] + origin_x),
+                int(max_loc[1] + origin_y),
                 int(template.shape[1]),
                 int(template.shape[0]),
             ]
@@ -732,7 +759,7 @@ class ImageRuntime:
 
         缩放步长与范围来自规则配置，最终返回最佳得分对应的位置与尺寸。
         """
-        source = self._crop(image, roi_back)
+        source, origin_x, origin_y = self._crop_origin(image, roi_back)
         if self._template_image_invalid(template):
             logger.error(f"Template image is invalid: {None if template is None else template.shape}")
             return True, 1.0, [int(v) for v in roi_back]
@@ -761,8 +788,8 @@ class ImageRuntime:
         matched = best_loc is not None and best_shape is not None and best_val > threshold
         if matched:
             roi_front = [
-                int(best_loc[0] + roi_back[0]),
-                int(best_loc[1] + roi_back[1]),
+                int(best_loc[0] + origin_x),
+                int(best_loc[1] + origin_y),
                 int(best_shape[0]),
                 int(best_shape[1]),
             ]
@@ -802,7 +829,7 @@ class ImageRuntime:
 
         `roi_front` 提供模板原始尺寸，用于透视变换后恢复目标区域大小。
         """
-        source = self._crop(image, roi_back)
+        source, origin_x, origin_y = self._crop_origin(image, roi_back)
         kp, des = self._get_sift().detectAndCompute(source, None)
         if des is None or template_entry.sift_des is None or kp is None:
             return False, 0.0, None
@@ -839,8 +866,8 @@ class ImageRuntime:
             return False, float(len(good)), None
 
         result_roi = [
-            int(transformed[0, 0, 0] + roi_back[0]),
-            int(transformed[0, 0, 1] + roi_back[1]),
+            int(transformed[0, 0, 0] + origin_x),
+            int(transformed[0, 0, 1] + origin_y),
             width,
             height,
         ]
@@ -862,7 +889,7 @@ class ImageRuntime:
         if rule["method"] != "Template matching":
             raise ValueError(f"unknown method {rule['method']}")
         template = self._get_template_entry(rule["file"]).image_rgb
-        source = self._crop(image, rule["roi_back"])
+        source, origin_x, origin_y = self._crop_origin(image, rule["roi_back"])
         if self._template_image_invalid(template):
             logger.error(f"Template image is invalid: {None if template is None else template.shape}")
             return []
@@ -873,8 +900,8 @@ class ImageRuntime:
         matches = []
         for point in zip(*locations[::-1]):
             score = float(results[point[1], point[0]])
-            x = int(rule["roi_back"][0] + point[0])
-            y = int(rule["roi_back"][1] + point[1])
+            x = int(origin_x + point[0])
+            y = int(origin_y + point[1])
             matches.append((score, x, y, int(template.shape[1]), int(template.shape[0])))
         return matches
 
