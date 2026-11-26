@@ -95,7 +95,7 @@
     "roiFront": "918,114,200,55",
     "roiBack": "918,110,200,65",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.7,
     "description": "筛选中 选中悬赏标识"
   },
   {
@@ -104,7 +104,7 @@
     "roiFront": "954,122,123,41",
     "roiBack": "920,110,190,70",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.7,
     "description": "筛选中 选中热门标识"
   },
   {
@@ -113,7 +113,7 @@
     "roiFront": "936,121,158,44",
     "roiBack": "920,110,190,70",
     "method": "Template matching",
-    "threshold": 0.8,
+    "threshold": 0.7,
     "description": "筛选中 选中收藏标识"
   },
   {
