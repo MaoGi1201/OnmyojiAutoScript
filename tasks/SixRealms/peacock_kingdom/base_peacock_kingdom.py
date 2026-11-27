@@ -10,6 +10,7 @@ from typing import List, Optional
 class BasePeacockKingdom(GeneralBattle, SixRealmsCommon):
     coin_num: int = 0
     skill_roaring_thunder: int = 0
+    cnt_skill_power: int = 0  # 力强化已选次数
 
     def get_pk_skill_select(self, skill_rule_list: List[RuleImage]) -> Optional[RuleImage]:
         """
@@ -40,6 +41,7 @@ class BasePeacockKingdom(GeneralBattle, SixRealmsCommon):
     def before_run(self):
         self.coin_num = 0
         self.skill_roaring_thunder = 0
+        self.cnt_skill_power = 0
         pages.page_battle = self.navigator.resolve_page(pages.page_battle)
         pages.page_battle.recognizer = pages.any_of(self.I_BOSS_SKIP, pages.page_battle.recognizer)
         pages.page_battle_result = self.navigator.resolve_page(pages.page_battle_result)
@@ -68,12 +70,22 @@ class BasePeacockKingdom(GeneralBattle, SixRealmsCommon):
         if self.appear(self.I_UI_CONFIRM_SAMLL):
             self.click(self.I_UI_CONFIRM_SAMLL, interval=0.8)
             return BattleAction.CONTINUE
-        # 力量或魅力强化
+        # 力量(力强化)最多选 4 次, 之后优先怪力乱神
         if self.appear(self.I_PK_SELECT_0, interval=1.5) or self.appear(self.I_PK_SELECT_3, interval=1.5):
             context.is_win = True
-            select_btn = self.get_pk_skill_select([self.I_PK_SKILL_POWER, self.I_PK_SKILL_CHARM])
-            if select_btn:
-                self.appear_then_click(select_btn, interval=1)
+            if self.cnt_skill_power >= 4:
+                skill_rules = [self.I_PK_SKILL_STRANGE_POWER, self.I_PK_SKILL_CHARM, self.I_PK_SKILL_POWER]
+            else:
+                skill_rules = [self.I_PK_SKILL_POWER, self.I_PK_SKILL_CHARM, self.I_PK_SKILL_STRANGE_POWER]
+            for skill_rule in skill_rules:
+                if not self.appear(skill_rule):
+                    continue
+                select_btn = self.get_pk_skill_select([skill_rule])
+                if select_btn and self.appear_then_click(select_btn, interval=1):
+                    if skill_rule is self.I_PK_SKILL_POWER:
+                        self.cnt_skill_power += 1
+                        logger.info(f'Skill power level: {self.cnt_skill_power}')
+                break
             return BattleAction.CONTINUE
         # 选择技能
         if self.appear(self.I_SELECT_3, interval=1.5) and self.appear(self.I_PK_SKILL_REFRESH):
