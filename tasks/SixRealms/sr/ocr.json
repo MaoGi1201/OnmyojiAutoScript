@@ -1,0 +1,11 @@
+[
+  {
+    "itemName": "sr_switch",
+    "roiFront": "405,211,29,69",
+    "roiBack": "405,211,29,69",
+    "mode": "Full",
+    "method": "Default",
+    "keyword": "変更",
+    "description": "六道之门更替按钮(竖排「変更」)"
+  }
+]

@@ -1,14 +1,5 @@
 [
   {
-    "itemName": "sr_switch",
-    "imageName": "sr_sr_switch.png",
-    "roiFront": "407,223,27,57",
-    "roiBack": "388,188,71,146",
-    "method": "Template matching",
-    "threshold": 0.8,
-    "description": "六道之门更替标志"
-  },
-  {
     "itemName": "sr_to_moon_sea",
     "imageName": "sr_sr_to_moon_sea.png",
     "roiFront": "602,149,56,59",
@@ -110,8 +101,8 @@
   {
     "itemName": "sr_peacock_kingdom_info",
     "imageName": "sr_sr_peacock_kingdom_info.png",
-    "roiFront": "990,607,90,96",
-    "roiBack": "747,558,533,162",
+    "roiFront": "992,607,89,97",
+    "roiBack": "745,558,534,162",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "孔雀国玩法详情"
@@ -169,5 +160,59 @@
     "method": "Template matching",
     "threshold": 0.8,
     "description": "非表示勾选框-已勾选"
+  },
+  {
+    "itemName": "sr_boss_again",
+    "imageName": "sr_sr_boss_again.png",
+    "roiFront": "438,407,176,62",
+    "roiBack": "428,394,206,94",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "战斗失败弹窗-再戦"
+  },
+  {
+    "itemName": "sr_boss_giveup",
+    "imageName": "sr_sr_boss_giveup.png",
+    "roiFront": "665,409,176,63",
+    "roiBack": "653,383,207,106",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "战斗失败弹窗-放弃"
+  },
+  {
+    "itemName": "sr_settle_ryou",
+    "imageName": "sr_sr_settle_ryou.png",
+    "roiFront": "133,115,84,136",
+    "roiBack": "123,105,104,156",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "结算评价-良(未通关)"
+  },
+  {
+    "itemName": "sr_settle_shutu",
+    "imageName": "sr_sr_settle_shutu.png",
+    "roiFront": "108,141,173,122",
+    "roiBack": "53,70,273,278",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "结算评价-极(通关)"
+  },
+  {
+    "itemName": "sr_boss_get_exp",
+    "imageName": "sr_sr_boss_get_exp.png",
+    "roiFront": "561,109,171,45",
+    "roiBack": "492,86,281,100",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "御神获得经验"
+  },
+  {
+    "itemName": "sr_skill_unlock",
+    "imageName": "sr_sr_skill_unlock.png",
+    "roiFront": "538,137,211,50",
+    "roiBack": "1029,190,105,152",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "技能解锁标志"
   }
 ]

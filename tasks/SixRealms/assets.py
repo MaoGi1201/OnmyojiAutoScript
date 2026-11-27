@@ -55,8 +55,6 @@ class SixRealmsAssets:
 	I_MS_CHECK_EXIT_PREPARE = RuleImage(roi_front=(480,285,326,57), roi_back=(436,223,414,249), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_ms_check_exit_prepare.png")
 	# 召唤商店弹窗
 	I_MS_CHECK_OPEN_STORE = RuleImage(roi_front=(425,285,432,60), roi_back=(423,227,437,263), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_ms_check_open_store.png")
-	# 技能解锁标志
-	I_MS_SKILL_UNLOCK = RuleImage(roi_front=(538,137,211,50), roi_back=(1029,190,105,152), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_ms_skill_unlock.png")
 	# 月之海地图标志
 	I_MS_CHECK_MAP = RuleImage(roi_front=(1119,15,144,230), roi_back=(1088,0,192,286), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_ms_check_map.png")
 	# 月之海主界面标志
@@ -72,16 +70,8 @@ class SixRealmsAssets:
 	I_BOSS_TEAM_UNLOCK = RuleImage(roi_front=(1138,497,22,21), roi_back=(1127,491,40,41), threshold=0.95, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_boss_team_unlock.png")
 	# description
 	I_BOSS_SKIP = RuleImage(roi_front=(1131,13,100,42), roi_back=(1113,5,136,62), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_boss_skip.png")
-	# 御神获得经验
-	I_BOSS_GET_EXP = RuleImage(roi_front=(561,109,171,45), roi_back=(492,86,281,100), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_boss_get_exp.png")
 	# description
 	I_BOSS_SHARE = RuleImage(roi_front=(1090,604,70,74), roi_back=(1074,587,100,100), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_boss_share.png")
-	# 结算的椒图
-	I_BOSS_SHUTU = RuleImage(roi_front=(108,141,173,122), roi_back=(53,70,273,278), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_boss_shutu.png")
-	# description
-	I_BOSS_BATTLE_AGAIN = RuleImage(roi_front=(435,403,173,64), roi_back=(409,390,212,100), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_boss_battle_again.png")
-	# description
-	I_BOSS_BATTLE_GIVEUP = RuleImage(roi_front=(671,399,175,59), roi_back=(649,381,219,100), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_boss_battle_giveup.png")
 	# boss备战
 	I_BOSS_FIRE_PREPARE = RuleImage(roi_front=(849,624,48,57), roi_back=(829,597,103,104), threshold=0.8, method="Template matching", file="./tasks/SixRealms/moon_sea/ms/ms_boss_fire_prepare.png")
 
@@ -294,8 +284,6 @@ class SixRealmsAssets:
 
 
 	# Image Rule Assets
-	# 六道之门更替标志
-	I_SR_SWITCH = RuleImage(roi_front=(407,223,27,57), roi_back=(388,188,71,146), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_switch.png")
 	# 更替到月之海
 	I_SR_TO_MOON_SEA = RuleImage(roi_front=(602,149,56,59), roi_back=(345,112,546,517), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_to_moon_sea.png")
 	# 更替到香行域
@@ -319,7 +307,7 @@ class SixRealmsAssets:
 	# 真言塔玩法详情
 	I_SR_MANTRA_TOWER_INFO = RuleImage(roi_front=(991,611,84,97), roi_back=(747,558,533,162), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_mantra_tower_info.png")
 	# 孔雀国玩法详情
-	I_SR_PEACOCK_KINGDOM_INFO = RuleImage(roi_front=(990,607,90,96), roi_back=(747,558,533,162), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_peacock_kingdom_info.png")
+	I_SR_PEACOCK_KINGDOM_INFO = RuleImage(roi_front=(992,607,89,97), roi_back=(745,558,534,162), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_peacock_kingdom_info.png")
 	# 双倍奖励取消标志
 	I_SR_DOUBLE_REWARD_CANCEL = RuleImage(roi_front=(492,422,124,48), roi_back=(422,388,229,115), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_double_reward_cancel.png")
 	# 双倍奖励使用标志
@@ -332,5 +320,22 @@ class SixRealmsAssets:
 	I_SR_NOT_SHOW_UNCHECK = RuleImage(roi_front=(560,340,38,40), roi_back=(560,340,38,40), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_not_show_uncheck.png")
 	# 非表示勾选框-已勾选
 	I_SR_NOT_SHOW_CHECK = RuleImage(roi_front=(559,342,39,41), roi_back=(559,342,39,41), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_not_show_check.png")
+	# 战斗失败弹窗-再戦
+	I_SR_BOSS_AGAIN = RuleImage(roi_front=(438,407,176,62), roi_back=(428,394,206,94), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_boss_again.png")
+	# 战斗失败弹窗-放弃
+	I_SR_BOSS_GIVEUP = RuleImage(roi_front=(665,409,176,63), roi_back=(653,383,207,106), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_boss_giveup.png")
+	# 结算评价-良(未通关)
+	I_SR_SETTLE_RYOU = RuleImage(roi_front=(133,115,84,136), roi_back=(123,105,104,156), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_settle_ryou.png")
+	# 结算评价-极(通关)
+	I_SR_SETTLE_SHUTU = RuleImage(roi_front=(108,141,173,122), roi_back=(53,70,273,278), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_settle_shutu.png")
+	# 御神获得经验
+	I_SR_BOSS_GET_EXP = RuleImage(roi_front=(561,109,171,45), roi_back=(492,86,281,100), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_boss_get_exp.png")
+	# 技能解锁标志
+	I_SR_SKILL_UNLOCK = RuleImage(roi_front=(538,137,211,50), roi_back=(1029,190,105,152), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_skill_unlock.png")
+
+
+	# Ocr Rule Assets
+	# 六道之门更替按钮(竖排「変更」)
+	O_SR_SWITCH = RuleOcr(roi=(405,211,29,69), area=(405,211,29,69), mode="Full", method="Default", keyword="変更", name="sr_switch")
 
 

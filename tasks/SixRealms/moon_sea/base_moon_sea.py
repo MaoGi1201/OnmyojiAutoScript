@@ -15,12 +15,12 @@ class BaseMoonSea(GeneralBattle, SixRealmsCommon):
         pages.page_battle = self.navigator.resolve_page(pages.page_battle)
         pages.page_battle.recognizer = pages.any_of(self.I_BOSS_SKIP, pages.page_battle.recognizer)
         pages.page_battle_result = self.navigator.resolve_page(pages.page_battle_result)
-        pages.page_battle_result.recognizer = pages.any_of(self.I_BOSS_BATTLE_AGAIN, self.I_BOSS_BATTLE_GIVEUP,
+        pages.page_battle_result.recognizer = pages.any_of(self.I_SR_BOSS_AGAIN, self.I_SR_BOSS_GIVEUP,
                                                            self.I_SELECT_3, self.I_SKILL_REFRESH, self.I_UI_CONFIRM_SAMLL,
                                                            pages.page_battle_result.recognizer)
         pages.page_reward = self.navigator.resolve_page(pages.page_reward)
-        pages.page_reward.recognizer = pages.any_of(self.I_COIN, self.I_SR_DOUBLE_REWARD_USE, self.I_BOSS_GET_EXP,
-                                                    self.I_BOSS_SHARE, self.I_BOSS_SHUTU, self.I_MS_SKILL_UNLOCK,
+        pages.page_reward.recognizer = pages.any_of(self.I_COIN, self.I_SR_DOUBLE_REWARD_USE, self.I_SR_BOSS_GET_EXP,
+                                                    self.I_BOSS_SHARE, self.I_SR_SETTLE_SHUTU, self.I_SR_SETTLE_RYOU, self.I_SR_SKILL_UNLOCK,
                                                     pages.page_reward.recognizer)
 
     def _handle_in_battle(self, context: BattleContext, config: GeneralBattleConfig) -> BattleAction:
@@ -31,9 +31,9 @@ class BaseMoonSea(GeneralBattle, SixRealmsCommon):
     def _handle_result(self, context: BattleContext, config: GeneralBattleConfig) -> BattleAction:
         context.reward_no_battle_ts = None
         # 打输了, 直接放弃
-        if self.appear(self.I_BOSS_BATTLE_GIVEUP):
+        if self.appear(self.I_SR_BOSS_GIVEUP):
             context.is_win = False
-            self.click(self.I_BOSS_BATTLE_GIVEUP, interval=0.8)
+            self.click(self.I_SR_BOSS_GIVEUP, interval=0.8)
             return BattleAction.CONTINUE
         # 放弃之后的2次弹窗确认
         if self.appear(self.I_UI_CONFIRM_SAMLL):
@@ -52,7 +52,8 @@ class BaseMoonSea(GeneralBattle, SixRealmsCommon):
 
     def _handle_reward(self, context: BattleContext, config: GeneralBattleConfig) -> BattleAction:
         context.reward_no_battle_ts = None
-        if self.appear(self.I_BOSS_SHUTU):  # 极表示boss战赢了
+        # 结算页只表示这轮打完了: 极/良 都算完成, 不区分
+        if self.appear(self.I_SR_SETTLE_SHUTU) or self.appear(self.I_SR_SETTLE_RYOU):
             context.is_win = True
         if context.is_win and self.appear_then_click(self.I_SR_DOUBLE_REWARD_USE, interval=1.5):
             return BattleAction.CONTINUE

@@ -36,46 +36,10 @@
     "description": "description"
   },
   {
-    "itemName": "boss_get_exp",
-    "imageName": "ms_boss_get_exp.png",
-    "roiFront": "561,109,171,45",
-    "roiBack": "492,86,281,100",
-    "method": "Template matching",
-    "threshold": 0.8,
-    "description": "御神获得经验"
-  },
-  {
     "itemName": "boss_share",
     "imageName": "ms_boss_share.png",
     "roiFront": "1090,604,70,74",
     "roiBack": "1074,587,100,100",
-    "method": "Template matching",
-    "threshold": 0.8,
-    "description": "description"
-  },
-  {
-    "itemName": "boss_shutu",
-    "imageName": "ms_boss_shutu.png",
-    "roiFront": "108,141,173,122",
-    "roiBack": "53,70,273,278",
-    "method": "Template matching",
-    "threshold": 0.8,
-    "description": "结算的椒图"
-  },
-  {
-    "itemName": "boss_battle_again",
-    "imageName": "ms_boss_battle_again.png",
-    "roiFront": "435,403,173,64",
-    "roiBack": "409,390,212,100",
-    "method": "Template matching",
-    "threshold": 0.8,
-    "description": "description"
-  },
-  {
-    "itemName": "boss_battle_giveup",
-    "imageName": "ms_boss_battle_giveup.png",
-    "roiFront": "671,399,175,59",
-    "roiBack": "649,381,219,100",
     "method": "Template matching",
     "threshold": 0.8,
     "description": "description"
