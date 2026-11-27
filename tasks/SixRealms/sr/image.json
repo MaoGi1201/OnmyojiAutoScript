@@ -29,11 +29,11 @@
   {
     "itemName": "sr_to_pure_buddha_realm",
     "imageName": "sr_sr_to_pure_buddha_realm.png",
-    "roiFront": "598,525,56,59",
-    "roiBack": "345,112,546,517",
+    "roiFront": "583,514,80,80",
+    "roiBack": "566,496,116,116",
     "method": "Template matching",
     "threshold": 0.8,
-    "description": "更替到净佛刹"
+    "description": "更替到净佛刹(六道之门最下面的图标)"
   },
   {
     "itemName": "sr_to_mantra_tower",
@@ -83,11 +83,11 @@
   {
     "itemName": "sr_pure_buddha_realm_info",
     "imageName": "sr_sr_pure_buddha_realm_info.png",
-    "roiFront": "989,612,90,92",
-    "roiBack": "747,558,533,162",
+    "roiFront": "984,611,93,89",
+    "roiBack": "745,558,534,162",
     "method": "Template matching",
     "threshold": 0.8,
-    "description": "净佛刹玩法详情"
+    "description": "净佛刹名称标签(识别六道之门里已切到净佛刹)"
   },
   {
     "itemName": "sr_mantra_tower_info",

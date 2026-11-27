@@ -1,0 +1,11 @@
+[
+  {
+    "itemName": "pb_bloom_exit",
+    "imageName": "pb_pb_bloom_exit.png",
+    "roiFront": "1188,637,55,49",
+    "roiBack": "1188,637,55,49",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "練磨之岛离开"
+  }
+]

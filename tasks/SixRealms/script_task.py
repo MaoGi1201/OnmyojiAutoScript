@@ -14,6 +14,7 @@ from tasks.GameUi.page import page_main, page_shikigami_records
 from module.logger import logger
 from tasks.SixRealms.moon_sea.moon_sea import MoonSea
 from tasks.SixRealms.peacock_kingdom.peacock_kingdom import PeacockKingdom
+from tasks.SixRealms.pure_buddha_realm.pure_buddha_realm import PureBuddhaRealm
 
 
 class ScriptTask(GameUi, SwitchSoul):
@@ -26,6 +27,10 @@ class ScriptTask(GameUi, SwitchSoul):
     @cached_property
     def peacock_kingdom(self) -> PeacockKingdom:
         return PeacockKingdom(self.config, self.device)
+
+    @cached_property
+    def pure_buddha_realm(self) -> PureBuddhaRealm:
+        return PureBuddhaRealm(self.config, self.device)
 
     def run(self):
         _config = self.config.model.six_realms
@@ -44,6 +49,9 @@ class ScriptTask(GameUi, SwitchSoul):
                 case SixRealmsType.PEACOCK_KINGDOM:
                     self.switch_current_soul(_config.pk_switch_soul_conf)
                     self.peacock_kingdom.run()
+                case SixRealmsType.PURE_BUDDHA_REALM:
+                    self.switch_current_soul(_config.pb_switch_soul_conf)
+                    self.pure_buddha_realm.run()
                 case _:
                     raise ValueError(f'Invalid six_realms_type {_config.six_realms_gate.six_realms_type}')
             cnt += 1

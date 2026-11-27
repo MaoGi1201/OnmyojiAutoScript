@@ -27,11 +27,26 @@ page_six_gates.add_enter_failure_hooks(handle_six_realms_popup_hook)
 page_six_gates.add_leave_failure_hooks(handle_six_realms_popup_hook)
 
 
+def _switch_realm(task, switch_rule, name_rule, info_rule) -> bool:
+    """变更里选副本 -> 点变更边上的副本名进详情页
+
+    :param switch_rule: 变更列表里该副本的图标
+    :param name_rule: 选中后左侧该副本的名字(点它进详情页)
+    :param info_rule: 详情页的判据
+    """
+    task.ui_click(SixRealmsAssets.O_SR_SWITCH, switch_rule, interval=1.5)
+    if not task.appear_then_click(switch_rule):
+        return False
+    if task.appear(info_rule):
+        return True
+    return task.wait_until_appear_then_click(name_rule, wait_time=3) or task.appear(info_rule)
+
+
 # ----------------月之海----------------
 def handle_enter_moon_sea(task) -> bool:
     """六道之门页面切换到月之海"""
-    task.ui_click(SixRealmsAssets.I_SR_SWITCH, SixRealmsAssets.I_SR_TO_MOON_SEA, interval=1.5)
-    return task.appear_then_click(SixRealmsAssets.I_SR_TO_MOON_SEA)
+    return _switch_realm(task, SixRealmsAssets.I_SR_TO_MOON_SEA,
+                         GameUiAssets.I_CHECK_MOON_SEA, SixRealmsAssets.I_SR_MOON_SEA_INFO)
 
 def switch_moon_sea_shikigami(task) -> bool:
     """切换月之海式神"""
@@ -51,8 +66,8 @@ page_moon_sea.add_enter_success_hooks(switch_moon_sea_shikigami)
 # ----------------孔雀国----------------
 def handle_enter_peacock_kingdom(task) -> bool:
     """六道之门页面切换到孔雀国"""
-    task.ui_click(SixRealmsAssets.I_SR_SWITCH, SixRealmsAssets.I_SR_TO_PEACOCK_KINGDOM, interval=1.5)
-    return task.appear_then_click(SixRealmsAssets.I_SR_TO_PEACOCK_KINGDOM)
+    return _switch_realm(task, SixRealmsAssets.I_SR_TO_PEACOCK_KINGDOM,
+                         GameUiAssets.I_CHECK_PEACOCK_KINGDOM, SixRealmsAssets.I_SR_PEACOCK_KINGDOM_INFO)
 
 page_peacock_kingdom = Page(SixRealmsAssets.I_SR_PEACOCK_KINGDOM_INFO)
 page_peacock_kingdom.connect(page_six_gates, GlobalGameAssets.I_UI_BACK_BLUE, key="page_peacock_kingdom->page_six_gates")
@@ -64,7 +79,7 @@ page_peacock_kingdom.add_enter_failure_hooks(handle_enter_peacock_kingdom)
 # ----------------香行域----------------
 def handle_enter_incense_realm(task) -> bool:
     """六道之门页面切换到香行域"""
-    task.ui_click(SixRealmsAssets.I_SR_SWITCH, SixRealmsAssets.I_SR_TO_INCENSE_REALM, interval=1.5)
+    task.ui_click(SixRealmsAssets.O_SR_SWITCH, SixRealmsAssets.I_SR_TO_INCENSE_REALM, interval=1.5)
     return task.appear_then_click(SixRealmsAssets.I_SR_TO_INCENSE_REALM)
 
 page_incense_realm = Page(SixRealmsAssets.I_SR_INCENSE_REALM_INFO)
@@ -76,7 +91,7 @@ page_six_gates.connect(page_incense_realm, GameUiAssets.I_CHECK_INCENSE_REALM, k
 # ----------------错季森----------------
 def handle_enter_seasonrift_forest(task) -> bool:
     """六道之门页面切换到错季森"""
-    task.ui_click(SixRealmsAssets.I_SR_SWITCH, SixRealmsAssets.I_SR_TO_SEASONRIFT_FOREST, interval=1.5)
+    task.ui_click(SixRealmsAssets.O_SR_SWITCH, SixRealmsAssets.I_SR_TO_SEASONRIFT_FOREST, interval=1.5)
     return task.appear_then_click(SixRealmsAssets.I_SR_TO_SEASONRIFT_FOREST)
 
 page_seasonrift_forest = Page(SixRealmsAssets.I_SR_SEASONRIFT_FOREST_INFO)
@@ -89,8 +104,8 @@ page_seasonrift_forest.add_enter_failure_hooks(handle_enter_seasonrift_forest)
 # ----------------净佛刹----------------
 def handle_enter_pure_buddha_realm(task) -> bool:
     """六道之门页面切换到净佛刹"""
-    task.ui_click(SixRealmsAssets.I_SR_SWITCH, SixRealmsAssets.I_SR_TO_PURE_BUDDHA_REALM, interval=1.5)
-    return task.appear_then_click(SixRealmsAssets.I_SR_TO_PURE_BUDDHA_REALM)
+    return _switch_realm(task, SixRealmsAssets.I_SR_TO_PURE_BUDDHA_REALM,
+                         GameUiAssets.I_CHECK_PURE_BUDDHA_REALM, SixRealmsAssets.I_SR_PURE_BUDDHA_REALM_INFO)
 
 page_pure_buddha_realm = Page(SixRealmsAssets.I_SR_PURE_BUDDHA_REALM_INFO)
 page_pure_buddha_realm.connect(page_six_gates, GlobalGameAssets.I_UI_BACK_BLUE, key="page_pure_buddha_realm->page_six_gates")
@@ -102,7 +117,7 @@ page_pure_buddha_realm.add_enter_failure_hooks(handle_enter_pure_buddha_realm)
 # ----------------真言塔----------------
 def handle_enter_mantra_tower(task) -> bool:
     """六道之门页面切换到真言塔"""
-    task.ui_click(SixRealmsAssets.I_SR_SWITCH, SixRealmsAssets.I_SR_TO_MANTRA_TOWER, interval=1.5)
+    task.ui_click(SixRealmsAssets.O_SR_SWITCH, SixRealmsAssets.I_SR_TO_MANTRA_TOWER, interval=1.5)
     return task.appear_then_click(SixRealmsAssets.I_SR_TO_MANTRA_TOWER)
 
 page_mantra_tower = Page(SixRealmsAssets.I_SR_MANTRA_TOWER_INFO)

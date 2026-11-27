@@ -1,0 +1,29 @@
+[
+  {
+    "itemName": "pb_select_4",
+    "imageName": "pbr_pb_select_4.png",
+    "roiFront": "1044,552,91,41",
+    "roiBack": "1020,532,140,80",
+    "method": "Template matching",
+    "threshold": 0.75,
+    "description": "战后万相の礼-最右"
+  },
+  {
+    "itemName": "pb_select_3",
+    "imageName": "pbr_pb_select_3.png",
+    "roiFront": "915,552,91,41",
+    "roiBack": "885,532,140,80",
+    "method": "Template matching",
+    "threshold": 0.75,
+    "description": "开局技能-最右"
+  },
+  {
+    "itemName": "pb_wanshou",
+    "imageName": "pb_pb_wanshou.png",
+    "roiFront": "1025,272,120,45",
+    "roiBack": "1015,262,140,65",
+    "method": "Template matching",
+    "threshold": 0.85,
+    "description": "战后四选一页标志(万相の礼标题,文字不闪)"
+  }
+]

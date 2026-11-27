@@ -1,0 +1,47 @@
+[
+  {
+    "itemName": "pb_boss_prepare",
+    "imageName": "pb_pb_boss_prepare.png",
+    "roiFront": "850,625,60,60",
+    "roiBack": "850,625,60,60",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "boss备战"
+  },
+  {
+    "itemName": "pb_boss_unlock",
+    "imageName": "pb_pb_boss_unlock.png",
+    "roiFront": "1129,530,20,25",
+    "roiBack": "1129,530,20,25",
+    "method": "Template matching",
+    "threshold": 0.7,
+    "description": ""
+  },
+  {
+    "itemName": "pb_boss_lock",
+    "imageName": "pb_pb_boss_lock.png",
+    "roiFront": "1129,530,20,25",
+    "roiBack": "1129,530,20,25",
+    "method": "Template matching",
+    "threshold": 0.7,
+    "description": ""
+  },
+  {
+    "itemName": "pb_boss_fire",
+    "imageName": "pb_pb_boss_fire.png",
+    "roiFront": "1124,594,86,84",
+    "roiBack": "1124,594,86,84",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "boss挑战"
+  },
+  {
+    "itemName": "pb_boss_share",
+    "imageName": "pb_pb_boss_share.png",
+    "roiFront": "1161,626,59,62",
+    "roiBack": "1142,609,100,100",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "净佛刹boss分享"
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "itemName": "pb_mystery_title",
+    "imageName": "pb_pb_mystery_title.png",
+    "roiFront": "100,23,135,42",
+    "roiBack": "84,11,163,66",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "神秘之岛-左上角岛名(页面判断)"
+  },
+  {
+    "itemName": "pb_mystery_back",
+    "imageName": "pbr_pb_mystery_back.png",
+    "roiFront": "23,20,41,50",
+    "roiBack": "23,20,41,50",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": ""
+  }
+]

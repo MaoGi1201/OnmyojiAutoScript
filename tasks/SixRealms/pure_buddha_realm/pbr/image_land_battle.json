@@ -1,0 +1,20 @@
+[
+  {
+    "itemName": "pb_battle_common",
+    "imageName": "pb_pb_battle_common.png",
+    "roiFront": "717,220,41,40",
+    "roiBack": "699,207,72,69",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "普通怪物标签(激战之岛标志)"
+  },
+  {
+    "itemName": "pb_battle_fire",
+    "imageName": "pb_pb_battle_fire.png",
+    "roiFront": "1132,581,94,92",
+    "roiBack": "1132,581,94,92",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "岛屿内挑战"
+  }
+]

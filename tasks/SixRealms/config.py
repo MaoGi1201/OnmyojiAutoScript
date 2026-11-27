@@ -15,6 +15,7 @@ from tasks.Component.SwitchSoul.switch_soul_config import SwitchSoulConfig
 class SixRealmsType(str, Enum):
     MOON_SEA = 'MoonSea'
     PEACOCK_KINGDOM = 'PeacockKingdom'
+    PURE_BUDDHA_REALM = 'PureBuddhaRealm'
 
 
 class SixRealmsGate(BaseModel):
@@ -36,4 +37,5 @@ class SixRealms(ConfigBase):
     six_realms_gate: SixRealmsGate = Field(default_factory=SixRealmsGate)
     switch_soul_config: SwitchSoulConfig = Field(default_factory=SwitchSoulConfig)
     pk_switch_soul_conf: SwitchSoulConfig = Field(default_factory=SwitchSoulConfig)
+    pb_switch_soul_conf: SwitchSoulConfig = Field(default_factory=SwitchSoulConfig)
 

@@ -278,6 +278,93 @@ class SixRealmsAssets:
 	O_PK_STORE_REFRESH_TIME = RuleOcr(roi=(585,660,114,29), area=(585,660,114,29), mode="Single", method="Default", keyword="", name="pk_store_refresh_time")
 
 
+	# Image Rule Assets
+	# 開放(助战阵容出阵)
+	I_PB_START_CONFIRM = RuleImage(roi_front=(1137,577,85,95), roi_back=(1137,577,85,95), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_start_confirm.png")
+	# 開放(净佛刹门口)
+	I_PB_START = RuleImage(roi_front=(1127,579,100,100), roi_back=(1127,579,100,100), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_start.png")
+	# 出陣(试炼式神)
+	I_PB_START_CONFIRM2 = RuleImage(roi_front=(1137,585,84,86), roi_back=(1137,585,84,86), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_start_confirm2.png")
+	# 退出主界面
+	I_PB_EXIT_MAIN = RuleImage(roi_front=(516,316,56,55), roi_back=(484,293,323,95), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_exit_main.png")
+	# 继续
+	I_PB_CONTINUE = RuleImage(roi_front=(1128,579,97,98), roi_back=(1092,548,174,163), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_continue.png")
+	# 净佛刹地图
+	I_PB_CHECK_MAP = RuleImage(roi_front=(1120,19,142,233), roi_back=(1103,0,177,271), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_check_map.png")
+	# 开局技能选择-最右
+	I_PB_START_THIRD_SKILL = RuleImage(roi_front=(219,601,97,40), roi_back=(219,601,97,40), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_start_third_skill.png")
+	# 净佛刹主界面标志
+	I_PB_CHECK_MAIN = RuleImage(roi_front=(97,21,104,43), roi_back=(97,21,104,43), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_check_main.png")
+
+
+	# Image Rule Assets
+	# boss备战
+	I_PB_BOSS_PREPARE = RuleImage(roi_front=(850,625,60,60), roi_back=(850,625,60,60), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_boss_prepare.png")
+	#
+	I_PB_BOSS_UNLOCK = RuleImage(roi_front=(1129,530,20,25), roi_back=(1129,530,20,25), threshold=0.7, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_boss_unlock.png")
+	#
+	I_PB_BOSS_LOCK = RuleImage(roi_front=(1129,530,20,25), roi_back=(1129,530,20,25), threshold=0.7, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_boss_lock.png")
+	# boss挑战
+	I_PB_BOSS_FIRE = RuleImage(roi_front=(1124,594,86,84), roi_back=(1124,594,86,84), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_boss_fire.png")
+	# 净佛刹boss分享
+	I_PB_BOSS_SHARE = RuleImage(roi_front=(1161,626,59,62), roi_back=(1142,609,100,100), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_boss_share.png")
+
+
+	# Image Rule Assets
+	# 神秘之屿
+	I_PB_LAND_MYSTERY = RuleImage(roi_front=(904,401,28,91), roi_back=(107,144,1041,439), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_land_mystery.png")
+	# 混沌之岛
+	I_PB_LAND_CHAOS = RuleImage(roi_front=(902,448,30,93), roi_back=(107,144,1041,439), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_land_chaos.png")
+	# 練磨之岛
+	I_PB_LAND_BLOOM = RuleImage(roi_front=(371,360,32,153), roi_back=(107,144,1041,439), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_land_bloom.png")
+	# 激戦之岛
+	I_PB_LAND_FIRE = RuleImage(roi_front=(370,350,26,88), roi_back=(107,144,1041,439), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_land_fire.png")
+	# 安息之岛
+	I_PB_LAND_STORE = RuleImage(roi_front=(903,405,30,89), roi_back=(107,144,1041,439), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_land_store.png")
+
+
+	# Image Rule Assets
+	# 普通怪物标签(激战之岛标志)
+	I_PB_BATTLE_COMMON = RuleImage(roi_front=(717,220,41,40), roi_back=(699,207,72,69), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_battle_common.png")
+	# 岛屿内挑战
+	I_PB_BATTLE_FIRE = RuleImage(roi_front=(1132,581,94,92), roi_back=(1132,581,94,92), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_battle_fire.png")
+
+
+	# Image Rule Assets
+	# 練磨之岛离开
+	I_PB_BLOOM_EXIT = RuleImage(roi_front=(1188,637,55,49), roi_back=(1188,637,55,49), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_bloom_exit.png")
+
+
+	# Image Rule Assets
+	# 幸运宝箱
+	I_PB_CHAOS_BOX = RuleImage(roi_front=(680,298,90,98), roi_back=(662,274,133,143), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_chaos_box.png")
+	# 混沌之岛离开
+	I_PB_CHAOS_EXIT = RuleImage(roi_front=(1157,640,58,40), roi_back=(1157,640,58,40), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_chaos_exit.png")
+	# 混沌精英
+	I_PB_CHAOS_ELITE_FLAG = RuleImage(roi_front=(684,531,97,99), roi_back=(684,531,97,99), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_chaos_elite_flag.png")
+
+
+	# Image Rule Assets
+	# 神秘之岛-左上角岛名(页面判断)
+	I_PB_MYSTERY_TITLE = RuleImage(roi_front=(100,23,135,42), roi_back=(84,11,163,66), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_mystery_title.png")
+	#
+	I_PB_MYSTERY_BACK = RuleImage(roi_front=(23,20,41,50), roi_back=(23,20,41,50), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pbr_pb_mystery_back.png")
+
+
+	# Image Rule Assets
+	# 安息之岛离开
+	I_PB_STORE_EXIT = RuleImage(roi_front=(1194,617,60,42), roi_back=(1194,617,60,42), threshold=0.8, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_store_exit.png")
+
+
+	# Image Rule Assets
+	# 战后万相の礼-最右
+	I_PB_SELECT_4 = RuleImage(roi_front=(1044,552,91,41), roi_back=(1020,532,140,80), threshold=0.75, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pbr_pb_select_4.png")
+	# 开局技能-最右
+	I_PB_SELECT_3 = RuleImage(roi_front=(915,552,91,41), roi_back=(885,532,140,80), threshold=0.75, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pbr_pb_select_3.png")
+	# 战后四选一页标志(万相の礼标题,文字不闪)
+	I_PB_WANSHOU = RuleImage(roi_front=(1025,272,120,45), roi_back=(1015,262,140,65), threshold=0.85, method="Template matching", file="./tasks/SixRealms/pure_buddha_realm/pbr/pb_pb_wanshou.png")
+
+
 	# Click Rule Assets
 	# 切换式神区域
 	C_SR_SWITCH_SHIKIGAMI = RuleClick(roi_front=(51,614,53,55), roi_back=(51,614,53,55), name="sr_switch_shikigami")
@@ -290,8 +377,8 @@ class SixRealmsAssets:
 	I_SR_TO_INCENSE_REALM = RuleImage(roi_front=(756,241,56,59), roi_back=(345,112,546,517), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_to_incense_realm.png")
 	# 更替到错季森
 	I_SR_TO_SEASONRIFT_FOREST = RuleImage(roi_front=(762,421,56,59), roi_back=(345,112,546,517), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_to_seasonrift_forest.png")
-	# 更替到净佛刹
-	I_SR_TO_PURE_BUDDHA_REALM = RuleImage(roi_front=(598,525,56,59), roi_back=(345,112,546,517), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_to_pure_buddha_realm.png")
+	# 更替到净佛刹(六道之门最下面的图标)
+	I_SR_TO_PURE_BUDDHA_REALM = RuleImage(roi_front=(583,514,80,80), roi_back=(566,496,116,116), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_to_pure_buddha_realm.png")
 	# 更替到真言塔
 	I_SR_TO_MANTRA_TOWER = RuleImage(roi_front=(432,426,56,59), roi_back=(345,112,546,517), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_to_mantra_tower.png")
 	# 更替到孔雀国
@@ -302,8 +389,8 @@ class SixRealmsAssets:
 	I_SR_INCENSE_REALM_INFO = RuleImage(roi_front=(980,605,95,95), roi_back=(747,558,533,162), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_incense_realm_info.png")
 	# 错季森玩法详情
 	I_SR_SEASONRIFT_FOREST_INFO = RuleImage(roi_front=(982,609,94,88), roi_back=(747,558,533,162), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_seasonrift_forest_info.png")
-	# 净佛刹玩法详情
-	I_SR_PURE_BUDDHA_REALM_INFO = RuleImage(roi_front=(989,612,90,92), roi_back=(747,558,533,162), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_pure_buddha_realm_info.png")
+	# 净佛刹名称标签(识别六道之门里已切到净佛刹)
+	I_SR_PURE_BUDDHA_REALM_INFO = RuleImage(roi_front=(984,611,93,89), roi_back=(745,558,534,162), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_pure_buddha_realm_info.png")
 	# 真言塔玩法详情
 	I_SR_MANTRA_TOWER_INFO = RuleImage(roi_front=(991,611,84,97), roi_back=(747,558,533,162), threshold=0.8, method="Template matching", file="./tasks/SixRealms/sr/sr_sr_mantra_tower_info.png")
 	# 孔雀国玩法详情

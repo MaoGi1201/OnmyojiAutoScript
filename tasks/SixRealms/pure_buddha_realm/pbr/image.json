@@ -1,0 +1,74 @@
+[
+  {
+    "itemName": "pb_start_confirm",
+    "imageName": "pb_pb_start_confirm.png",
+    "roiFront": "1137,577,85,95",
+    "roiBack": "1137,577,85,95",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "開放(助战阵容出阵)"
+  },
+  {
+    "itemName": "pb_start",
+    "imageName": "pb_pb_start.png",
+    "roiFront": "1127,579,100,100",
+    "roiBack": "1127,579,100,100",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "開放(净佛刹门口)"
+  },
+  {
+    "itemName": "pb_start_confirm2",
+    "imageName": "pb_pb_start_confirm2.png",
+    "roiFront": "1137,585,84,86",
+    "roiBack": "1137,585,84,86",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "出陣(试炼式神)"
+  },
+  {
+    "itemName": "pb_exit_main",
+    "imageName": "pb_pb_exit_main.png",
+    "roiFront": "516,316,56,55",
+    "roiBack": "484,293,323,95",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "退出主界面"
+  },
+  {
+    "itemName": "pb_continue",
+    "imageName": "pb_pb_continue.png",
+    "roiFront": "1128,579,97,98",
+    "roiBack": "1092,548,174,163",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "继续"
+  },
+  {
+    "itemName": "pb_check_map",
+    "imageName": "pb_pb_check_map.png",
+    "roiFront": "1120,19,142,233",
+    "roiBack": "1103,0,177,271",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "净佛刹地图"
+  },
+  {
+    "itemName": "pb_start_third_skill",
+    "imageName": "pb_pb_start_third_skill.png",
+    "roiFront": "219,601,97,40",
+    "roiBack": "219,601,97,40",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "开局技能选择-最右"
+  },
+  {
+    "itemName": "pb_check_main",
+    "imageName": "pb_pb_check_main.png",
+    "roiFront": "97,21,104,43",
+    "roiBack": "97,21,104,43",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "净佛刹主界面标志"
+  }
+]

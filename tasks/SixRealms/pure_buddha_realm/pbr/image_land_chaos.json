@@ -1,0 +1,29 @@
+[
+  {
+    "itemName": "pb_chaos_box",
+    "imageName": "pb_pb_chaos_box.png",
+    "roiFront": "680,298,90,98",
+    "roiBack": "662,274,133,143",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "幸运宝箱"
+  },
+  {
+    "itemName": "pb_chaos_exit",
+    "imageName": "pb_pb_chaos_exit.png",
+    "roiFront": "1157,640,58,40",
+    "roiBack": "1157,640,58,40",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "混沌之岛离开"
+  },
+  {
+    "itemName": "pb_chaos_elite_flag",
+    "imageName": "pb_pb_chaos_elite_flag.png",
+    "roiFront": "684,531,97,99",
+    "roiBack": "684,531,97,99",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "混沌精英"
+  }
+]

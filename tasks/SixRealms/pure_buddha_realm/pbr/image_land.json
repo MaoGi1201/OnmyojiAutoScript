@@ -1,0 +1,47 @@
+[
+  {
+    "itemName": "pb_land_mystery",
+    "imageName": "pb_pb_land_mystery.png",
+    "roiFront": "904,401,28,91",
+    "roiBack": "107,144,1041,439",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "神秘之屿"
+  },
+  {
+    "itemName": "pb_land_chaos",
+    "imageName": "pb_pb_land_chaos.png",
+    "roiFront": "902,448,30,93",
+    "roiBack": "107,144,1041,439",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "混沌之岛"
+  },
+  {
+    "itemName": "pb_land_bloom",
+    "imageName": "pb_pb_land_bloom.png",
+    "roiFront": "371,360,32,153",
+    "roiBack": "107,144,1041,439",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "練磨之岛"
+  },
+  {
+    "itemName": "pb_land_fire",
+    "imageName": "pb_pb_land_fire.png",
+    "roiFront": "370,350,26,88",
+    "roiBack": "107,144,1041,439",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "激戦之岛"
+  },
+  {
+    "itemName": "pb_land_store",
+    "imageName": "pb_pb_land_store.png",
+    "roiFront": "903,405,30,89",
+    "roiBack": "107,144,1041,439",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "安息之岛"
+  }
+]

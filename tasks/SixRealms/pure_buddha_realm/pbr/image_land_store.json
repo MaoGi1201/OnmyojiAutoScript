@@ -1,0 +1,11 @@
+[
+  {
+    "itemName": "pb_store_exit",
+    "imageName": "pb_pb_store_exit.png",
+    "roiFront": "1194,617,60,42",
+    "roiBack": "1194,617,60,42",
+    "method": "Template matching",
+    "threshold": 0.8,
+    "description": "安息之岛离开"
+  }
+]
